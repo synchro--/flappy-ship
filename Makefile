@@ -1,6 +1,6 @@
 # Project: flappyShip
 
-CPP  = g++
+CXX  = g++
 CC   = gcc
 BIN  = flappyShip
 
@@ -8,7 +8,7 @@ OBJ  = main.o car.o mesh.o
 LINKOBJ  = main.o car.o mesh.o
 LIBS = -L/usr/X11R6 -lGL -lGLU -lSDL2_image -lSDL2 -lm
 INCS = -I. -I/usr/X11R6/include
-CXXINCS=#
+CXXINCS=-std=c++11
 CXXFLAGS = $(CXXINCS)
 CFLAGS = $(INCS)
 RM = rm -f
@@ -23,13 +23,13 @@ run: $(BIN)
 	@./$(BIN)
 
 $(BIN): $(OBJ)
-	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+	$(CXX) $(LINKOBJ) -o $(BIN) $(LIBS)
 
-main.o: main.cpp
-	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+main.o: main.cxx
+	$(CXX) -c main.cxx -o main.o $(CXXFLAGS)
 
-car.o: car.cpp
-	$(CPP) -c car.cpp -o car.o $(CXXFLAGS)
+car.o: car.cxx
+	$(CXX) -c car.cxx -o car.o $(CXXFLAGS)
 
-mesh.o: mesh.cpp
-	$(CPP) -c mesh.cpp -o mesh.o $(CXXFLAGS)
+mesh.o: mesh.cxx
+	$(CXX) -c mesh.cxx -o mesh.o $(CXXFLAGS)
