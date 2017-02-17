@@ -512,24 +512,24 @@ int main(int argc, char *argv[]) {
           break;
         }
         car.controller.EatKey(e.key.keysym.sym, keymap, true);
-        
+
         /*switch(e.key.keysym.sym) {
-          case SDLK_F1: 
+          case SDLK_F1:
                     cameraType = (cameraType + 1) % CAMERA_TYPE_MAX;
-          case SDLK_F2: 
+          case SDLK_F2:
                     useWireframe = !useWireframe;
 
-          case SDLK_F3: 
+          case SDLK_F3:
                     useEnvmap = !useEnvmap;
 
-          case SDLK_F4: 
+          case SDLK_F4:
                     useHeadlight = !useHeadlight;
 
-          case SDLK_F5: 
+          case SDLK_F5:
                     useShadow = !useShadow;
                     break;
         } */
-        
+
         if (e.key.keysym.sym == SDLK_F1)
           cameraType = (cameraType + 1) % CAMERA_TYPE_MAX;
         if (e.key.keysym.sym == SDLK_F2)

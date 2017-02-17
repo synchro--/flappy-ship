@@ -17,9 +17,6 @@ Mesh carlinga((char *)"Envos.obj");
 // var globale di tipo mesh
 // Mesh carlinga((char *)"Ferrari_chassis.obj"); // chiama il costruttore
 Mesh wheelBR1((char *)"Ferrari_wheel_back_R.obj");
-Mesh wheelFR1((char *)"Ferrari_wheel_front_R.obj");
-Mesh wheelBR2((char *)"Ferrari_wheel_back_R_metal.obj");
-Mesh wheelFR2((char *)"Ferrari_wheel_front_R_metal.obj");
 Mesh pista((char *)"pista.obj");
 
 extern bool useEnvmap; // var globale esterna: per usare l'evnrionment mapping
@@ -56,7 +53,7 @@ void SetupEnvmapTexture() {
                           // con la texture)
 }
 
-//DA CHIARIRE
+// DA CHIARIRE
 // funzione che prepara tutto per creare le coordinate texture (s,t) da (x,y,z)
 // Mappo l'intervallo [ minY , maxY ] nell'intervallo delle T [0..1]
 //     e l'intervallo [ minZ , maxZ ] nell'intervallo delle S [0..1]
@@ -281,11 +278,12 @@ void Car::RenderAllParts(bool usecolor) const {
 
   // draw the spaceship using a mesh
   glPushMatrix();
-  float sc_meshX, sc_meshY, sc_meshZ; //scaling factors 
-  sc_meshX = -0.007;
-  sc_meshY = 0.007; 
-  sc_meshZ = -0.007; 
-  glScalef(sc_meshX, sc_meshY, sc_meshZ); // patch: riscaliamo la mesh 
+
+  float sc_meshX, sc_meshY, sc_meshZ; // scaling factors
+  sc_meshX = -0.005;
+  sc_meshY = 0.005;
+  sc_meshZ = -0.005;
+  glScalef(sc_meshX, sc_meshY, sc_meshZ); // patch: riscaliamo la mesh
 
   if (!useEnvmap) {
     if (usecolor)
@@ -294,120 +292,20 @@ void Car::RenderAllParts(bool usecolor) const {
     if (usecolor)
       SetupEnvmapTexture();
   }
-  carlinga.RenderNxV(); // rendering delle mesh carlinga usando normali per vertice
-  if (usecolor)
+  if (usecolor) {
     glEnable(GL_LIGHTING);
-
-   //curva l'astronave a seconda dello sterzo    
-    scope([&](void){
-      int sign = -1; 
-      glTranslate(carlinga.Center());
-      glRotatef(sign*sterzo, 0, 0, 1);
-      glTranslate(-carlinga.Center());  
-      carlinga.RenderNxF();
-    }); 
-
-
-  for (int i = 0; i < 2; i++) {
-
-    // i==0 -> disegno ruote destre.
-    // i==1 -> disegno ruote sinistre.
-    int sign;
-    if (i == 0)
-      sign = 1;
-    else
-      sign = -1;
-    glPushMatrix();
-    if (i == 1) {
-      //traslo - ruoto centro - traslo indietro
-      glTranslatef(0, +wheelFR1.Center().Y(), 0);
-      glRotatef(180, 0, 0, 1);
-      glTranslatef(0, -wheelFR1.Center().Y(), 0);
-    }
-
-    glTranslate(wheelFR1.Center());
-    glRotatef(sign * sterzo, 0, 1, 0);
-    glRotatef(-sign * mozzoA, 1, 0, 0);
-    glTranslate(-wheelFR1.Center());
-
-    if (usecolor) {
-      glColor3f(.6, .6, .6);
-      SetupWheelTexture(wheelFR1.bbmin, wheelFR1.bbmax);
-    }
-    wheelFR1.RenderNxF(); // la ruota viene meglio FLAT SHADED - normali per faccia
-    // provare x credere
-    glDisable(GL_TEXTURE_2D);
-    if (usecolor)
-      glColor3f(0.9, 0.9, 0.9);
-    wheelFR2.RenderNxV();
-    glPopMatrix();
-
-    glPushMatrix();
-
-    if (i == 1) {
-      glTranslatef(0, +wheelBR1.Center().Y(), 0);
-      glRotatef(180, 0, 0, 1);
-      glTranslatef(0, -wheelBR1.Center().Y(), 0);
-    }
-
-    glTranslate(wheelBR1.Center());
-    glRotatef(-sign * mozzoA, 1, 0, 0);
-    glTranslate(-wheelBR1.Center());
-
-    if (usecolor) {
-      glColor3f(.6, .6, .6);
-    }
-    if (usecolor) {
-      //bbmin e bbmax are the bounding box extremes
-      SetupWheelTexture(wheelBR1.bbmin, wheelBR1.bbmax);
-    }
-
-    wheelBR1.RenderNxF();
-    glDisable(GL_TEXTURE_2D);
-    if (usecolor)
-      glColor3f(0.9, 0.9, 0.9);
-    wheelBR2.RenderNxV();
-
-    glPopMatrix();
   }
-  /*
-    // modo vecchio: disegno le ruote senza usare le mesh
-    // ruota posteriore D
-    glPushMatrix();
-    glTranslatef( 0.58,+raggioRuotaP-0.28,+0.8);
-    glRotatef(mozzoP,1,0,0);
-    // SONO NELLO SPAZIO RUOTA
-    glScalef(0.1, raggioRuotaP, raggioRuotaP);
-    drawWheel();
-    glPopMatrix();
 
-    // ruota posteriore S
-    glPushMatrix();
-    glTranslatef(-0.58,+raggioRuotaP-0.28,+0.8);
-    glRotatef(mozzoP,1,0,0);
-    glScalef(0.1, raggioRuotaP, raggioRuotaP);
-    drawWheel();
-    glPopMatrix();
-
-    // ruota anteriore D
-    glPushMatrix();
-    glTranslatef( 0.58,+raggioRuotaA-0.28,-0.55);
-    glRotatef(sterzo,0,1,0);
-    glRotatef(mozzoA,1,0,0);
-    glScalef(0.08, raggioRuotaA, raggioRuotaA);
-    drawWheel();
-    glPopMatrix();
-
-    // ruota anteriore S
-    glPushMatrix();
-    glTranslatef(-0.58,+raggioRuotaA-0.28,-0.55);
-    glRotatef(sterzo,0,1,0);
-    glRotatef(mozzoA,1,0,0);
-    drawAxis();
-    glScalef(0.08, raggioRuotaA, raggioRuotaA);
-    drawWheel();
-    glPopMatrix();
-    */
+  // curva l'astronave a seconda dello sterzo
+  scope([&](void) {
+    //vado al centro dell'astronave e la ruoto di un angolo definito dallo sterzo 
+    //rispetto all'asse z
+    int sign = -1;
+    glTranslate(carlinga.Center());
+    glRotatef(sign * sterzo, 0, 0, 1);
+    glTranslate(-carlinga.Center());
+    carlinga.RenderNxV(); // render di carling using normal x vertex
+  });
 
   glPopMatrix();
 }
@@ -426,7 +324,7 @@ void Car::Render() const {
   // drawAxis(); // disegno assi spazio macchina
 
   DrawHeadlight(-0.3, 0, -1, 10, useHeadlight); // accendi faro sinistro
-  DrawHeadlight(+0.3, 0, -1, 1, useHeadlight); // accendi faro destro
+  DrawHeadlight(+0.3, 0, -1, 1, useHeadlight);  // accendi faro destro
 
   RenderAllParts(true);
 
@@ -435,13 +333,13 @@ void Car::Render() const {
     glColor3f(0.4, 0.4, 0.4); // colore fisso
     glTranslatef(0, 0.01, 0); // alzo l'ombra di un epsilon per evitare
                               // z-fighting con il pavimento
-    glScalef(1.01, 0,
+    glScalef(
+        1.01, 0,
         1.01); // appiattisco sulla Y, ingrandisco dell'1% sulla Z e sulla X
     glDisable(GL_LIGHTING); // niente lighing per l'ombra
     RenderAllParts(false);  // disegno la macchina appiattita
     glEnable(GL_LIGHTING);
   }
-
 
   glPopMatrix();
   glPopMatrix();
