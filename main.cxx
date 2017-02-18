@@ -119,14 +119,13 @@ int main(int argc, char *argv[]) {
   SDL_Joystick *joystick;
   static int keymap[Controller::NKEYS] = {SDLK_a, SDLK_d, SDLK_w, SDLK_s};
 
-  Car car;          //our SpaceShip!
+  Car car;       //our SpaceShip!
   GameState gs; //current state of the game!
 
-
+  //temporary
   int fpsNow = car.fpsNow; 
   int scrW = car.scrW; 
   int scrH = car.scrH;
-  float fps = car.fps;
   float viewAlpha = car.viewAlpha; 
   float viewBeta = car.viewBeta;
   float eyeDist = car.eyeDist; 
@@ -315,7 +314,7 @@ int main(int argc, char *argv[]) {
       Uint32 timeNow = SDL_GetTicks(); // che ore sono?
 
       if (timeLastInterval + fpsSampling < timeNow) {
-        fps = 1000.0 * ((float)fpsNow) / (timeNow - timeLastInterval);
+        car.fps = 1000.0 * ((float)fpsNow) / (timeNow - timeLastInterval);
         fpsNow = 0;
         timeLastInterval = timeNow;
       }
