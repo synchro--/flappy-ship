@@ -11,8 +11,7 @@
 #include "point3.hxx"
 
 #include "mesh.hxx"
-
-extern bool useWireframe; // quick hack: una var globale definita altrove
+#include "gameState.hxx"
 
 void Mesh::ComputeNormalsPerFace() {
   for (int i = 0; i < f.size(); i++) {

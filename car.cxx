@@ -1,26 +1,10 @@
 // implementazione dei metodi definiti in car.h
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <cmath>
-#include <cstdio>
-#include <vector> // la classe vector di STL
-
-#include "point3.hxx"
-#include "mesh.hxx"
-
 #include "car.hxx"
-#include "utils.hxx"
 
 // Spaceship
 Mesh carlinga((char *)"Envos.obj");
 // var globale di tipo mesh
-// Mesh carlinga((char *)"Ferrari_chassis.obj"); // chiama il costruttore
-Mesh wheelBR1((char *)"Ferrari_wheel_back_R.obj");
 Mesh pista((char *)"pista.obj");
-
-extern bool useEnvmap; // var globale esterna: per usare l'evnrionment mapping
-extern bool useHeadlight; // var globale esterna: per usare i fari
-extern bool useShadow;    // var globale esterna: per generare l'ombra
 
 // da invocare quando e' stato premuto/rilasciato il tasto numero "keycode"
 void Controller::EatKey(int keycode, int *keymap, bool pressed_or_released) {
@@ -296,8 +280,9 @@ void Car::RenderAllParts(bool usecolor) const {
 
   // curva l'astronave a seconda dello sterzo
   scope([&](void) {
-    //vado al centro dell'astronave e la ruoto di un angolo definito dallo sterzo 
-    //rispetto all'asse z
+    // vado al centro dell'astronave e la ruoto di un angolo definito dallo
+    // sterzo
+    // rispetto all'asse z
     int sign = -1;
     glTranslate(carlinga.Center());
     glRotatef(sign * sterzo, 0, 0, 1);
@@ -328,22 +313,96 @@ void Car::Render() const {
 
   // ombra!
   if (useShadow) {
-     Shadow();
+    Shadow();
   }
 
   glPopMatrix();
   glPopMatrix();
 }
 
-
 void Car::Shadow() const {
-    glColor3f(0.4, 0.4, 0.4); // colore fisso
-    glTranslatef(0, 0.01, 0); // alzo l'ombra di un epsilon per evitare
-                              // z-fighting con il pavimento
-    glScalef(
-        1.01, 0,
-        1.01); // appiattisco sulla Y, ingrandisco dell'1% sulla Z e sulla X
-    glDisable(GL_LIGHTING); // niente lighing per l'ombra
-    RenderAllParts(false);  // disegno la macchina appiattita
-    glEnable(GL_LIGHTING);
+  glColor3f(0.4, 0.4, 0.4); // colore fisso
+  glTranslatef(0, 0.01, 0); // alzo l'ombra di un epsilon per evitare
+                            // z-fighting con il pavimento
+  glScalef(1.01, 0,
+           1.01); // appiattisco sulla Y, ingrandisco dell'1% sulla Z e sulla X
+  glDisable(GL_LIGHTING); // niente lighing per l'ombra
+  RenderAllParts(false);  // disegno la macchina appiattita
+  glEnable(GL_LIGHTING);
+}
+
+
+// setto la posizione della camera
+void Car::setCamera() {
+  double angle = this->facing;
+  double cosf = cos(angle * M_PI / 180.0);
+  double sinf = sin(angle * M_PI / 180.0);
+  double camd, camh, ex, ey, ez, cx, cy, cz;
+  double cosff, sinff;
+
+  // controllo la posizione della camera a seconda dell'opzione selezionata
+  switch (this->cameraType) {
+  case CAMERA_BACK_CAR:
+    camd = 2.5;
+    camh = 1.0;
+    ex = px + camd * sinf;
+    ey = py + camh;
+    ez = pz + camd * cosf;
+    cx = px - camd * sinf;
+    cy = py + camh;
+    cz = pz - camd * cosf;
+    gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
+    break;
+  case CAMERA_TOP_FIXED:
+    camd = 0.5;
+    camh = 0.55;
+    angle = facing + 40.0;
+    cosff = cos(angle * M_PI / 180.0);
+    sinff = sin(angle * M_PI / 180.0);
+    ex = px + camd * sinff;
+    ey = py + camh;
+    ez = pz + camd * cosff;
+    cx = px - camd * sinf;
+    cy = py + camh;
+    cz = pz - camd * cosf;
+    gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
+    break;
+  case CAMERA_TOP_CAR:
+    camd = 2.5;
+    camh = 1.0;
+    ex = px + camd * sinf;
+    ey = py + camh;
+    ez = pz + camd * cosf;
+    cx = px - camd * sinf;
+    cy = py + camh;
+    cz = pz - camd * cosf;
+    gluLookAt(ex, ey + 5, ez, cx, cy, cz, 0.0, 1.0, 0.0);
+    break;
+  case CAMERA_PILOT:
+    camd = 0.2;
+    camh = 0.55;
+    ex = px + camd * sinf;
+    ey = py + camh;
+    ez = pz + camd * cosf;
+    cx = px - camd * sinf;
+    cy = py + camh;
+    cz = pz - camd * cosf;
+    gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
+    break;
+  case CAMERA_MOUSE:
+    glTranslatef(0, 0, -eyeDist);
+    glRotatef(viewBeta, 1, 0, 0);
+    glRotatef(viewAlpha, 0, 1, 0);
+    /*
+    printf("%f %f %f\n",viewAlpha,viewBeta,eyeDist);
+                    ex=eyeDist*cos(viewAlpha)*sin(viewBeta);
+                    ey=eyeDist*sin(viewAlpha)*sin(viewBeta);
+                    ez=eyeDist*cos(viewBeta);
+                    cx = px - camd*sinf;
+                    cy = py + camh;
+                    cz = pz - camd*cosf;
+                    gluLookAt(ex,ey,ez,cx,cy,cz,0.0,1.0,0.0);
+    */
+    break;
+  }
 }

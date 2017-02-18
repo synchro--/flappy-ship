@@ -4,8 +4,8 @@ CXX  = g++
 CC   = gcc
 BIN  = flappyShip
 
-OBJ  = main.o car.o mesh.o
-LINKOBJ  = main.o car.o mesh.o
+OBJ  = main.o car.o mesh.o utils.o gameState.o
+LINKOBJ  = main.o car.o mesh.o utils.o gameState.o
 LIBS = -L/usr/X11R6 -lGL -lGLU -lSDL2_image -lSDL2 -lm
 INCS = -I. -I/usr/X11R6/include
 CXXINCS=-std=c++11
@@ -33,3 +33,9 @@ car.o: car.cxx
 
 mesh.o: mesh.cxx
 	$(CXX) -c mesh.cxx -o mesh.o $(CXXFLAGS)
+
+utils.o: utils.cxx
+	$(CXX) -c utils.cxx -o utils.o $(CXXFLAGS)
+
+gameState.o: gameState.cxx
+	$(CXX) -c gameState.cxx -o gameState.o $(CXXFLAGS)

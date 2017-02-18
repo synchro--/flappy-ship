@@ -1,5 +1,18 @@
 #ifndef CAR_HXX
+
 #define CAR_HXX
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <cmath>
+#include <cstdio>
+#include <vector> // la classe vector di STL
+
+#include "point3.hxx"
+
+#include "mesh.hxx"
+#include "utils.hxx"
+#include "gameState.hxx"
 
 class Controller {
 public:
@@ -11,7 +24,7 @@ public:
   Controller() { Init(); } // costruttore
 };
 
-class Car {
+class Car : public GameState {
 
   void RenderAllParts(bool usecolor) const;
   // disegna tutte le parti della macchina
@@ -22,7 +35,10 @@ public:
   void Init();         // inizializza variabili
   void Render() const; // disegna a schermo
   void DoStep();       // computa un passo del motore fisico
+  //utils from cars 
   void Shadow() const; 
+  void setCamera();
+
   Car() { Init(); }    // costruttore
 
   Controller controller;

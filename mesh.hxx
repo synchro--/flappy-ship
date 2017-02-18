@@ -1,6 +1,7 @@
 #ifndef MESH_HXX
 
 #define MESH_HXX
+#include "gameState.hxx"
 
 // classe Vertex:
 // i vertici della mesh
@@ -41,7 +42,7 @@ public:
   // attributi per wedge
 };
 
-class Mesh {
+class Mesh : public GameState {
   std::vector<Vertex> v; // vettore di vertici
   std::vector<Face> f;   // vettore di facce
   std::vector<Edge> e;   // vettore di edge (per ora, non usato)
