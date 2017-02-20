@@ -118,7 +118,7 @@ void drawFloor() {
 }
 
 
-void drawSky(GameState gs) {
+void drawSky(Game gs) {
 
   if (gs.useWireframe) {
     glDisable(GL_TEXTURE_2D);
@@ -162,7 +162,7 @@ void redraw() {
 // setta le matrici di trasformazione in modo
 // che le coordinate in spazio oggetto siano le coord
 // del pixel sullo schemo
-void SetCoordToPixel(GameState gs) {
+void SetCoordToPixel(Game gs) {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glMatrixMode(GL_MODELVIEW);

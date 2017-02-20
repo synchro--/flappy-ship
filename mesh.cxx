@@ -11,7 +11,7 @@
 #include "point3.hxx"
 
 #include "mesh.hxx"
-#include "gameState.hxx"
+#include "game.hxx"
 
 void Mesh::ComputeNormalsPerFace() {
   for (int i = 0; i < f.size(); i++) {

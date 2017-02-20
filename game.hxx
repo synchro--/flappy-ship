@@ -1,17 +1,17 @@
-#ifndef GAMESTATE_HXX
-#define GAMESTATE_HXX
+#ifndef GAME_HXX
+#define GAME_HXX
 //The current state of the game with all the variables that need to be accessed globally
 
 #include "types.hxx"
 #include <SDL2/SDL.h>
 
-class GameState {
+class Game {
     public:
     void init(); 
-    GameState() { init(); } //constructor
+    Game() { init(); } //constructor
 
     //define global vars
-    //static, every class that inherits from GameState share the same instance of the global vars
+    //static, every class that inherits from Game share the same instance of the global vars
     static float viewAlpha, viewBeta, eyeDist;
     static int scrH, scrW;          // altezza e larghezza viewport (in pixels)
     static bool useWireframe, useEnvmap, useHeadlight, useShadow;
@@ -26,4 +26,4 @@ class GameState {
 };
 
 
-#endif //GAMESTATE_HXX
+#endif //GAME_HXX
