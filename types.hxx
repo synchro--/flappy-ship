@@ -1,7 +1,7 @@
 #ifndef TYPES_HXX
 #define TYPES_HXX
 
-enum Mode { MENU, GAME, SETTINGS, RANKING}; 
+enum State { MENU, GAME, SETTINGS, RANKING}; 
 
 #define CAMERA_BACK_CAR 0
 #define CAMERA_TOP_FIXED 1

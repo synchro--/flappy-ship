@@ -12,7 +12,7 @@
 
 #include "mesh.hxx"
 #include "utils.hxx"
-#include "gameState.hxx"
+#include "game.hxx"
 
 class Controller {
 public:
@@ -24,7 +24,7 @@ public:
   Controller() { Init(); } // costruttore
 };
 
-class Car : public GameState {
+class Car : public Game {
 
   void RenderAllParts(bool usecolor) const;
   // disegna tutte le parti della macchina

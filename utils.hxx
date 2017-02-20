@@ -10,7 +10,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "types.hxx"
-#include "gameState.hxx"
+#include "game.hxx"
 #include "car.hxx"
 
 //accepts a lambda to be performed between between push and pop
@@ -18,11 +18,11 @@
 void scope(const std::function <void (void)>& lambda);
 
 bool LoadTexture(int textbind, char *filename); 
-void SetCoordToPixel(GameState gs);
+void SetCoordToPixel(Game gs);
 
 //drawing functions  
 void drawSphere(double r, int lats, int longs);
-void drawSky(GameState gs); 
+void drawSky(Game gs); 
 void drawFloor();
 void drawAxis(); 
 void redraw(); 

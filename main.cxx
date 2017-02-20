@@ -8,7 +8,7 @@
 #include "car.hxx"
 #include "types.hxx"
 #include "utils.hxx"
-#include "gameState.hxx"
+#include "game.hxx"
 
 
 const int PHYS_SAMPLING_STEP = 10; // numero di millisec che un passo di fisica simula
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
   static int keymap[Controller::NKEYS] = {SDLK_a, SDLK_d, SDLK_w, SDLK_s};
 
   Car car;       //our SpaceShip!
-  GameState gs; //current state of the game!
+  Game gs; //current state of the game!
 
   //temporary
   int fpsNow = car.fpsNow; 

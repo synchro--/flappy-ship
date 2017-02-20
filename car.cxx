@@ -290,6 +290,9 @@ void Car::RenderAllParts(bool usecolor) const {
     carlinga.RenderNxV(); // render di carling using normal x vertex
   });
 
+
+  
+
   glPopMatrix();
 }
 
