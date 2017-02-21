@@ -99,11 +99,12 @@ void Car::DoStep() {
   facing = facing - (vzm * grip) * sterzo;
 
   // rotazione mozzo ruote (a seconda della velocita' sulla z)
+  /*
   float da; // delta angolo
   da = (360.0 * vzm) / (2.0 * M_PI * raggioRuotaA);
   mozzoA += da;
   da = (360.0 * vzm) / (2.0 * M_PI * raggioRuotaP);
-  mozzoP += da;
+  mozzoP += da;*/
 
   // ritorno a vel coord mondo
   vx = +cosf * vxm + sinf * vzm;
