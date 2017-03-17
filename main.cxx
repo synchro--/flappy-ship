@@ -6,12 +6,12 @@
 #include <SDL2/SDL_image.h>
 
 #include "car.hxx"
+#include "game.hxx"
 #include "types.hxx"
 #include "utils.hxx"
-#include "game.hxx"
 
-
-const int PHYS_SAMPLING_STEP = 10; // numero di millisec che un passo di fisica simula
+const int PHYS_SAMPLING_STEP =
+    10; // numero di millisec che un passo di fisica simula
 // Frames Per Seconds
 const int fpsSampling = 3000; // lunghezza intervallo di calcolo fps
 
@@ -19,11 +19,11 @@ extern void drawPista();
 
 /* Esegue il Rendering della scena */
 void rendering(SDL_Window *win, Car car) {
-   
-  int fpsNow = car.fpsNow; 
-  int scrW = car.scrW; 
+
+  int fpsNow = car.fpsNow;
+  int scrW = car.scrW;
   int scrH = car.scrH;
-  float fps = car.fps;  
+  float fps = car.fps;
 
   // un frame in piu'!!!
   fpsNow++;
@@ -110,8 +110,6 @@ void rendering(SDL_Window *win, Car car) {
   SDL_GL_SwapWindow(win);
 }
 
-
-
 int main(int argc, char *argv[]) {
   SDL_Window *win;
   SDL_GLContext mainContext;
@@ -119,23 +117,23 @@ int main(int argc, char *argv[]) {
   SDL_Joystick *joystick;
   static int keymap[Controller::NKEYS] = {SDLK_a, SDLK_d, SDLK_w, SDLK_s};
 
-  Car car;       //our SpaceShip!
-  Game gs; //current state of the game!
+  Car car; // our SpaceShip!
+  Game gs; // current state of the game!
 
-  //temporary
-  int fpsNow = car.fpsNow; 
-  int scrW = car.scrW; 
+  // temporary
+  int fpsNow = car.fpsNow;
+  int scrW = car.scrW;
   int scrH = car.scrH;
-  float viewAlpha = car.viewAlpha; 
+  float viewAlpha = car.viewAlpha;
   float viewBeta = car.viewBeta;
-  float eyeDist = car.eyeDist; 
-  int nstep = car.nstep; 
+  float eyeDist = car.eyeDist;
+  int nstep = car.nstep;
   bool useWireframe = car.useWireframe;
   bool useEnvmap = car.useEnvmap;
   bool useHeadlight = car.useHeadlight;
-  bool useShadow = car.useShadow; 
-  int cameraType = car.cameraType; 
-  Uint32 timeLastInterval = car.timeLastInterval; 
+  bool useShadow = car.useShadow;
+  int cameraType = car.cameraType;
+  Uint32 timeLastInterval = car.timeLastInterval;
 
   // inizializzazione di SDL
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);

@@ -10,8 +10,8 @@
 
 #include "point3.hxx"
 
-#include "mesh.hxx"
 #include "game.hxx"
+#include "mesh.hxx"
 
 void Mesh::ComputeNormalsPerFace() {
   for (int i = 0; i < f.size(); i++) {

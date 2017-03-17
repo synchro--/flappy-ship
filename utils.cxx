@@ -1,15 +1,14 @@
 #include "utils.hxx"
 
-//accepts a lambda to be performed between between push and pop
-//Saves time and helps against bugs
-void scope(const std::function <void (void)>& lambda) {
-    glPushMatrix(); 
-    lambda(); 
-    glPopMatrix(); 
+// accepts a lambda to be performed between between push and pop
+// Saves time and helps against bugs
+void mat_scope(const std::function<void(void)> &lambda) {
+  glPushMatrix();
+  lambda();
+  glPopMatrix();
 }
 
-
-//load texture from an image and return bool if success
+// load texture from an image and return bool if success
 bool LoadTexture(int textbind, char *filename) {
   SDL_Surface *s = IMG_Load(filename);
   if (!s)
@@ -117,7 +116,6 @@ void drawFloor() {
   glEnd();
 }
 
-
 void drawSky(Game gs) {
 
   if (gs.useWireframe) {
@@ -157,7 +155,6 @@ void redraw() {
   e.window.event = SDL_WINDOWEVENT_EXPOSED;
   SDL_PushEvent(&e);
 }
-
 
 // setta le matrici di trasformazione in modo
 // che le coordinate in spazio oggetto siano le coord

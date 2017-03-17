@@ -10,9 +10,9 @@
 
 #include "point3.hxx"
 
+#include "game.hxx"
 #include "mesh.hxx"
 #include "utils.hxx"
-#include "game.hxx"
 
 class Controller {
 public:
@@ -35,11 +35,11 @@ public:
   void Init();         // inizializza variabili
   void Render() const; // disegna a schermo
   void DoStep();       // computa un passo del motore fisico
-  //utils from cars 
-  void Shadow() const; 
+  // utils from cars
+  void Shadow() const;
   void setCamera();
 
-  Car() { Init(); }    // costruttore
+  Car() { Init(); } // costruttore
 
   Controller controller;
 

@@ -8,7 +8,7 @@ OBJ  = main.o car.o mesh.o utils.o game.o
 LINKOBJ  = main.o car.o mesh.o utils.o game.o
 LIBS = -L/usr/X11R6 -lGL -lGLU -lSDL2_image -lSDL2 -lm
 INCS = -I. -I/usr/X11R6/include
-CXXINCS=-std=c++11
+CXXINCS=-std=c++14
 CXXFLAGS = $(CXXINCS)
 CFLAGS = $(INCS)
 RM = rm -f

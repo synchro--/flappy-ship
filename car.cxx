@@ -120,7 +120,7 @@ void Car::DoStep() {
 void drawAxis(); // anche questa
 
 void drawPista() {
-  scope([](void) {
+  mat_scope([](void) {
     glColor3f(0.4, 0.4, .8);
     glScalef(0.75, 1.0, 0.75);
     glTranslatef(0, 0.01, 0);
@@ -279,7 +279,7 @@ void Car::RenderAllParts(bool usecolor) const {
   }
 
   // curva l'astronave a seconda dello sterzo
-  scope([&](void) {
+  mat_scope([&](void) {
     // vado al centro dell'astronave e la ruoto di un angolo definito dallo
     // sterzo
     // rispetto all'asse z
@@ -289,9 +289,6 @@ void Car::RenderAllParts(bool usecolor) const {
     glTranslate(-carlinga.Center());
     carlinga.RenderNxV(); // render di carling using normal x vertex
   });
-
-
-  
 
   glPopMatrix();
 }
@@ -333,7 +330,6 @@ void Car::Shadow() const {
   RenderAllParts(false);  // disegno la macchina appiattita
   glEnable(GL_LIGHTING);
 }
-
 
 // setto la posizione della camera
 void Car::setCamera() {

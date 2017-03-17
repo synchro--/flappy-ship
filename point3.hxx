@@ -59,10 +59,10 @@ public:
                   coord[0] * a.coord[1] - coord[1] * a.coord[0]);
   }
 
-  //ottenere punto come vertice di OpenGl
+  // ottenere punto come vertice di OpenGl
   void getAsVertex() const { glVertex3fv(coord); }
 
-  //ottenere punto come normale di OpenGl
+  // ottenere punto come normale di OpenGl
   void getAsNormal() const { glNormal3fv(coord); }
 };
 
@@ -72,4 +72,4 @@ typedef Point3 Vector3;
 
 inline void glTranslate(Point3 v) { glTranslatef(v.X(), v.Y(), v.Z()); }
 
-#endif 
+#endif
