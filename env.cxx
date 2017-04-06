@@ -7,10 +7,10 @@ using namespace agl;
   Env& get_env() {
   //having a unique ptr ensures the Env will be called only during the main
 
-    //static std::unique_ptr<Context> s_env(nullptr);
+    //static std::unique_ptr<Env> s_env(nullptr);
     static auto s_env = std::make_unique<Env>();
     if (!s_env) {
-      s_env.reset(new Env()); // initialize the Context on demand
+      s_env.reset(new Env()); // initialize the environment on demand
     }
 
     return *s_env;
@@ -89,6 +89,22 @@ void drawFloor() {
     }
   glEnd();
  }
+
+// Switches mode into GL_MODELVIEW, and then loads an identity matrix.
+void Context::setup_model() {
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+}
+
+// Switches mode into GL_PERSPECTIVE, and then loads an identity matrix.
+// The perspective is then arbitrarily set up.
+void Context::setup_persp(float width, float height) {
+  logs::v(__func__, "initializing perspective projection");
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(70, width / height, .2, 1000.0);
+}
 
 
 }

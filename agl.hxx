@@ -14,6 +14,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "types.hxx"
+#include "game.hxx"
 
 /*AGL: Abstract Graphic Library
 The purpose is to create an abstract layer on the top of openGL in order to
@@ -101,9 +102,10 @@ extern const Color WHITE, BLACK, RED, GREEN, YELLOW;
     // destructor takes care of closing the SDL libraries
     virtual ~Env();
     // accepts a lambda to be performed between push and pop
-    // Saves time and helps against bugs ensuring the matrix will be popped after
-    // pushing
+    // Saves time and helps against bugs ensuring the matrix will be popped after pushing
     void mat_scope(const std::function<void()> callback);
+
+
 
     // load texture from an image and return bool if success
     bool LoadTexture(int textbind, char *filename);
@@ -115,6 +117,14 @@ extern const Color WHITE, BLACK, RED, GREEN, YELLOW;
     void drawFloor();
     void drawAxis();
     void redraw();
+
+    void Env::setup_model();
+    void Env::setup_persp(float width, float height);
+
+    // Returns the current FPS.
+    inline decltype(m_fps) fps() {
+      return m_fps;
+    }
 
   }; 
 
