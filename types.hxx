@@ -6,6 +6,11 @@ enum Key {
     W,A,S,D,UP,DOWN,LEFT,RIGHT,ESC,RETURN
   };
 
+//logging levels 
+enum Level {
+    INFO, ERROR, PANIC;
+}
+
 // Default colors
 const Color WHITE  = {1.0f, 1.0f, 1.0f, 1.0f};
 const Color BLACK  = { .0f,  .0f,  .0f, 1.0f};
