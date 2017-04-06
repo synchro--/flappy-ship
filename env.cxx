@@ -2,7 +2,6 @@
 #include <SDL2/SDL_ttf.h>
 
 namespace agl {
-
 // Returns the singleton instance of agl::Env, initializing it if necessary
 Env &get_env() {
   // having a unique ptr ensures the Env will be called only during the main
