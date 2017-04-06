@@ -2,7 +2,9 @@
 #define TYPES_HXX
 
 enum State { MENU, GAME, SETTINGS, RANKING };
-enum Key {}
+enum Key {
+    W,A,S,D,UP,DOWN,LEFT,RIGHT,ESC,RETURN
+  };
 
 // Default colors
 const Color WHITE  = {1.0f, 1.0f, 1.0f, 1.0f};
