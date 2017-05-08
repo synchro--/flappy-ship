@@ -38,10 +38,17 @@ Env::Env()
       m_step(0),
       m_fps(0.0),
       m_fps_now(0.0),
-      m_last_time(0);
+      m_last_time(0); 
 
 // "__func__" is included by C++11 and is equal to the function name
 static const auto TAG = __func__;
+
+Env::~Env(){
+  log::i(TAG, "Quit...");
+
+  TTF_Quit();
+  SDL_Quit(); 
+}
 
 void Env::mat_scope(const std::function <void (void)> callback {
   glPushMatrix();
@@ -122,35 +129,34 @@ void Env::drawSphere(double r, int lats, int longs) {
   // Switches mode into GL_PERSPECTIVE, and then loads an identity matrix.
   // The perspective is then arbitrarily set up.
   void Env::setup_persp(float width, float height) {
-
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(70, width / height, .2, 1000.0);
   }
 
   // Sets the action callback which is called once in every iteration. Before the actual rendering. 
-  void Context::set_action(decltype(m_actionf) actions) {
+  void Env::set_action(decltype(m_actionf) actions) {
     m_actionf = actions;
   }
 
   // Sets the onkeydown callback.
-  void Context::set_onkeydown(decltype(m_onkeydownf) onkeydown) {
+  void Env::set_onkeydown(decltype(m_onkeydownf) onkeydown) {
     m_onkeydownf = onkeydown;
   }
 
   // Sets the onkeyup callback.
-  void Context::set_onkeyup(decltype(m_onkeyupf) onkeyup) {
+  void Env::set_onkeyup(decltype(m_onkeyupf) onkeyup) {
     m_onkeyupf = onkeyup;
   }
 
   // Sets the onwindowevent callback, which is called when the window is exposed
   // again after being covered - usually it is set to the same as m_renderf.
-  void Context::set_onwindowevent(decltype(m_onwinevf) onwinev) {
+  void Env::set_onwindowevent(decltype(m_onwinevf) onwinev) {
     m_onwinevf = onwinev;
   }
 
   // Sets the m_renderf callback, which is called to render the scene.
-  void Context::set_render(decltype(m_renderf) render) { m_renderf = render; }
+  void Env::set_render(decltype(m_renderf) render) { m_renderf = render; }
 
 }
 

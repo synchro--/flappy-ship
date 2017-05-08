@@ -1,3 +1,17 @@
+TODO
+
+membro cmd della classe game che è un vector. 
+met. submit che fa cmd.push_back per registrare i comandi
+met. process_comand per eseguirli 
+     fai switch del comando (che è un ENUM) ed esegui i passi di fisica necessari per ogni comando. 
+
+
+
+
+
+-----------------------------------------------------
+DEFAULT VARIABLES VALUES 
+
 viewAlpha = 20;
 viewBeta = 40; // angoli che definiscono la vista
 eyeDist = 5.0;                 // distanza dell'occhio dall'origine

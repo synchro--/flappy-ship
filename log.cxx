@@ -2,6 +2,7 @@
 
 namespace log {
 
+
 const char *level_to_str(Level lv) {
   switch (lv) {
   case Level::INFO:
@@ -93,4 +94,53 @@ void Logger::panic(const char *tag, const char *fmt, ...) {
 
   vpanic(tag, fmt, ap);
 }
+
+
+static Logger s_logger; 
+
+Logger &global() {
+  return s_logger;
+}
+
+Level get_level() { return s_logger.get_level(); }
+
+void set_level(Level lv) { s_logger.set_level(lv); }
+
+void print(const char *tag, Level lv, const char *fmt, ...) {
+  std::va_list ap;
+  va_start(ap, fmt);
+
+  s_logger.vprint(tag, lv, fmt, ap);
+
+  va_end(ap);
+}
+
+
+void i(const char *tag, const char *fmt, ...) {
+  std::va_list ap;
+  va_start(ap, fmt);
+
+  lv = Level::INFO;
+  s_logger.vprint(tag, lv, fmt, ap);
+
+  va_end(ap);
+}
+
+void e(const char *tag, const char *fmt, ...) {
+  std::va_list ap;
+  va_start(ap, fmt);
+
+  lv = Level::ERROR;
+  s_logger.vprint(tag, lv, fmt, ap);
+
+  va_end(ap);
+}
+
+void panic(const char *tag, const char *fmt, ...) {
+  std::va_list ap;
+  va_start(ap, fmt);
+
+  s_logger.vpanic(tag, fmt, ap);
+}
+
 }

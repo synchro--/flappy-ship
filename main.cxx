@@ -112,7 +112,7 @@ void rendering(SDL_Window *win, Car car) {
 
 int main(int argc, char *argv[]) {
   SDL_Window *win;
-  SDL_GLContext mainContext;
+  SDL_GLEnv mainEnv;
   Uint32 windowID;
   SDL_Joystick *joystick;
   static int keymap[Controller::NKEYS] = {SDLK_a, SDLK_d, SDLK_w, SDLK_s};
@@ -148,8 +148,8 @@ int main(int argc, char *argv[]) {
   win = SDL_CreateWindow(argv[0], 0, 0, scrW, scrH,
                          SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
-  // Create our opengl context and attach it to our window
-  mainContext = SDL_GL_CreateContext(win);
+  // Create our opengl Env and attach it to our window
+  mainEnv = SDL_GL_CreateEnv(win);
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
@@ -341,7 +341,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-  SDL_GL_DeleteContext(mainContext);
+  SDL_GL_DeleteEnv(mainEnv);
   SDL_DestroyWindow(win);
   SDL_Quit();
   return (0);

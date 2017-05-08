@@ -17,7 +17,7 @@
 #include "types.hxx"
 
 /*AGL: Abstract Graphic Library
-The purpose is to create an abstract layer on the top of openGL in order to
+The purpose is to create an abstract layer on the top of OpenGL in order to
 simplify the usage of all the graphic functions in the project*/
 
 namespace agl {
@@ -80,6 +80,11 @@ struct Vertex {
   void render(bool send_normal = false) const;
 };
 
+
+/* The Env class represent the Environment of the game.
+   It handles all the main components of the scene and all the callbacks 
+   associated with the commands. 
+*/
 class Env final {
 
 private:
@@ -98,6 +103,7 @@ private:
   std::function<void(Key)> m_onkeyupf, m_onkeydownf;
 
 public:
+  //Friends can touch your private parts. 
   friend Env &get_env();
 
   // destructor takes care of closing the SDL libraries
@@ -105,18 +111,18 @@ public:
   // accepts a lambda to be performed between push and pop
   // Saves time and helps against bugs ensuring the matrix will be popped after
   // pushing
-  void mat_scope(const std::function<void()> callback);
+  void Env::mat_scope(const std::function<void()> callback);
 
   // load texture from an image and return bool if success
-  bool LoadTexture(int textbind, char *filename);
-  void SetCoordToPixel(Game gs);
+  bool Env::LoadTexture(int textbind, char *filename);
+  void Env::SetCoordToPixel(Game gs);
 
   // drawing functions
-  void drawSphere(double r, int lats, int longs);
-  void drawSky();
-  void drawFloor();
-  void drawAxis();
-  void redraw();
+  void Env::drawSphere(double r, int lats, int longs);
+  void Env::drawSky();
+  void Env::drawFloor();
+  void Env::drawAxis();
+  void Env::redraw();
 
   void Env::setup_model();
   void Env::setup_persp(float width, float height);
@@ -126,11 +132,11 @@ public:
 
   // Setters for all the callbacks
   // Default: empty
-  void set_action(decltype(m_actionf) actions = [] {});
-  void set_onkeydown(decltype(m_onkeydownf) onkeydown = [](Key) {});
-  void set_onkeyup(decltype(m_onkeyupf) onkeyup = [](Key) {});
-  void set_onwindowevent(decltype(m_onwinevf) onwinev = [] {});
-  void set_render(decltype(m_renderf) render = [] {});
+  void Env::set_action(decltype(m_actionf) actions = [] {});
+  void Env::set_onkeydown(decltype(m_onkeydownf) onkeydown = [](Key) {});
+  void Env::set_onkeyup(decltype(m_onkeyupf) onkeyup = [](Key) {});
+  void Env::set_onwindowevent(decltype(m_onwinevf) onwinev = [] {});
+  void Env::set_render(decltype(m_renderf) render = [] {});
 };
 
 // return singleton instance
