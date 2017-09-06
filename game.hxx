@@ -14,7 +14,7 @@ public:
   // define global vars
   //, every class that inherits from Game share the same instance of the global
   // vars
-  float viewAlpha, viewBeta, eyeDist;
+  float view_alpha, view_beta, eyeDist;
   int scrH, scrW; // altezza e larghezza viewport (in pixels)
   bool useWireframe, useEnvmap, useHeadlight, useShadow;
   int cameraType;

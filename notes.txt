@@ -12,8 +12,8 @@ met. process_comand per eseguirli
 -----------------------------------------------------
 DEFAULT VARIABLES VALUES 
 
-viewAlpha = 20;
-viewBeta = 40; // angoli che definiscono la vista
+view_alpha = 20;
+view_beta = 40; // angoli che definiscono la vista
 eyeDist = 5.0;                 // distanza dell'occhio dall'origine
 scrH = 750;
 scrW = 750;          // altezza e larghezza viewport (in pixels)

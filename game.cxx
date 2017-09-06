@@ -3,8 +3,8 @@
 void Game::init() {}
 
 // initialize static variables
-float Game::viewAlpha = 20;
-float Game::viewBeta = 40; // angoli che definiscono la vista
+float Game::view_alpha = 20;
+float Game::view_beta = 40; // angoli che definiscono la vista
 float Game::eyeDist = 5.0; // distanza dell'occhio dall'origine
 int Game::scrH = 750;
 int Game::scrW = 750; // altezza e larghezza viewport (in pixels)

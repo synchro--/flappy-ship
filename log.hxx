@@ -1,11 +1,11 @@
 #ifndef _LOG_HXX
 #define _LOG_HXX
 
-#include "types.hxx"
-
 #include <cstdio>
 #include <cstdarg>
 #include <iostream>
+#include <unistd.h>
+#include <types.hxx>
 
 // pretty simple logging utility with printf like formatting
 
@@ -19,36 +19,38 @@ private:
   Level m_level;
 
 public:
-  //singleton function must be friend 
+  //singleton function must be friend
   //friend Logger &get_logger();
+  Logger(std::ostream& os = std::cerr, Level lv = Level::INFO);
 
   Level get_level();
   void set_level(Level lv);
 
   void vprint(const char *tag, Level lv, const char *fmt, std::va_list l);
   void print(const char *tag, Level lv, const char *fmt, ...);
-  void vpanic(const char *tag, Level lv, const char *fmt, std::va_list l);
+  void vpanic(const char *tag, const char *fmt, std::va_list l);
 
   void i(const char *tag, const char *fmt, ...);
   void e(const char *tag, const char *fmt, ...);
   void panic(const char *tag, const char *fmt, ...);
- }
- 
+ };
 
- 
- //return the static global logger instance
- Logger &global();
 
-   Level get_level();
-  void set_level(Level lv);
 
-  void vprint(const char *tag, Level lv, const char *fmt, std::va_list l);
-  void print(const char *tag, Level lv, const char *fmt, ...);
-  void vpanic(const char *tag, Level lv, const char *fmt, std::va_list l);
+    //return the static global logger instance
+    Logger &global();
 
-  void i(const char *tag, const char *fmt, ...);
-  void e(const char *tag, const char *fmt, ...);
-  void panic(const char *tag, const char *fmt, ...);
+    //global logger functions
+    Level get_level();
+    void set_level(Level lv);
+
+    void vprint(const char *tag, Level lv, const char *fmt, std::va_list l);
+    void print(const char *tag, Level lv, const char *fmt, ...);
+    void vpanic(const char *tag, Level lv, const char *fmt, std::va_list l);
+
+    void i(const char *tag, const char *fmt, ...);
+    void e(const char *tag, const char *fmt, ...);
+    void panic(const char *tag, const char *fmt, ...);
 
 }
 

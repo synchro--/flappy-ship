@@ -15,6 +15,7 @@
 
 #include "game.hxx"
 #include "types.hxx"
+#include "log.hxx"
 
 /*AGL: Abstract Graphic Library
 The purpose is to create an abstract layer on the top of OpenGL in order to
@@ -82,8 +83,8 @@ struct Vertex {
 
 
 /* The Env class represent the Environment of the game.
-   It handles all the main components of the scene and all the callbacks 
-   associated with the commands. 
+   It handles all the main components of the scene and all the callbacks
+   associated with the commands.
 */
 class Env final {
 
@@ -103,7 +104,7 @@ private:
   std::function<void(Key)> m_onkeyupf, m_onkeydownf;
 
 public:
-  //Friends can touch your private parts. 
+  //Friends can touch your private parts.
   friend Env &get_env();
 
   // destructor takes care of closing the SDL libraries

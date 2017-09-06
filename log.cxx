@@ -11,26 +11,26 @@ const char *level_to_str(Level lv) {
   case Level::ERROR:
     return "E";
 
-  case Level::PANIC return "PANIC:";
+case Level::PANIC: return "PANIC:";
 
       default:
     // shouldn't arrive here
-    cout << "Logging Level not recognized.\n";
+    std::cout << "Logging Level not recognized.\n";
     std::terminate();
   }
 }
 
 Logger::Logger(std::ostream &os, Level lv) : m_os(os), m_level(lv) {}
 
-Level get_level() { return m_level; }
+Level Logger::get_level() { return m_level; }
 
-void set_level(Level lv) { m_level = lv; }
+void Logger::set_level(Level lv) { m_level = lv; }
 
 void Logger::vprint(const char *tag, Level lv, const char *fmt,
                     std::va_list l) {
 
   // if less important than current level exit
-  if (lv < m_current) {
+  if (lv < m_level) {
     return;
   }
 
@@ -59,7 +59,7 @@ void Logger::print(const char *tag, Level lv, const char *fmt, ...) {
   va_end(ap);
 }
 
-void Logger::vpanic(const char *tag, const char *fmt, std::va_list l) {
+void Logger::vpanic(const char *tag, const char *fmt, std::va_list ap) {
   Level lv = Level::PANIC;
   vprint(tag, lv, fmt, ap);
   va_end(ap);
@@ -72,7 +72,7 @@ void Logger::i(const char *tag, const char *fmt, ...) {
   std::va_list ap;
   va_start(ap, fmt);
 
-  lv = Level::INFO;
+  Level lv = Level::INFO;
   vprint(tag, lv, fmt, ap);
 
   va_end(ap);
@@ -82,7 +82,7 @@ void Logger::e(const char *tag, const char *fmt, ...) {
   std::va_list ap;
   va_start(ap, fmt);
 
-  lv = Level::ERROR;
+  Level lv = Level::ERROR;
   vprint(tag, lv, fmt, ap);
 
   va_end(ap);
@@ -96,7 +96,7 @@ void Logger::panic(const char *tag, const char *fmt, ...) {
 }
 
 
-static Logger s_logger; 
+static Logger s_logger;
 
 Logger &global() {
   return s_logger;
@@ -120,7 +120,7 @@ void i(const char *tag, const char *fmt, ...) {
   std::va_list ap;
   va_start(ap, fmt);
 
-  lv = Level::INFO;
+  Level lv = Level::INFO;
   s_logger.vprint(tag, lv, fmt, ap);
 
   va_end(ap);
@@ -130,7 +130,7 @@ void e(const char *tag, const char *fmt, ...) {
   std::va_list ap;
   va_start(ap, fmt);
 
-  lv = Level::ERROR;
+  Level lv = Level::ERROR;
   s_logger.vprint(tag, lv, fmt, ap);
 
   va_end(ap);

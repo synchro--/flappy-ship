@@ -34,7 +34,8 @@ void drawAxis() {
   glVertex3f(0, -1, 0);
   glVertex3f(0, +1, 0);
 
-  glVertex3f(0, 0, -1);
+  glVertex3f(0, 0, -1); 
+
   glVertex3f(0, 0, +1);
   glEnd();
 
@@ -46,7 +47,7 @@ void drawAxis() {
   glVertex3f(+1, 0, 0);
   glVertex3f(+1 - K, +K, 0);
   glVertex3f(+1 - K, -K, 0);
-
+  
   glVertex3f(0, 0, +1);
   glVertex3f(0, +K, +1 - K);
   glVertex3f(0, -K, +1 - K);

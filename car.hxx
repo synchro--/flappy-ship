@@ -23,7 +23,6 @@ public:
   void Joy(int keymap, bool pressed_or_released);
   Controller() { Init(); } // costruttore
 };
-
 class Car : public Game {
 
   void RenderAllParts(bool usecolor) const;

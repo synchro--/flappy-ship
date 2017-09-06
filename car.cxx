@@ -390,13 +390,13 @@ void Car::setCamera() {
     break;
   case CAMERA_MOUSE:
     glTranslatef(0, 0, -eyeDist);
-    glRotatef(viewBeta, 1, 0, 0);
-    glRotatef(viewAlpha, 0, 1, 0);
+    glRotatef(view_beta, 1, 0, 0);
+    glRotatef(view_alpha, 0, 1, 0);
     /*
-    printf("%f %f %f\n",viewAlpha,viewBeta,eyeDist);
-                    ex=eyeDist*cos(viewAlpha)*sin(viewBeta);
-                    ey=eyeDist*sin(viewAlpha)*sin(viewBeta);
-                    ez=eyeDist*cos(viewBeta);
+    printf("%f %f %f\n",view_alpha,view_beta,eyeDist);
+                    ex=eyeDist*cos(view_alpha)*sin(view_beta);
+                    ey=eyeDist*sin(view_alpha)*sin(view_beta);
+                    ez=eyeDist*cos(view_beta);
                     cx = px - camd*sinf;
                     cy = py + camh;
                     cz = pz - camd*cosf;

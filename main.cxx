@@ -59,8 +59,8 @@ void rendering(SDL_Window *win, Car car) {
 
   // settiamo matrice di vista
   // glTranslatef(0,0,-eyeDist);
-  // glRotatef(viewBeta,  1,0,0);
-  // glRotatef(viewAlpha, 0,1,0);
+  // glRotatef(view_beta,  1,0,0);
+  // glRotatef(view_alpha, 0,1,0);
   car.setCamera();
 
   // drawAxis(); // disegna assi frame MONDO
@@ -124,8 +124,8 @@ int main(int argc, char *argv[]) {
   int fpsNow = car.fpsNow;
   int scrW = car.scrW;
   int scrH = car.scrH;
-  float viewAlpha = car.viewAlpha;
-  float viewBeta = car.viewBeta;
+  float view_alpha = car.view_alpha;
+  float view_beta = car.view_beta;
   float eyeDist = car.eyeDist;
   int nstep = car.nstep;
   bool useWireframe = car.useWireframe;
@@ -245,13 +245,13 @@ int main(int argc, char *argv[]) {
 
       case SDL_MOUSEMOTION:
         if (e.motion.state & SDL_BUTTON(1) & cameraType == CAMERA_MOUSE) {
-          viewAlpha += e.motion.xrel;
-          viewBeta += e.motion.yrel;
-          // if (viewBeta<-90) viewBeta=-90;
-          if (viewBeta < +5)
-            viewBeta = +5; // per non andare sotto la macchina
-          if (viewBeta > +90)
-            viewBeta = +90;
+          view_alpha += e.motion.xrel;
+          view_beta += e.motion.yrel;
+          // if (view_beta<-90) view_beta=-90;
+          if (view_beta < +5)
+            view_beta = +5; // per non andare sotto la macchina
+          if (view_beta > +90)
+            view_beta = +90;
           // redraw(); // richiedi un ridisegno (non c'e' bisongo: si ridisegna
           // gia'
           // al ritmo delle computazioni fisiche)
