@@ -5,7 +5,6 @@ namespace agl {
 // Returns the singleton instance of agl::Env, initializing it if necessary
 Env &get_env() {
   // having a unique ptr ensures the Env will be called only during the main
-
   // static std::unique_ptr<Env> s_env(nullptr);
   static auto s_env = std::make_unique<Env>();
   if (!s_env) {
@@ -18,39 +17,49 @@ Env &get_env() {
 // constructs the environment, initializing many elements
 Env::Env()
     // All callbacks are init to empty lambdas
-    : m_actionf([] {}),
-      m_renderf([] {}),
-      m_onwinevf([], {}),
-      m_onkeydownf([](Key) {}),
-      m_onkeyupf([](Key) {}),
+    : m_action_handler([] {}), m_render_handler([] {}),
+      m_window_event_handler([], {}), m_key_down_handler([](Key) {}),
+      m_key_up_handler([](Key) {}),
 
       // all environment variables
-      m_view_alpha(20),
-      m_view_beta(40),
-      m_eye_dist(5.0),
-      m_screenH(750),
-      m_screenW(750),
-      m_wireframe(false),
-      m_envmap(true),
-      m_headlight(false),
-      m_shadow(true),
-      m_camera_type(0),
-      m_step(0),
-      m_fps(0.0),
-      m_fps_now(0.0),
-      m_last_time(0); 
+      m_view_alpha(20), m_view_beta(40), m_eye_dist(5.0), m_screenH(750),
+      m_screenW(750), m_wireframe(false), m_envmap(true), m_headlight(false),
+      m_shadow(true), m_camera_type(0), m_step(0), m_fps(0.0), m_fps_now(0.0),
+      m_last_time(0.0) {
+ 
+      // "__func__" == function name
+      static const auto TAG = __func__;
 
-// "__func__" is included by C++11 and is equal to the function name
-static const auto TAG = __func__;
+    // Don't let SDL set its signal() handlers - Ctrl+c and friends will work
+    SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
 
-Env::~Env(){
+    log::i(TAG, "initializing SDL and OpenGL");
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+      log::e(TAG, "Context::Context", SDL_GetError());
+      exit(EXIT_FAILURE);
+    }
+
+    if (TTF_Init() < 0) {
+      log::e(TAG, "Context::Context", SDL_GetError());
+      exit(EXIT_FAILURE);
+    }
+
+    enable_zbuffer(16);
+    enable_double_buffering();
+
+    logs::i(TAG, "SDL and OpenGL Init: done");
+  }
+
+//quit gracefully
+Env::~Env() {
   log::i(TAG, "Quit...");
 
   TTF_Quit();
-  SDL_Quit(); 
+  SDL_Quit();
 }
 
-void Env::mat_scope(const std::function <void (void)> callback {
+void Env::mat_scope(const std::function<void(void)> callback) {
   glPushMatrix();
   callback();
   glPopMatrix();
@@ -68,6 +77,38 @@ bool Env::LoadTexture(int textbind, char *filename) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR_MIPMAP_LINEAR);
   return true;
+}
+
+//hint: should be 100.0 20.0 20.0
+void Env::drawSky(double radius, int lats, int longs) {
+
+  if (m_wireframe) {
+    glDisable(GL_TEXTURE_2D);
+    glColor3f(0, 0, 0);
+    glDisable(GL_LIGHTING);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    drawSphere(100.0, 20, 20);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glColor3f(1, 1, 1);
+    glEnable(GL_LIGHTING);
+  } else {
+    glBindTexture(GL_TEXTURE_2D, 2);
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_GEN_S);
+    glEnable(GL_TEXTURE_GEN_T);
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); // Env map
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+    glColor3f(1, 1, 1);
+    glDisable(GL_LIGHTING);
+
+    //   drawCubeFill();
+    drawSphere(radius, lats, longs);
+
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
+  }
 }
 
 void Env::drawSphere(double r, int lats, int longs) {
@@ -97,69 +138,90 @@ void Env::drawSphere(double r, int lats, int longs) {
   }
 }
 
-  void Env::drawFloor() {
-    const float S = 100; // size
-    const float H = 0;   // altezza
-    const int K = 150;   // disegna K x K quads
+void Env::drawFloor(float sz, float height, size_t num_quads) {
+  // draw num_quads^2 number of quads
 
-    // disegna KxK quads
-    glBegin(GL_QUADS);
-    glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i quads
-    glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
-    for (int x = 0; x < K; x++)
-      for (int z = 0; z < K; z++) {
-        float x0 = -S + 2 * (x + 0) * S / K;
-        float x1 = -S + 2 * (x + 1) * S / K;
-        float z0 = -S + 2 * (z + 0) * S / K;
-        float z1 = -S + 2 * (z + 1) * S / K;
-        glVertex3d(x0, H, z0);
-        glVertex3d(x1, H, z0);
-        glVertex3d(x1, H, z1);
-        glVertex3d(x0, H, z1);
-      }
-    glEnd();
-  }
-
-  // Switches mode into GL_MODELVIEW, and then loads an identity matrix.
-  void Env::setup_model() {
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-  }
-
-  // Switches mode into GL_PERSPECTIVE, and then loads an identity matrix.
-  // The perspective is then arbitrarily set up.
-  void Env::setup_persp(float width, float height) {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(70, width / height, .2, 1000.0);
-  }
-
-  // Sets the action callback which is called once in every iteration. Before the actual rendering. 
-  void Env::set_action(decltype(m_actionf) actions) {
-    m_actionf = actions;
-  }
-
-  // Sets the onkeydown callback.
-  void Env::set_onkeydown(decltype(m_onkeydownf) onkeydown) {
-    m_onkeydownf = onkeydown;
-  }
-
-  // Sets the onkeyup callback.
-  void Env::set_onkeyup(decltype(m_onkeyupf) onkeyup) {
-    m_onkeyupf = onkeyup;
-  }
-
-  // Sets the onwindowevent callback, which is called when the window is exposed
-  // again after being covered - usually it is set to the same as m_renderf.
-  void Env::set_onwindowevent(decltype(m_onwinevf) onwinev) {
-    m_onwinevf = onwinev;
-  }
-
-  // Sets the m_renderf callback, which is called to render the scene.
-  void Env::set_render(decltype(m_renderf) render) { m_renderf = render; }
-
+  glBegin(GL_QUADS);
+  glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i quads
+  glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
+  for (int x = 0; x < num_quads; x++)
+    for (int z = 0; z < num_quads; z++) {
+      float x0 = -sz + 2 * (x + 0) * sz / num_quads;
+      float x1 = -sz + 2 * (x + 1) * sz / num_quads;
+      float z0 = -sz + 2 * (z + 0) * sz / num_quads;
+      float z1 = -sz + 2 * (z + 1) * sz / num_quads;
+      glVertex3d(x0, height, z0);
+      glVertex3d(x1, height, z0);
+      glVertex3d(x1, height, z1);
+      glVertex3d(x0, height, z1);
+    }
+  glEnd();
 }
 
+// probabilmente da eliminare e gestire diversamente in seguito
+void Env::redraw() {
+  // ci automandiamo un messaggio che (s.o. permettendo)
+  // ci fara' ridisegnare la finestra
+  SDL_Event e;
+  e.type = SDL_WINDOWEVENT;
+  e.window.event = SDL_WINDOWEVENT_EXPOSED;
+  SDL_PushEvent(&e);
+}
 
+// setta le matrici di trasformazione in modo
+// che le coordinate in spazio oggetto siano le coord
+// del pixel sullo schemo
+void Env::setCoordToPixel() {
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glTranslatef(-1, -1, 0);
+  glScalef(2.0 / m_screenW, 2.0 / m_screenH, 1);
+}
 
+// Switches mode into GL_MODELVIEW, and then loads an identity matrix.
+void Env::setup_model() {
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+}
+
+// Switches mode into GL_PERSPECTIVE, and then loads an identity matrix.
+// The perspective is then arbitrarily set up.
+void Env::setup_persp(float width, float height) {
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(70, width / height, .2, 1000.0);
+}
+
+// Sets the action callback which is called once in every iteration. Before the
+// actual rendering.
+void Env::set_action(decltype(m_action_handler) actions) {
+  m_action_handler = actions;
+}
+
+// Sets the onkeydown callback.
+void Env::set_keydown_handler(decltype(m_key_down_handler) onkeydown) {
+  m_key_down_handler = onkeydown;
+}
+
+// Sets the onkeyup callback.
+void Env::set_keyup_handler(decltype(m_key_up_handler) onkeyup) {
+  m_key_up_handler = onkeyup;
+}
+
+// Sets the onwindowevent callback, which is called when the window is exposed
+// again after being covered - usually it is set to the same as
+// m_render_handler.
+void Env::set_winevent_handler(decltype(m_window_event_handler) onwinev) {
+  m_window_event_handler = onwinev;
+}
+
+// Sets the m_render_handler callback, which is called to render the scene.
+void Env::set_render(decltype(m_render_handler) render) {
+  m_render_handler = render;
+}
+}
+
+// DA ELIMINARE
 // auto car = std::make_unique<Car>(); // requires C++14

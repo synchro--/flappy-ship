@@ -12,7 +12,6 @@
 
 #include "game.hxx"
 #include "mesh.hxx"
-#include "utils.hxx"
 
 class Controller {
 public:

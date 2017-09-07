@@ -1,6 +1,7 @@
 #ifndef _AGL_HXX_
 #define _AGL_HXX_
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <string>
@@ -14,8 +15,8 @@
 #include <SDL2/SDL_image.h>
 
 #include "game.hxx"
-#include "types.hxx"
 #include "log.hxx"
+#include "types.hxx"
 
 /*AGL: Abstract Graphic Library
 The purpose is to create an abstract layer on the top of OpenGL in order to
@@ -81,15 +82,28 @@ struct Vertex {
   void render(bool send_normal = false) const;
 };
 
+// Enables double buffering
+void enable_double_buffering() {
+  log::i(__func__, "enabling double buffer");
 
-/* The Env class represent the Environment of the game.
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+}
+
+// Enables the depth buffer at depth 'depth'
+void enable_zbuffer(size_t depth) {
+  log::i(__func__, "setting up Z-buffer of depth = %zu bits", depth);
+
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depth);
+}
+
+/* The Env class represents the Environment of the game.
    It handles all the main components of the scene and all the callbacks
    associated with the commands.
 */
 class Env final {
 
 private:
-  float m_view_aplha, m_view_beta;
+  float m_view_alpha, m_view_beta;
   float m_eye_dist;
   int m_screenH, m_screenW;
   int m_camera_type;
@@ -97,47 +111,56 @@ private:
   float m_fps_now; // fps currently drawn
   int m_step;      // number of steps of Physics currently done
   bool m_wireframe, m_envmap, m_headlight, m_shadow;
-  unsigned int m_last_time;
+  uint32_t m_last_time;
 
-  // callbacks variables
-  std::function<void()> m_actionf, m_renderf, m_onwinevf;
-  std::function<void(Key)> m_onkeyupf, m_onkeydownf;
+  /* Callbacks variables:
+  *  they will be the handler for keys, windows events and rendering.
+  *  The actual callback function will vary according to the current
+  *  state of the game.
+  *  For example, if we are on Menù, the rendering callback will be different
+  *  wrt when we are actually playing.
+  */
+  std::function<void()> m_action_handler, m_render_handler,
+      m_window_event_handler;
+  std::function<void(Key)> m_key_up_handler, m_key_down_handler;
 
 public:
-  //Friends can touch your private parts.
+  // Friends can touch your private parts.
   friend Env &get_env();
 
   // destructor takes care of closing the SDL libraries
   virtual ~Env();
-  // accepts a lambda to be performed between push and pop
-  // Saves time and helps against bugs ensuring the matrix will be popped after
-  // pushing
-  void Env::mat_scope(const std::function<void()> callback);
 
-  // load texture from an image and return bool if success
-  bool Env::LoadTexture(int textbind, char *filename);
-  void Env::SetCoordToPixel(Game gs);
 
   // drawing functions
-  void Env::drawSphere(double r, int lats, int longs);
-  void Env::drawSky();
-  void Env::drawFloor();
-  void Env::drawAxis();
-  void Env::redraw();
-
-  void Env::setup_model();
-  void Env::setup_persp(float width, float height);
+  void drawAxis();
+  void drawFloor(float sz, float height, size_t num_quads);
+  void drawSky();
+  void drawSphere(double r, int lats, int longs);
 
   // Returns the current FPS.
   inline decltype(m_fps) fps() { return m_fps; }
+  // load texture from an image and return bool if success
+  bool LoadTexture(int textbind, char *filename);
+
+  // accepts a lambda to be performed between push and pop
+  // Saves time and ensures the matrix will be popped after
+  // pushing
+  void mat_scope(const std::function<void()> callback);
+  void redraw();
+  void setCoordToPixel();
 
   // Setters for all the callbacks
   // Default: empty
-  void Env::set_action(decltype(m_actionf) actions = [] {});
-  void Env::set_onkeydown(decltype(m_onkeydownf) onkeydown = [](Key) {});
-  void Env::set_onkeyup(decltype(m_onkeyupf) onkeyup = [](Key) {});
-  void Env::set_onwindowevent(decltype(m_onwinevf) onwinev = [] {});
-  void Env::set_render(decltype(m_renderf) render = [] {});
+  void set_action(decltype(m_action_handler) actions = [] {});
+  void set_keydown_handler(decltype(m_key_down_handler) onkeydown = [](Key) {});
+  void set_keyup_handler(decltype(m_key_up_handler) onkeyup = [](Key) {});
+  void set_render(decltype(m_render_handler) render = [] {});
+  void set_winevent_handler(decltype(m_window_event_handler) onwinev = [] {});
+  
+  //Model and Projection matrix setup
+  void setup_model();
+  void setup_persp(float width, float height);
 };
 
 // return singleton instance

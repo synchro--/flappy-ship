@@ -7,7 +7,7 @@ enum Key {
   };
 
 //logging levels
-enum class Level {
+enum Level {
     INFO, ERROR, PANIC;
 };
 
@@ -15,9 +15,11 @@ enum class Level {
 // Default colors
 const Color WHITE  = {1.0f, 1.0f, 1.0f, 1.0f};
 const Color BLACK  = { .0f,  .0f,  .0f, 1.0f};
-const Color RED    = {.77f, .01f, .2f};
-const Color GREEN  = {.0f, .62f, .42f};
-const Color YELLOW = {1.0f, .83f, .0f};
+const Color RED    = {.768f, .109f, .109f};
+const Color GREEN  = {.447f, .643f, .074f};
+const Color YELLOW = {.913f, .643f, .074f};
+
+
 
 #define CAMERA_BACK_CAR 0
 #define CAMERA_TOP_FIXED 1

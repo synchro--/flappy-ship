@@ -8,7 +8,6 @@
 #include "car.hxx"
 #include "game.hxx"
 #include "types.hxx"
-#include "utils.hxx"
 
 const int PHYS_SAMPLING_STEP =
     10; // numero di millisec che un passo di fisica simula

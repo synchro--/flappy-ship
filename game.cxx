@@ -2,6 +2,8 @@
 
 void Game::init() {}
 
+// probabilmente queste variabili cambieranno e non saranno più statiche
+// trovare la classe di appartenenza 
 // initialize static variables
 float Game::view_alpha = 20;
 float Game::view_beta = 40; // angoli che definiscono la vista
