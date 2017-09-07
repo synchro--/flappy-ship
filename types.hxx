@@ -1,6 +1,8 @@
 #ifndef TYPES_HXX
 #define TYPES_HXX
 
+namespace types {
+
 enum State { MENU, GAME, SETTINGS, RANKING };
 enum Key {
     W,A,S,D,UP,DOWN,LEFT,RIGHT,ESC,RETURN
@@ -27,5 +29,7 @@ const Color YELLOW = {.913f, .643f, .074f};
 #define CAMERA_PILOT 3
 #define CAMERA_MOUSE 4
 #define CAMERA_TYPE_MAX 5
+
+}
 
 #endif

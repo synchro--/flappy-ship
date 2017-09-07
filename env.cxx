@@ -18,7 +18,7 @@ Env &get_env() {
 Env::Env()
     // All callbacks are init to empty lambdas
     : m_action_handler([] {}), m_render_handler([] {}),
-      m_window_event_handler([], {}), m_key_down_handler([](Key) {}),
+      m_window_event_handler([] {}), m_key_down_handler([](Key) {}),
       m_key_up_handler([](Key) {}),
 
       // all environment variables
@@ -33,15 +33,15 @@ Env::Env()
     // Don't let SDL set its signal() handlers - Ctrl+c and friends will work
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
 
-    log::i(TAG, "initializing SDL and OpenGL");
+    lg::i(TAG, "initializing SDL and OpenGL");
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-      log::e(TAG, "Context::Context", SDL_GetError());
+      lg::e(TAG, "Context::Context", SDL_GetError());
       exit(EXIT_FAILURE);
     }
 
     if (TTF_Init() < 0) {
-      log::e(TAG, "Context::Context", SDL_GetError());
+      lg::e(TAG, "Context::Context", SDL_GetError());
       exit(EXIT_FAILURE);
     }
 
@@ -53,7 +53,7 @@ Env::Env()
 
 //quit gracefully
 Env::~Env() {
-  log::i(TAG, "Quit...");
+  lg::i(TAG, "Quit...");
 
   TTF_Quit();
   SDL_Quit();
@@ -65,78 +65,45 @@ void Env::mat_scope(const std::function<void(void)> callback) {
   glPopMatrix();
 }
 
-bool Env::LoadTexture(int textbind, char *filename) {
-  SDL_Surface *s = IMG_Load(filename);
-  if (!s)
-    return false;
+//Load texture from image file.
+//repeat == true --> GL_REPEAT for s and t coordinates
+//nearest == true --> apply neareast neighbour interpolation
+/*
+* N.B: While linear interpolation gives a smoother result, 
+* it isn't always the most ideal option. Nearest neighbour interpolation 
+* is more suited in games that want to mimic 8 bit graphics, 
+* because of the pixelated look. 
+*/
 
-  glBindTexture(GL_TEXTURE_2D, textbind);
+Env::Texture Env::loadTexture(const char *filename, bool repeat, bool nearest) {
+
+  lg::i(__func__, "Loading texture from file %s", filename);
+
+  SDL_Surface *s = IMG_Load(filename);
+  if (!s) {
+    lg::e(__func__, "Error while loading texture from file %s", filename);      
+    return false;
+  }
+  
+  Texture texbind; 
+  //generate a name for the texture (i.e. an unsigned int)
+  glGenTextures(1, &texbind); 
+  glBindTexture(GL_TEXTURE_2D, texbind);
   gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, s->w, s->h, GL_RGB, GL_UNSIGNED_BYTE,
                     s->pixels);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, 
+    nearest ? GL_NEAREST : GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR_MIPMAP_LINEAR);
-  return true;
-}
 
-//hint: should be 100.0 20.0 20.0
-void Env::drawSky(double radius, int lats, int longs) {
-
-  if (m_wireframe) {
-    glDisable(GL_TEXTURE_2D);
-    glColor3f(0, 0, 0);
-    glDisable(GL_LIGHTING);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    drawSphere(100.0, 20, 20);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glColor3f(1, 1, 1);
-    glEnable(GL_LIGHTING);
-  } else {
-    glBindTexture(GL_TEXTURE_2D, 2);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_GEN_S);
-    glEnable(GL_TEXTURE_GEN_T);
-    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); // Env map
-    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-    glColor3f(1, 1, 1);
-    glDisable(GL_LIGHTING);
-
-    //   drawCubeFill();
-    drawSphere(radius, lats, longs);
-
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_GEN_T);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_LIGHTING);
-  }
-}
-
-void Env::drawSphere(double r, int lats, int longs) {
-  int i, j;
-  for (i = 0; i <= lats; i++) {
-    double lat0 = M_PI * (-0.5 + (double)(i - 1) / lats);
-    double z0 = sin(lat0);
-    double zr0 = cos(lat0);
-
-    double lat1 = M_PI * (-0.5 + (double)i / lats);
-    double z1 = sin(lat1);
-    double zr1 = cos(lat1);
-
-    glBegin(GL_QUAD_STRIP);
-    for (j = 0; j <= longs; j++) {
-      double lng = 2 * M_PI * (double)(j - 1) / longs;
-      double x = cos(lng);
-      double y = sin(lng);
-
-      // le normali servono per l'EnvMap
-      glNormal3f(x * zr0, y * zr0, z0);
-      glVertex3f(r * x * zr0, r * y * zr0, r * z0);
-      glNormal3f(x * zr1, y * zr1, z1);
-      glVertex3f(r * x * zr1, r * y * zr1, r * z1);
+    if (repeat) {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
-    glEnd();
-  }
+
+  return texbind;
 }
+
 
 void Env::drawFloor(float sz, float height, size_t num_quads) {
   // draw num_quads^2 number of quads
@@ -156,6 +123,65 @@ void Env::drawFloor(float sz, float height, size_t num_quads) {
       glVertex3d(x0, height, z1);
     }
   glEnd();
+}
+
+
+//hint: should be 100.0 20.0 20.0
+void Env::drawSky(Texture texbind, double radius, int lats, int longs) {
+
+  if (m_wireframe) {
+    glDisable(GL_TEXTURE_2D);
+    glColor3f(BLACK.r, BLACK.g, BLACK.b);
+    glDisable(GL_LIGHTING);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    drawSphere(100.0, 20, 20);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glColor3f(WHITE.r, WHITE.g, WHITE.b);
+    glEnable(GL_LIGHTING);
+  } else {
+    glBindTexture(GL_TEXTURE_2D, texbind);
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_GEN_S);
+    glEnable(GL_TEXTURE_GEN_T);
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); // Env map
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+    glColor3f(WHITE.r, WHITE.g, WHITE.b);
+    glDisable(GL_LIGHTING);
+
+    drawSphere(radius, lats, longs);
+
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
+  }
+}
+
+void Env::drawSphere(double radius, int lats, int longs) {
+  int i, j;
+  for (i = 0; i <= lats; i++) {
+    double lat0 = M_PI * (-0.5 + (double)(i - 1) / lats);
+    double z0 = sin(lat0);
+    double zr0 = cos(lat0);
+
+    double lat1 = M_PI * (-0.5 + (double)i / lats);
+    double z1 = sin(lat1);
+    double zr1 = cos(lat1);
+
+    glBegin(GL_QUAD_STRIP);
+    for (j = 0; j <= longs; j++) {
+      double lng = 2 * M_PI * (double)(j - 1) / longs;
+      double x = cos(lng);
+      double y = sin(lng);
+
+      //Normal are needed for the EnvMap
+      glNormal3f(x * zr0, y * zr0, z0);
+      glVertex3f(radius * x * zr0, radius * y * zr0, radius * z0);
+      glNormal3f(x * zr1, y * zr1, z1);
+      glVertex3f(radius * x * zr1, radius * y * zr1, radius * z1);
+    }
+    glEnd();
+  }
 }
 
 // probabilmente da eliminare e gestire diversamente in seguito

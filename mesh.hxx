@@ -35,17 +35,17 @@ public:
   Vector3 n; // normale (per faccia)
 
   // computa la normale della faccia
-  void ComputeNormal() {
+  inline void ComputeNormal() {
     n = -((v[1]->p - v[0]->p) % (v[2]->p - v[0]->p)).Normalize();
   }
 
   // attributi per wedge
 };
 
-class Mesh : public Game {
+class Mesh {
   std::vector<Vertex> v; // vettore di vertici
   std::vector<Face> f;   // vettore di facce
-  std::vector<Edge> e;   // vettore di edge (per ora, non usato)
+//  std::vector<Edge> e;   // vettore di edge (per ora, non usato)
 
 public:
   // costruttore con caricamento

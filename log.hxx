@@ -11,7 +11,7 @@
 
 // Levels are: INFO, ERROR, PANIC, defined in types.hxx
 
-namespace log {
+namespace lg {
 
 class Logger {
 private:

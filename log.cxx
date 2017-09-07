@@ -1,6 +1,6 @@
 #include "log.hxx"
 
-namespace log {
+namespace lg {
 
 
 const char *level_to_str(Level lv) {

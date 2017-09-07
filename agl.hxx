@@ -18,9 +18,11 @@
 #include "log.hxx"
 #include "types.hxx"
 
-/*AGL: Abstract Graphic Library
-The purpose is to create an abstract layer on the top of OpenGL in order to
-simplify the usage of all the graphic functions in the project*/
+/*
+* AGL: Abstract Graphic Library
+* The purpose is to create an abstract layer on the top of OpenGL in order to
+* simplify the usage of all the graphic functions in the project
+*/
 
 namespace agl {
 
@@ -84,14 +86,14 @@ struct Vertex {
 
 // Enables double buffering
 void enable_double_buffering() {
-  log::i(__func__, "enabling double buffer");
+  lg::i(__func__, "enabling double buffer");
 
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 }
 
 // Enables the depth buffer at depth 'depth'
 void enable_zbuffer(size_t depth) {
-  log::i(__func__, "setting up Z-buffer of depth = %zu bits", depth);
+  lg::i(__func__, "setting up Z-buffer of depth = %zu bits", depth);
 
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depth);
 }
@@ -131,17 +133,20 @@ public:
   // destructor takes care of closing the SDL libraries
   virtual ~Env();
 
-
   // drawing functions
-  void drawAxis();
   void drawFloor(float sz, float height, size_t num_quads);
-  void drawSky();
+  void drawSky(Texture texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
 
   // Returns the current FPS.
   inline decltype(m_fps) fps() { return m_fps; }
-  // load texture from an image and return bool if success
-  bool LoadTexture(int textbind, char *filename);
+
+  using Texture = GLuint;
+
+  // load texture from an image and return bool if success, should be changed to
+  // return a texture ID --i.e. unsigned integer
+  Texture loadTexture(const char *filename, bool repeat = false, 
+    bool nearest = false);
 
   // accepts a lambda to be performed between push and pop
   // Saves time and ensures the matrix will be popped after
@@ -157,8 +162,8 @@ public:
   void set_keyup_handler(decltype(m_key_up_handler) onkeyup = [](Key) {});
   void set_render(decltype(m_render_handler) render = [] {});
   void set_winevent_handler(decltype(m_window_event_handler) onwinev = [] {});
-  
-  //Model and Projection matrix setup
+
+  // Model and Projection matrix setup
   void setup_model();
   void setup_persp(float width, float height);
 };
