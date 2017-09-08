@@ -22,6 +22,9 @@
 * AGL: Abstract Graphic Library
 * The purpose is to create an abstract layer on the top of OpenGL in order to
 * simplify the usage of all the graphic functions in the project
+*
+* Note: methods have camelCase usually.
+*       Small ones like accessors, however, have _underscore_ case.
 */
 
 namespace agl {
@@ -105,6 +108,8 @@ void enable_zbuffer(size_t depth) {
 class Env final {
 
 private:
+  Env(); // constructs the Environment, intializing all the variables.
+
   float m_view_alpha, m_view_beta;
   float m_eye_dist;
   int m_screenH, m_screenW;
@@ -134,7 +139,7 @@ public:
   virtual ~Env();
 
   // drawing functions
-  void drawFloor(float sz, float height, size_t num_quads);
+  void drawFloor(Texture texbind, float sz, float height, size_t num_quads);
   void drawSky(Texture texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
 
@@ -143,12 +148,12 @@ public:
 
   using Texture = GLuint;
 
-  // load texture from an image and return bool if success, should be changed to
+  // Load texture from an image and return bool if success, should be changed to
   // return a texture ID --i.e. unsigned integer
-  Texture loadTexture(const char *filename, bool repeat = false, 
+  Texture loadTexture(const char *filename, bool repeat = false,
     bool nearest = false);
 
-  // accepts a lambda to be performed between push and pop
+  // Accepts a lambda to be performed between push and pop
   // Saves time and ensures the matrix will be popped after
   // pushing
   void mat_scope(const std::function<void()> callback);
@@ -166,6 +171,10 @@ public:
   // Model and Projection matrix setup
   void setup_model();
   void setup_persp(float width, float height);
+
+  //texture drawing helper function
+  void textureDrawing(Texture texbind, std::function<void ()> callback,
+                        bool gen_coordinates = true);
 };
 
 // return singleton instance

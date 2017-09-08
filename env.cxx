@@ -6,9 +6,9 @@ namespace agl {
 Env &get_env() {
   // having a unique ptr ensures the Env will be called only during the main
   // static std::unique_ptr<Env> s_env(nullptr);
-  static auto s_env = std::make_unique<Env>();
+  static std::unique_ptr<Env> s_env(nullptr);
   if (!s_env) {
-    s_env.reset(new Env()); // initialize the environment on demand
+    s_env.reset(new Env()); // initialize the environment
   }
 
   return *s_env;
@@ -26,7 +26,7 @@ Env::Env()
       m_screenW(750), m_wireframe(false), m_envmap(true), m_headlight(false),
       m_shadow(true), m_camera_type(0), m_step(0), m_fps(0.0), m_fps_now(0.0),
       m_last_time(0.0) {
- 
+
       // "__func__" == function name
       static const auto TAG = __func__;
 
@@ -69,10 +69,10 @@ void Env::mat_scope(const std::function<void(void)> callback) {
 //repeat == true --> GL_REPEAT for s and t coordinates
 //nearest == true --> apply neareast neighbour interpolation
 /*
-* N.B: While linear interpolation gives a smoother result, 
-* it isn't always the most ideal option. Nearest neighbour interpolation 
-* is more suited in games that want to mimic 8 bit graphics, 
-* because of the pixelated look. 
+* N.B: While linear interpolation gives a smoother result,
+* it isn't always the most ideal option. Nearest neighbour interpolation
+* is more suited in games that want to mimic 8 bit graphics,
+* because of the pixelated look.
 */
 
 Env::Texture Env::loadTexture(const char *filename, bool repeat, bool nearest) {
@@ -81,17 +81,17 @@ Env::Texture Env::loadTexture(const char *filename, bool repeat, bool nearest) {
 
   SDL_Surface *s = IMG_Load(filename);
   if (!s) {
-    lg::e(__func__, "Error while loading texture from file %s", filename);      
+    lg::e(__func__, "Error while loading texture from file %s", filename);
     return false;
   }
-  
-  Texture texbind; 
+
+  Texture texbind;
   //generate a name for the texture (i.e. an unsigned int)
-  glGenTextures(1, &texbind); 
+  glGenTextures(1, &texbind);
   glBindTexture(GL_TEXTURE_2D, texbind);
   gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, s->w, s->h, GL_RGB, GL_UNSIGNED_BYTE,
                     s->pixels);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, 
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
     nearest ? GL_NEAREST : GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR_MIPMAP_LINEAR);
@@ -105,56 +105,64 @@ Env::Texture Env::loadTexture(const char *filename, bool repeat, bool nearest) {
 }
 
 
-void Env::drawFloor(float sz, float height, size_t num_quads) {
-  // draw num_quads^2 number of quads
+void Env::drawFloor(Texture texbind, float sz, float height, size_t num_quads) {
 
-  glBegin(GL_QUADS);
-  glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i quads
-  glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
-  for (int x = 0; x < num_quads; x++)
-    for (int z = 0; z < num_quads; z++) {
-      float x0 = -sz + 2 * (x + 0) * sz / num_quads;
-      float x1 = -sz + 2 * (x + 1) * sz / num_quads;
-      float z0 = -sz + 2 * (z + 0) * sz / num_quads;
-      float z1 = -sz + 2 * (z + 1) * sz / num_quads;
-      glVertex3d(x0, height, z0);
-      glVertex3d(x1, height, z0);
-      glVertex3d(x1, height, z1);
-      glVertex3d(x0, height, z1);
-    }
-  glEnd();
+ textureDrawing(texbind, [&]{
+   // draw num_quads^2 number of quads
+   glBegin(GL_QUADS);
+      glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i quads
+      glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
+      for (int x = 0; x < num_quads; x++)
+        for (int z = 0; z < num_quads; z++) {
+          float x0 = -sz + 2 * (x + 0) * sz / num_quads;
+          float x1 = -sz + 2 * (x + 1) * sz / num_quads;
+          float z0 = -sz + 2 * (z + 0) * sz / num_quads;
+          float z1 = -sz + 2 * (z + 1) * sz / num_quads;
+          glVertex3d(x0, height, z0);
+          glVertex3d(x1, height, z0);
+          glVertex3d(x1, height, z1);
+          glVertex3d(x0, height, z1);
+       }
+   glEnd();
+
+ }, false)
 }
 
 
-//hint: should be 100.0 20.0 20.0
+//hint: should be 100.0 20.0 20.0 --> see Sky constructor
 void Env::drawSky(Texture texbind, double radius, int lats, int longs) {
 
-  if (m_wireframe) {
-    glDisable(GL_TEXTURE_2D);
-    glColor3f(BLACK.r, BLACK.g, BLACK.b);
-    glDisable(GL_LIGHTING);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    drawSphere(100.0, 20, 20);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glColor3f(WHITE.r, WHITE.g, WHITE.b);
-    glEnable(GL_LIGHTING);
-  } else {
-    glBindTexture(GL_TEXTURE_2D, texbind);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_GEN_S);
-    glEnable(GL_TEXTURE_GEN_T);
-    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); // Env map
-    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-    glColor3f(WHITE.r, WHITE.g, WHITE.b);
-    glDisable(GL_LIGHTING);
+  textureDrawing(texbind, [&]{
 
-    drawSphere(radius, lats, longs);
+    if (m_wireframe) {
+      glDisable(GL_TEXTURE_2D);
+      glColor3f(BLACK.r, BLACK.g, BLACK.b);
+      glDisable(GL_LIGHTING);
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      drawSphere(100.0, 20, 20);
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      glColor3f(WHITE.r, WHITE.g, WHITE.b);
+      glEnable(GL_LIGHTING);
+    } else {
+      glBindTexture(GL_TEXTURE_2D, texbind);
+      glEnable(GL_TEXTURE_2D);
+      glEnable(GL_TEXTURE_GEN_S);
+      glEnable(GL_TEXTURE_GEN_T);
+      glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); // Env map
+      glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+      glColor3f(WHITE.r, WHITE.g, WHITE.b);
+      glDisable(GL_LIGHTING);
 
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_GEN_T);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_LIGHTING);
-  }
+      drawSphere(radius, lats, longs);
+
+      glDisable(GL_TEXTURE_GEN_S);
+      glDisable(GL_TEXTURE_GEN_T);
+      glDisable(GL_TEXTURE_2D);
+      glEnable(GL_LIGHTING);
+    }
+
+  }, true)
+
 }
 
 void Env::drawSphere(double radius, int lats, int longs) {
@@ -247,7 +255,38 @@ void Env::set_winevent_handler(decltype(m_window_event_handler) onwinev) {
 void Env::set_render(decltype(m_render_handler) render) {
   m_render_handler = render;
 }
-}
 
-// DA ELIMINARE
-// auto car = std::make_unique<Car>(); // requires C++14
+//Helper function to draw textured objects
+//Accepts a lambda as a drawing function to be called afte the texture
+//is applied.
+  void Env::textureDrawing(Texture texbind, std::function<void()> callback,
+                              bool gen_coordinates) {
+
+    glBindTexture(GL_TEXTURE_2D, texbind);
+    glEnable(GL_TEXTURE_2D);
+
+    //if the surface is complex, let OpenGL generate the coords for you
+    if (gen_coordinates) {
+      glEnable(GL_TEXTURE_GEN_S);
+      glEnable(GL_TEXTURE_GEN_T);
+    }
+
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE,
+                m_envmap ? GL_SPHERE_MAP: GL_OBJECT_LINEAR); //EnvMap
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE,
+                envmap ? GL_SPHERE_MAP: GL_OBJECT_LINEAR);
+
+
+    //--- call the callback drawing function --- //
+    callback();
+
+    if (gen_coordinates) {
+      glDisable(GL_TEXTURE_GEN_T);
+      glDisable(GL_TEXTURE_GEN_S);
+    }
+
+    // disable texturing
+    glDisable(GL_TEXTURE_2D);
+  }
+
+}

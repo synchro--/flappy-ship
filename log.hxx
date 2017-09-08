@@ -7,10 +7,10 @@
 #include <unistd.h>
 #include <types.hxx>
 
-// pretty simple logging utility with printf like formatting
-
+// pretty simple logging utility with printf-like formatting
 // Levels are: INFO, ERROR, PANIC, defined in types.hxx
 
+//log is already in use by std Library
 namespace lg {
 
 class Logger {
@@ -50,6 +50,7 @@ public:
 
     void i(const char *tag, const char *fmt, ...);
     void e(const char *tag, const char *fmt, ...);
+    //Panic: GET OUTTA HERE
     void panic(const char *tag, const char *fmt, ...);
 
 }
