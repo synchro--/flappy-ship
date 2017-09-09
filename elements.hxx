@@ -24,8 +24,8 @@ namespace elements {
   class Floor {
     private:
         float m_size, m_height;
-        agl::env &m_env; //reference to env, needed in the constructor
-        agl::Texture m_tex; //floor texture
+        agl::Env &m_env; //reference to env, needed in the constructor
+        agl::TexID m_tex; //floor texture
 
         //construct the floor loading the texture
         Floor(const char *texture_filename);
@@ -43,8 +43,8 @@ namespace elements {
   //The Sky. Same mechanism as above
   class Sky {
     private:
-        agl::env &m_env;
-        agl::Texture m_tex;
+        agl::Env &m_env;
+        agl::TexID m_tex;
         double m_radius;
         int m_lats, m_longs;
 
@@ -77,6 +77,59 @@ namespace elements {
    - come stabilire la direzione corretta e rilevera se si passa l'ostacolo dalla
    - parte giusta ? discutere con cillo
   */
+
+
+
+  /*
+  * The Spaceship class.
+  *
+  * STATE and MOTION:
+  * The motion of the spaceship is defined by the 4 state variables:
+  * THROTTLE - STEER_L - STEER_R - BRAKE that are either 'off' or 'on'.
+  * When the player send a key, the action will be stored in a queue in the form
+  * of <State Variable , on/off > (here called Motion).
+  * Thus, the Spaceship execute commands by simply reading from the queue
+  * and set the respective state var to on-off.
+  *
+  * RENDERING:
+  * When the state of the spaceship change, we need to redraw the ship.
+  * Hence, the rendering will be updated according to the state and ultimately
+  * to the commands given by the player.
+  */
+
+  class Spaceship {
+     private:
+     agl::Env &m_env;
+     agl::TexID m_tex;
+     agl::Mesh m_mesh; //mesh structure for the Aventador Spaceship
+     //angles, grip and friction
+
+     //state
+     bool m_state[5];
+
+     //commands will be stored in a queue and processed with callbacks
+     std::queue<spaceship::Command> m_cmds;
+
+     //private constructor to ensure singleton instance
+     //instance is obtained through get_spaceship()
+     Spaceship(const char *texture_filename, const char *mesh_filename);
+
+     //internal logic and physics of the spaceship
+
+     bool updateNeeded();
+     bool doMotion();
+
+
+
+     public:
+      friend Spaceship* get_spaceship(const char *texture_filename, const char *mesh_filename);
+
+      //APIs to interact with the spaceship
+      bool executeCommand();
+      bool sendCommand(spaceship::Command);
+      //render the Spaceship: TexID + Mesh
+      void render();
+  }
 
 }
 

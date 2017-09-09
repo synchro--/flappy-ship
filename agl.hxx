@@ -7,6 +7,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <queue>
 
 #include <GL/gl.h>
 #include <GL/glew.h>
@@ -139,18 +140,18 @@ public:
   virtual ~Env();
 
   // drawing functions
-  void drawFloor(Texture texbind, float sz, float height, size_t num_quads);
-  void drawSky(Texture texbind, double radius, int lats, int longs);
+  void drawFloor(TexID texbind, float sz, float height, size_t num_quads);
+  void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
 
   // Returns the current FPS.
   inline decltype(m_fps) fps() { return m_fps; }
 
-  using Texture = GLuint;
+  using TexID = GLuint;
 
   // Load texture from an image and return bool if success, should be changed to
   // return a texture ID --i.e. unsigned integer
-  Texture loadTexture(const char *filename, bool repeat = false,
+  TexID loadTexture(const char *filename, bool repeat = false,
     bool nearest = false);
 
   // Accepts a lambda to be performed between push and pop
@@ -173,7 +174,7 @@ public:
   void setup_persp(float width, float height);
 
   //texture drawing helper function
-  void textureDrawing(Texture texbind, std::function<void ()> callback,
+  void textureDrawing(TexID texbind, std::function<void ()> callback,
                         bool gen_coordinates = true);
 };
 

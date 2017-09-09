@@ -75,7 +75,7 @@ void Env::mat_scope(const std::function<void(void)> callback) {
 * because of the pixelated look.
 */
 
-Env::Texture Env::loadTexture(const char *filename, bool repeat, bool nearest) {
+Env::TexID Env::loadTexture(const char *filename, bool repeat, bool nearest) {
 
   lg::i(__func__, "Loading texture from file %s", filename);
 
@@ -85,7 +85,7 @@ Env::Texture Env::loadTexture(const char *filename, bool repeat, bool nearest) {
     return false;
   }
 
-  Texture texbind;
+  TexID texbind;
   //generate a name for the texture (i.e. an unsigned int)
   glGenTextures(1, &texbind);
   glBindTexture(GL_TEXTURE_2D, texbind);
@@ -105,7 +105,7 @@ Env::Texture Env::loadTexture(const char *filename, bool repeat, bool nearest) {
 }
 
 
-void Env::drawFloor(Texture texbind, float sz, float height, size_t num_quads) {
+void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
 
  textureDrawing(texbind, [&]{
    // draw num_quads^2 number of quads
@@ -130,7 +130,7 @@ void Env::drawFloor(Texture texbind, float sz, float height, size_t num_quads) {
 
 
 //hint: should be 100.0 20.0 20.0 --> see Sky constructor
-void Env::drawSky(Texture texbind, double radius, int lats, int longs) {
+void Env::drawSky(TexID texbind, double radius, int lats, int longs) {
 
   textureDrawing(texbind, [&]{
 
@@ -259,7 +259,7 @@ void Env::set_render(decltype(m_render_handler) render) {
 //Helper function to draw textured objects
 //Accepts a lambda as a drawing function to be called afte the texture
 //is applied.
-  void Env::textureDrawing(Texture texbind, std::function<void()> callback,
+  void Env::textureDrawing(TexID texbind, std::function<void()> callback,
                               bool gen_coordinates) {
 
     glBindTexture(GL_TEXTURE_2D, texbind);
