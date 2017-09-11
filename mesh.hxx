@@ -45,7 +45,7 @@ public:
 class Mesh {
   std::vector<Vertex> v; // vettore di vertici
   std::vector<Face> f;   // vettore di facce
-//  std::vector<Edge> e;   // vettore di edge (per ora, non usato)
+  //  std::vector<Edge> e;   // vettore di edge (per ora, non usato)
 
 public:
   // costruttore con caricamento

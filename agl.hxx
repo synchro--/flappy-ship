@@ -4,10 +4,10 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <queue>
 #include <string>
 #include <utility>
 #include <vector>
-#include <queue>
 
 #include <GL/gl.h>
 #include <GL/glew.h>
@@ -75,8 +75,9 @@ struct Normal3 : public Vec3 {
   void render() const;
 }
 
-// Point3 will be used out of clarity, to distinguish between points and vectors
-using Point3 = Vec3;
+// Point3 is defined out of clarity, to distinguish a point from
+// a vector ;
+using Point3 = Vec3
 
 // struct representing the vertex of a mesh.
 struct Vertex {
@@ -152,7 +153,7 @@ public:
   // Load texture from an image and return bool if success, should be changed to
   // return a texture ID --i.e. unsigned integer
   TexID loadTexture(const char *filename, bool repeat = false,
-    bool nearest = false);
+                    bool nearest = false);
 
   // Accepts a lambda to be performed between push and pop
   // Saves time and ensures the matrix will be popped after
@@ -173,9 +174,9 @@ public:
   void setup_model();
   void setup_persp(float width, float height);
 
-  //texture drawing helper function
-  void textureDrawing(TexID texbind, std::function<void ()> callback,
-                        bool gen_coordinates = true);
+  // texture drawing helper function
+  void textureDrawing(TexID texbind, std::function<void()> callback,
+                      bool gen_coordinates = true);
 };
 
 // return singleton instance

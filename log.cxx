@@ -2,7 +2,6 @@
 
 namespace lg {
 
-
 const char *level_to_str(Level lv) {
   switch (lv) {
   case Level::INFO:
@@ -11,9 +10,10 @@ const char *level_to_str(Level lv) {
   case Level::ERROR:
     return "E";
 
-case Level::PANIC: return "PANIC:";
+  case Level::PANIC:
+    return "PANIC:";
 
-      default:
+  default:
     // shouldn't arrive here
     std::cout << "Logging Level not recognized.\n";
     std::terminate();
@@ -95,12 +95,9 @@ void Logger::panic(const char *tag, const char *fmt, ...) {
   vpanic(tag, fmt, ap);
 }
 
-
 static Logger s_logger;
 
-Logger &global() {
-  return s_logger;
-}
+Logger &global() { return s_logger; }
 
 Level get_level() { return s_logger.get_level(); }
 
@@ -114,7 +111,6 @@ void print(const char *tag, Level lv, const char *fmt, ...) {
 
   va_end(ap);
 }
-
 
 void i(const char *tag, const char *fmt, ...) {
   std::va_list ap;
@@ -142,5 +138,4 @@ void panic(const char *tag, const char *fmt, ...) {
 
   s_logger.vpanic(tag, fmt, ap);
 }
-
 }
