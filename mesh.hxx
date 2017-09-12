@@ -1,77 +1,41 @@
-#ifndef MESH_HXX
 
-#define MESH_HXX
-#include "game.hxx"
-
-// classe Vertex:
-// i vertici della mesh
-
-class Vertex {
-public:
-  Point3 p; // posizione
-
-  // attributi per verice
-  Vector3 n; // normale (per vertice)
-};
-
-class Edge {
-public:
-  Vertex *v[2]; // due puntatori a Vertice (i due estremi dell'edge)
-  // attributi per edge:
-};
-
-class Face {
-public:
-  Vertex *v[3]; // tre puntatori a Vertice (i tre vertici del triangolo)
-
-  // costruttore
-  Face(Vertex *a, Vertex *b, Vertex *c) {
-    v[0] = a;
-    v[1] = b;
-    v[2] = c;
-  }
-
-  // attributi per faccia
-  Vector3 n; // normale (per faccia)
-
-  // computa la normale della faccia
-  inline void ComputeNormal() {
-    n = -((v[1]->p - v[0]->p) % (v[2]->p - v[0]->p)).Normalize();
-  }
-
-  // attributi per wedge
-};
-
+// A mesh object, loaded from a Wavefront Obj
 class Mesh {
-  std::vector<Vertex> v; // vettore di vertici
-  std::vector<Face> f;   // vettore di facce
-  //  std::vector<Edge> e;   // vettore di edge (per ora, non usato)
+private:
+  std::vector<Vertex> m_verts; // vettore di vertici
+  std::vector<Face> m_faces;   // vettore di facce
+  //  std::vector<Edge> m_edges;   // vettore di edge (per ora, non usato)
+  // empty constructor. loadMesh must be used instead
+  Mesh();
+
+  // Note: the wireframe bool will be retrieved by the "m_env" of whichever
+  // class is loading a mesh
+  void render(bool wireframe = false, bool gouraud_shading = true);
+
+  // bounding box: minumum and maximum coordinates
+  void ComputeBoundingBox();
+  void ComputeNormalsPerFace();
+  void ComputeNormalsPerVertex();
 
 public:
   // costruttore con caricamento
+  /*
   Mesh(char *filename) {
     LoadFromObj(filename);
     ComputeNormalsPerFace();
     ComputeNormalsPerVertex();
     ComputeBoundingBox();
-  }
+}*/
 
-  // metodi
-  void RenderNxF();  // manda a schermo la mesh Normali x Faccia
-  void RenderNxV();  // manda a schermo la mesh Normali x Vertice
-  void RenderWire(); // manda a schermo la mesh in wireframe
+  // friend function to load the mesh instead of exporting the cons
+  friend std::unique_ptr<Mesh> loadMesh(char *mesh_filename);
 
-  bool LoadFromObj(char *filename); //  carica la mesh da un file OFF
+  // frontend for the render method
+  void renderFlat(bool wireframe = false);
+  void renderGouraud(bool wireframe = false);
 
-  void ComputeNormalsPerFace();
-  void ComputeNormalsPerVertex();
-
-  void ComputeBoundingBox();
-
-  // centro del axis aligned bounding box
-  Point3 Center() { return (bbmin + bbmax) / 2.0; };
+  // center of the axis-aligned bounding box
+  inline Point3 Center() { return (bbmin + bbmax) / 2.0; };
 
   Point3 bbmin, bbmax; // bounding box
 };
-
-#endif

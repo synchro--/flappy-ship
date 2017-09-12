@@ -46,7 +46,7 @@ void Mesh::ComputeNormalsPerVertex() {
 }
 
 // renderizzo la mesh in wireframe
-void Mesh::RenderWire() {
+void Mesh::renderWire() {
   glLineWidth(1.0);
   // (nota: ogni edge viene disegnato due volte.
   // sarebbe meglio avere ed usare la struttura edge)
@@ -61,293 +61,304 @@ void Mesh::RenderWire() {
 }
 
 // Render usando la normale per faccia (FLAT SHADING)
-void Mesh::RenderNxF() {
-  if (useWireframe) {
-    glDisable(GL_TEXTURE_2D);
-    glColor3f(.5, .5, .5);
-    RenderWire();
-    glColor3f(1, 1, 1);
-  }
+void Mesh::renderFlat(bool wireframe_on) { render(wireframe_on, false); }
 
-  // mandiamo tutti i triangoli a schermo
-  glBegin(GL_TRIANGLES);
-  for (int i = 0; i < f.size(); i++) {
-    f[i].n.getAsNormal(); // flat shading
-
-    (f[i].v[0])->p.getAsVertex();
-
-    (f[i].v[1])->p.getAsVertex();
-
-    (f[i].v[2])->p.getAsVertex();
-  }
-  glEnd();
-}
+void Mesh::renderGouraud(bool wireframe_on) { render(wireframe_on, true); }
 
 // Render usando la normale per vertice (GOURAUD SHADING)
-void Mesh::RenderNxV() {
-  if (useWireframe) {
+void Mesh::render(bool wireframe_on, bool goraud_shading) {
+  if (wireframe_on) {
     glDisable(GL_TEXTURE_2D);
     glColor3f(.5, .5, .5);
-    RenderWire();
+    renderWire();
     glColor3f(1, 1, 1);
   }
 
-  // mandiamo tutti i triangoli a schermo
   glBegin(GL_TRIANGLES);
-  for (int i = 0; i < f.size(); i++) {
-    (f[i].v[0])->n.getAsNormal(); // gouroud shading (o phong?)
-    (f[i].v[0])->p.getAsVertex();
 
-    (f[i].v[1])->n.getAsNormal();
-    (f[i].v[1])->p.getAsVertex();
+  if (goraud_shading) {
+    // mandiamo tutti i triangoli a schermo
+    bool send_normals = goraud_shading;
 
-    (f[i].v[2])->n.getAsNormal();
-    (f[i].v[2])->p.getAsVertex();
+    for (const auto &face : m_faces) {
+      // If using flat shading
+      if (!send_normals) {
+        face.normal.render();
+      }
+
+      for (auto vert : face.verts) {
+        vert->render(send_normals); // Render vertex (and normals if chosen)
+      }
+    }
+    /*
+          for (int i = 0; i < f.size(); i++) {
+            (f[i].v[0])->n.getAsNormal();
+            (f[i].v[0])->p.getAsVertex();
+
+            (f[i].v[1])->n.getAsNormal();
+            (f[i].v[1])->p.getAsVertex();
+
+            (f[i].v[2])->n.getAsNormal();
+            (f[i].v[2])->p.getAsVertex();
+          }
+      }
+        else {
+          //flat shading
+          for (int i = 0; i < f.size(); i++) {
+            f[i].n.getAsNormal(); // flat shading
+
+            (f[i].v[0])->p.getAsVertex();
+
+            (f[i].v[1])->p.getAsVertex();
+
+            (f[i].v[2])->p.getAsVertex();
+          }
+      }
+    */
+    glEnd();
   }
-  glEnd();
-}
 
-// trova l'AXIS ALIGNED BOUNDIG BOX
-void Mesh::ComputeBoundingBox() {
-  // basta trovare la min x, y, e z, e la max x, y, e z di tutti i vertici
-  // (nota: non e' necessario usare le facce: perche?)
-  if (!v.size())
-    return;
-  bbmin = bbmax = v[0].p;
-  for (int i = 0; i < v.size(); i++) {
-    for (int k = 0; k < 3; k++) {
-      if (bbmin.coord[k] > v[i].p.coord[k])
-        bbmin.coord[k] = v[i].p.coord[k];
-      if (bbmax.coord[k] < v[i].p.coord[k])
-        bbmax.coord[k] = v[i].p.coord[k];
+  // trova l'AXIS ALIGNED BOUNDIG BOX
+  void Mesh::ComputeBoundingBox() {
+    // basta trovare la min x, y, e z, e la max x, y, e z di tutti i vertici
+    // (nota: non e' necessario usare le facce: perche?)
+    if (!v.size())
+      return;
+    bbmin = bbmax = v[0].p;
+    for (int i = 0; i < v.size(); i++) {
+      for (int k = 0; k < 3; k++) {
+        if (bbmin.coord[k] > v[i].p.coord[k])
+          bbmin.coord[k] = v[i].p.coord[k];
+        if (bbmax.coord[k] < v[i].p.coord[k])
+          bbmax.coord[k] = v[i].p.coord[k];
+      }
     }
   }
-}
 
-// carica la mesh da un file in formato Obj
-//   Nota: nel file, possono essere presenti sia quads che tris
-//   ma nella rappresentazione interna (classe Mesh) abbiamo solo tris.
-//
-bool Mesh::LoadFromObj(char *filename) {
+  // carica la mesh da un file in formato Obj
+  //   Nota: nel file, possono essere presenti sia quads che tris
+  //   ma nella rappresentazione interna (classe Mesh) abbiamo solo tris.
+  //   modificarlo per ritornare un oggetto mesh, farlo diventare load_mesh
+  bool Mesh::LoadFromObj(char *filename) {
 
-  FILE *file = fopen(filename, "rt"); // apriamo il file in lettura
-  if (!file)
-    return false;
+    FILE *file = fopen(filename, "rt"); // apriamo il file in lettura
+    if (!file)
+      return false;
 
-  // make a first pass through the file to get a count of the number
-  // of vertices, normals, texcoords & triangles
-  char buf[128];
-  int nv, nf, nt;
-  float x, y, z;
-  int va, vb, vc, vd;
-  int na, nb, nc, nd;
-  int ta, tb, tc, td;
+    // make a first pass through the file to get a count of the number
+    // of vertices, normals, texcoords & triangles
+    char buf[128];
+    int nv, nf, nt;
+    float x, y, z;
+    int va, vb, vc, vd;
+    int na, nb, nc, nd;
+    int ta, tb, tc, td;
 
-  nv = 0;
-  nf = 0;
-  nt = 0;
-  while (fscanf(file, "%s", buf) != EOF) {
-    switch (buf[0]) {
-    case '#': // comment
-      // eat up rest of line
-      fgets(buf, sizeof(buf), file);
-      break;
-    case 'v': // v, vn, vt
-      switch (buf[1]) {
-      case '\0': // vertex
+    nv = 0;
+    nf = 0;
+    nt = 0;
+    while (fscanf(file, "%s", buf) != EOF) {
+      switch (buf[0]) {
+      case '#': // comment
         // eat up rest of line
         fgets(buf, sizeof(buf), file);
-        nv++;
         break;
+      case 'v': // v, vn, vt
+        switch (buf[1]) {
+        case '\0': // vertex
+          // eat up rest of line
+          fgets(buf, sizeof(buf), file);
+          nv++;
+          break;
+        default:
+          break;
+        }
+        break;
+      case 'f': // face
+        fscanf(file, "%s", buf);
+        // can be one of %d, %d//%d, %d/%d, %d/%d/%d %d//%d
+        if (strstr(buf, "//")) {
+          // v//n
+          sscanf(buf, "%d//%d", &va, &na);
+          fscanf(file, "%d//%d", &vb, &nb);
+          fscanf(file, "%d//%d", &vc, &nc);
+          nf++;
+          nt++;
+          while (fscanf(file, "%d//%d", &vd, &nd) > 0) {
+            nt++;
+          }
+        } else if (sscanf(buf, "%d/%d/%d", &va, &ta, &na) == 3) {
+          // v/t/n
+          fscanf(file, "%d/%d/%d", &vb, &tb, &nb);
+          fscanf(file, "%d/%d/%d", &vc, &tc, &nc);
+          nf++;
+          nt++;
+          while (fscanf(file, "%d/%d/%d", &vd, &td, &nd) > 0) {
+            nt++;
+          }
+        } else if (sscanf(buf, "%d/%d", &va, &ta) == 2) {
+          // v/t
+          fscanf(file, "%d/%d", &vb, &tb);
+          fscanf(file, "%d/%d", &vc, &tc);
+          nf++;
+          nt++;
+          while (fscanf(file, "%d/%d", &vd, &td) > 0) {
+            nt++;
+          }
+        } else {
+          // v
+          fscanf(file, "%d", &va);
+          fscanf(file, "%d", &vb);
+          nf++;
+          nt++;
+          while (fscanf(file, "%d", &vc) > 0) {
+            nt++;
+          }
+        }
+        break;
+
       default:
+        // eat up rest of line
+        fgets(buf, sizeof(buf), file);
         break;
       }
-      break;
-    case 'f': // face
-      fscanf(file, "%s", buf);
-      // can be one of %d, %d//%d, %d/%d, %d/%d/%d %d//%d
-      if (strstr(buf, "//")) {
-        // v//n
-        sscanf(buf, "%d//%d", &va, &na);
-        fscanf(file, "%d//%d", &vb, &nb);
-        fscanf(file, "%d//%d", &vc, &nc);
-        nf++;
-        nt++;
-        while (fscanf(file, "%d//%d", &vd, &nd) > 0) {
-          nt++;
-        }
-      } else if (sscanf(buf, "%d/%d/%d", &va, &ta, &na) == 3) {
-        // v/t/n
-        fscanf(file, "%d/%d/%d", &vb, &tb, &nb);
-        fscanf(file, "%d/%d/%d", &vc, &tc, &nc);
-        nf++;
-        nt++;
-        while (fscanf(file, "%d/%d/%d", &vd, &td, &nd) > 0) {
-          nt++;
-        }
-      } else if (sscanf(buf, "%d/%d", &va, &ta) == 2) {
-        // v/t
-        fscanf(file, "%d/%d", &vb, &tb);
-        fscanf(file, "%d/%d", &vc, &tc);
-        nf++;
-        nt++;
-        while (fscanf(file, "%d/%d", &vd, &td) > 0) {
-          nt++;
-        }
-      } else {
-        // v
-        fscanf(file, "%d", &va);
-        fscanf(file, "%d", &vb);
-        nf++;
-        nt++;
-        while (fscanf(file, "%d", &vc) > 0) {
-          nt++;
-        }
-      }
-      break;
-
-    default:
-      // eat up rest of line
-      fgets(buf, sizeof(buf), file);
-      break;
     }
-  }
 
-  // printf("dopo FirstPass nv=%d nf=%d nt=%d\n",nv,nf,nt);
+    // printf("dopo FirstPass nv=%d nf=%d nt=%d\n",nv,nf,nt);
 
-  // allochiamo spazio per nv vertici
-  v.resize(nv);
+    // allochiamo spazio per nv vertici
+    v.resize(nv);
 
-  // rewind to beginning of file and read in the data this pass
-  rewind(file);
+    // rewind to beginning of file and read in the data this pass
+    rewind(file);
 
-  // on the second pass through the file, read all the data into the
-  // allocated arrays
+    // on the second pass through the file, read all the data into the
+    // allocated arrays
 
-  nv = 0;
-  nt = 0;
-  while (fscanf(file, "%s", buf) != EOF) {
-    switch (buf[0]) {
-    case '#': // comment
-      // eat up rest of line
-      fgets(buf, sizeof(buf), file);
-      break;
-    case 'v': // v, vn, vt
-      switch (buf[1]) {
-      case '\0': // vertex
-        fscanf(file, "%f %f %f", &x, &y, &z);
-        v[nv].p = Point3(x, y, z);
-        nv++;
+    nv = 0;
+    nt = 0;
+    while (fscanf(file, "%s", buf) != EOF) {
+      switch (buf[0]) {
+      case '#': // comment
+        // eat up rest of line
+        fgets(buf, sizeof(buf), file);
         break;
+      case 'v': // v, vn, vt
+        switch (buf[1]) {
+        case '\0': // vertex
+          fscanf(file, "%f %f %f", &x, &y, &z);
+          v[nv].p = Point3(x, y, z);
+          nv++;
+          break;
+        default:
+          break;
+        }
+        break;
+      case 'f': // face
+        fscanf(file, "%s", buf);
+        // can be one of %d, %d//%d, %d/%d, %d/%d/%d %d//%d
+        if (strstr(buf, "//")) {
+          // v//n
+          sscanf(buf, "%d//%d", &va, &na);
+          fscanf(file, "%d//%d", &vb, &nb);
+          fscanf(file, "%d//%d", &vc, &nc);
+          va--;
+          vb--;
+          vc--;
+          Face newface(&(v[va]), &(v[vc]),
+                       &(v[vb])); // invoco il costruttore di faccia
+          f.push_back(
+              newface); // inserico la nuova faccia in coda al vettore facce
+          nt++;
+          vb = vc;
+          while (fscanf(file, "%d//%d", &vc, &nc) > 0) {
+            vc--;
+            Face newface(&(v[va]), &(v[vc]),
+                         &(v[vb])); // invoco il costruttore di faccia
+            f.push_back(
+                newface); // inserico la nuova faccia in coda al vettore facce
+            nt++;
+            vb = vc;
+          }
+        } else if (sscanf(buf, "%d/%d/%d", &va, &ta, &na) == 3) {
+          // v/t/n
+          fscanf(file, "%d/%d/%d", &vb, &tb, &nb);
+          fscanf(file, "%d/%d/%d", &vc, &tc, &nc);
+          va--;
+          vb--;
+          vc--;
+          Face newface(&(v[va]), &(v[vc]),
+                       &(v[vb])); // invoco il costruttore di faccia
+          f.push_back(
+              newface); // inserico la nuova faccia in coda al vettore facce
+          nt++;
+          vb = vc;
+          while (fscanf(file, "%d/%d/%d", &vc, &tc, &nc) > 0) {
+            vc--;
+            Face newface(&(v[va]), &(v[vc]),
+                         &(v[vb])); // invoco il costruttore di faccia
+            f.push_back(
+                newface); // inserico la nuova faccia in coda al vettore facce
+            nt++;
+            vb = vc;
+          }
+        } else if (sscanf(buf, "%d/%d", &va, &ta) == 2) {
+          // v/t
+          fscanf(file, "%d/%d", &va, &ta);
+          fscanf(file, "%d/%d", &va, &ta);
+          va--;
+          vb--;
+          vc--;
+          Face newface(&(v[va]), &(v[vc]),
+                       &(v[vb])); // invoco il costruttore di faccia
+          f.push_back(
+              newface); // inserico la nuova faccia in coda al vettore facce
+          nt++;
+          vb = vc;
+          while (fscanf(file, "%d/%d", &vc, &tc) > 0) {
+            vc--;
+            Face newface(&(v[va]), &(v[vc]),
+                         &(v[vb])); // invoco il costruttore di faccia
+            f.push_back(
+                newface); // inserico la nuova faccia in coda al vettore facce
+            nt++;
+            vb = vc;
+          }
+        } else {
+          // v
+          sscanf(buf, "%d", &va);
+          fscanf(file, "%d", &vb);
+          fscanf(file, "%d", &vc);
+          va--;
+          vb--;
+          vc--;
+          Face newface(&(v[va]), &(v[vc]),
+                       &(v[vb])); // invoco il costruttore di faccia
+          f.push_back(
+              newface); // inserico la nuova faccia in coda al vettore facce
+          nt++;
+          vb = vc;
+          while (fscanf(file, "%d", &vc) > 0) {
+            vc--;
+            Face newface(&(v[va]), &(v[vc]),
+                         &(v[vb])); // invoco il costruttore di faccia
+            f.push_back(
+                newface); // inserico la nuova faccia in coda al vettore facce
+            nt++;
+            vb = vc;
+          }
+        }
+        break;
+
       default:
+        // eat up rest of line
+        fgets(buf, sizeof(buf), file);
         break;
       }
-      break;
-    case 'f': // face
-      fscanf(file, "%s", buf);
-      // can be one of %d, %d//%d, %d/%d, %d/%d/%d %d//%d
-      if (strstr(buf, "//")) {
-        // v//n
-        sscanf(buf, "%d//%d", &va, &na);
-        fscanf(file, "%d//%d", &vb, &nb);
-        fscanf(file, "%d//%d", &vc, &nc);
-        va--;
-        vb--;
-        vc--;
-        Face newface(&(v[va]), &(v[vc]),
-                     &(v[vb])); // invoco il costruttore di faccia
-        f.push_back(
-            newface); // inserico la nuova faccia in coda al vettore facce
-        nt++;
-        vb = vc;
-        while (fscanf(file, "%d//%d", &vc, &nc) > 0) {
-          vc--;
-          Face newface(&(v[va]), &(v[vc]),
-                       &(v[vb])); // invoco il costruttore di faccia
-          f.push_back(
-              newface); // inserico la nuova faccia in coda al vettore facce
-          nt++;
-          vb = vc;
-        }
-      } else if (sscanf(buf, "%d/%d/%d", &va, &ta, &na) == 3) {
-        // v/t/n
-        fscanf(file, "%d/%d/%d", &vb, &tb, &nb);
-        fscanf(file, "%d/%d/%d", &vc, &tc, &nc);
-        va--;
-        vb--;
-        vc--;
-        Face newface(&(v[va]), &(v[vc]),
-                     &(v[vb])); // invoco il costruttore di faccia
-        f.push_back(
-            newface); // inserico la nuova faccia in coda al vettore facce
-        nt++;
-        vb = vc;
-        while (fscanf(file, "%d/%d/%d", &vc, &tc, &nc) > 0) {
-          vc--;
-          Face newface(&(v[va]), &(v[vc]),
-                       &(v[vb])); // invoco il costruttore di faccia
-          f.push_back(
-              newface); // inserico la nuova faccia in coda al vettore facce
-          nt++;
-          vb = vc;
-        }
-      } else if (sscanf(buf, "%d/%d", &va, &ta) == 2) {
-        // v/t
-        fscanf(file, "%d/%d", &va, &ta);
-        fscanf(file, "%d/%d", &va, &ta);
-        va--;
-        vb--;
-        vc--;
-        Face newface(&(v[va]), &(v[vc]),
-                     &(v[vb])); // invoco il costruttore di faccia
-        f.push_back(
-            newface); // inserico la nuova faccia in coda al vettore facce
-        nt++;
-        vb = vc;
-        while (fscanf(file, "%d/%d", &vc, &tc) > 0) {
-          vc--;
-          Face newface(&(v[va]), &(v[vc]),
-                       &(v[vb])); // invoco il costruttore di faccia
-          f.push_back(
-              newface); // inserico la nuova faccia in coda al vettore facce
-          nt++;
-          vb = vc;
-        }
-      } else {
-        // v
-        sscanf(buf, "%d", &va);
-        fscanf(file, "%d", &vb);
-        fscanf(file, "%d", &vc);
-        va--;
-        vb--;
-        vc--;
-        Face newface(&(v[va]), &(v[vc]),
-                     &(v[vb])); // invoco il costruttore di faccia
-        f.push_back(
-            newface); // inserico la nuova faccia in coda al vettore facce
-        nt++;
-        vb = vc;
-        while (fscanf(file, "%d", &vc) > 0) {
-          vc--;
-          Face newface(&(v[va]), &(v[vc]),
-                       &(v[vb])); // invoco il costruttore di faccia
-          f.push_back(
-              newface); // inserico la nuova faccia in coda al vettore facce
-          nt++;
-          vb = vc;
-        }
-      }
-      break;
-
-    default:
-      // eat up rest of line
-      fgets(buf, sizeof(buf), file);
-      break;
     }
+
+    // printf("dopo SecondPass nv=%d nt=%d\n",nv,nt);
+
+    fclose(file);
+    return true;
   }
-
-  // printf("dopo SecondPass nv=%d nt=%d\n",nv,nt);
-
-  fclose(file);
-  return true;
-}

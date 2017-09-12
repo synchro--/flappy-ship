@@ -39,56 +39,6 @@ struct Color {
 
 extern const Color WHITE, BLACK, RED, GREEN, YELLOW;
 
-// a 2D horizontal vector (point)
-struct Vec2 {
-  float x, z;
-};
-
-// a 3D vector (and point)
-struct Vec3 {
-  float x, y, z;
-
-  float modulo() const;
-
-  inline void gl_translate() { glTranslatef(x, y, z); }
-
-  Vec3(float x = 0.0f, float y = 0.0f, float z = 0.0f);
-
-  Vec3 normalize() const;
-
-  Vec3 operator-() const;
-
-  Vec3 &operator+=(const Vec3 &other);
-
-  Vec3 operator+(const Vec3 &other) const;
-  Vec3 operator-(const Vec3 &other) const;
-  Vec3 operator/(float f) const;
-  // redefine % operator to define cross-product
-  Vec3 operator%(const Vec3 &a) const;
-};
-
-// a vector that represents a Normal, meant to be rendered as such.
-struct Normal3 : public Vec3 {
-  Normal3(float x = 0.0f, float y = 0.0f, float z = 0.0f);
-  Normal3(const Vec3 &vec3);
-
-  void render() const;
-}
-
-// Point3 is defined out of clarity, to distinguish a point from
-// a vector ;
-using Point3 = Vec3
-
-// struct representing the vertex of a mesh.
-struct Vertex {
-  Vec3 point;
-  Normal3 normal;
-
-  Vertex(const Vec3 &v = Vec3());
-
-  void render(bool send_normal = false) const;
-};
-
 // Enables double buffering
 void enable_double_buffering() {
   lg::i(__func__, "enabling double buffer");
@@ -102,6 +52,89 @@ void enable_zbuffer(size_t depth) {
 
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depth);
 }
+
+// a 2D Point (or horizontal vector)
+struct Point2 {
+  float x, z;
+};
+
+// a 3D vector (and point)
+struct Point3 {
+  float x, y, z;
+
+  Point3(float x = 0.0f, float y = 0.0f, float z = 0.0f);
+  Point3();
+
+  inline void gl_translate() { glTranslatef(x, y, z); }
+
+  float modulo() const;
+
+  Point3 normalize() const;
+
+  Point3 operator-() const;
+
+  Point3 &operator+=(const Point3 &other);
+
+  Point3 operator+(const Point3 &other) const;
+  Point3 operator-(const Point3 &other) const;
+  Point3 operator/(float f) const;
+  // redefine % operator to define cross-product
+  Point3 operator%(const Point3 &a) const;
+};
+
+// Define Vec3 as a snynonim of Point3, out of clarity.
+// They share the implementation but differ in behaviors in few rendering
+// scenarios.
+using Vec3 = Point3;
+
+// a vector that represents (and it is therefore rendered as a) Normal.
+struct Normal3 : public Vec3 {
+  Normal3(float x = 0.0f, float y = 0.0f, float z = 0.0f);
+  Normal3(const Vec3 &vec3);
+
+  void render() const;
+};
+
+struct Vertex {
+  Vec3 point;
+  Normal3 normal;
+
+  Vertex(const Vec3 &v = Vec3());
+
+  void render(bool send_normal = false) const;
+};
+
+struct Edge {
+public:
+  Vertex *v[2]; // due puntatori a Vertice (i due estremi dell'edge)
+  // attributi per edge:
+};
+
+struct Face {
+public:
+  Vertex *v[3]; // tre puntatori a Vertice (i tre vertici del triangolo)
+
+  // costruttore
+  Face(Vertex *a, Vertex *b, Vertex *c) {
+    v[0] = a;
+    v[1] = b;
+    v[2] = c;
+  }
+
+  // attributi per faccia
+  Normal3 normal // normale (per faccia)
+
+      // computa la normale della faccia
+      inline void
+      ComputeNormal() {
+    normal = -((v[1]->point - v[0]->point) % (v[2]->point - v[0]->point))
+                  .normalize();
+  }
+
+  // attributi per wedge
+};
+
+// QUI VANNO FACE E MESH
 
 /* The Env class represents the Environment of the game.
    It handles all the main components of the scene and all the callbacks
@@ -147,6 +180,7 @@ public:
 
   // Returns the current FPS.
   inline decltype(m_fps) fps() { return m_fps; }
+  inline decltype(m_wireframe) isWireframe() { return m_wireframe; }
 
   using TexID = GLuint;
 
