@@ -14,11 +14,11 @@ Point3::Point3(float x, float y, float z) : x(x), y(y), z(z) {}
 // empty constructor:
 Point3::Point3() : x(0), y(0), z(0) {}
 
-// restituisce la versione di se stesso normalizzata
-Point3 Point3::normalize() const { return (*this) / modulo(); }
-
 // restituisce il modulo
 float Point3::modulo() const { return sqrt(x * x + y * y + z * z); }
+
+// restituisce la versione di se stesso normalizzata
+Point3 Point3::normalize() const { return (*this) / modulo(); }
 
 // operatore "/" binario: divisione per uno scalare (un float)
 Point3 Point3::operator/(float f) const { return Point3(x / f, y / f, z / f); }
@@ -55,12 +55,13 @@ void Normal3::render() const {
 // Vertex constructor, initialize both its "views"
 Vertex::Vertex(const Vec3 &v) : point(v), normal(0, 0, 0) {}
 
+//if send_normal true, renders also the normal, otherwise only vertices
 void Vertex::render(bool send_normal) const {
-  if (send_normal) {
-    normal.render();
-  }
+    if (send_normal) {
+      normal.render();
+    }
 
-  float coords[]{point.x, point.y, point.z};
-  glVertex3fv(coords);
-}
+    float coords[]{point.x, point.y, point.z};
+    glVertex3fv(coords);
+  }
 }

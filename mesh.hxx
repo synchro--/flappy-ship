@@ -10,12 +10,15 @@ private:
 
   // Note: the wireframe bool will be retrieved by the "m_env" of whichever
   // class is loading a mesh
+  void renderWire();
   void render(bool wireframe = false, bool gouraud_shading = true);
 
   // bounding box: minumum and maximum coordinates
-  void ComputeBoundingBox();
-  void ComputeNormalsPerFace();
-  void ComputeNormalsPerVertex();
+  void computeBoundingBox();
+  void computeNormalsPerVertex();
+  //use the 2 methods above to setup the mesh
+  void init();
+
 
 public:
   // costruttore con caricamento
@@ -35,7 +38,7 @@ public:
   void renderGouraud(bool wireframe = false);
 
   // center of the axis-aligned bounding box
-  inline Point3 Center() { return (bbmin + bbmax) / 2.0; };
+  inline Point3 center() { return (bbmin + bbmax) / 2.0; };
 
   Point3 bbmin, bbmax; // bounding box
 };

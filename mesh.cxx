@@ -3,21 +3,20 @@
 // Implementazione dei metodi di Mesh
 
 #include <GL/gl.h>
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <vector>
+#include <cmath>
+
 
 #include "point3.hxx"
 
 #include "game.hxx"
 #include "mesh.hxx"
 
-void Mesh::ComputeNormalsPerFace() {
-  for (int i = 0; i < f.size(); i++) {
-    f[i].ComputeNormal();
-  }
-}
+//Face constructor, compute the normal of the face too
+Mesh::Face::Face(Vertex *v1, Vertex *v2, Vertex *v3)
+: verts{{v1, v2, v3}} {computeNormal(); }
 
 // Computo normali per vertice
 // (come media rinormalizzata delle normali delle facce adjacenti)
@@ -25,23 +24,28 @@ void Mesh::ComputeNormalsPerVertex() {
   // uso solo le strutture di navigazione FV (da Faccia a Vertice)!
 
   // fase uno: ciclo sui vertici, azzero tutte le normali
-  for (int i = 0; i < v.size(); i++) {
-    v[i].n = Point3(0, 0, 0);
+  for (auto &vertex: m_verts {
+    vertex.normal = Normal3();
   }
 
   // fase due: ciclo sulle facce: accumulo le normali di F nei 3 V
   // corrispondenti
-  for (int i = 0; i < f.size(); i++) {
+  for (auto &face : m_faces {
+    for (auto vertex : f.verts){
+      vertex->normal += face.normal;
+    }
+    /*
     f[i].v[0]->n = f[i].v[0]->n + f[i].n;
     f[i].v[1]->n = f[i].v[1]->n + f[i].n;
     f[i].v[2]->n = f[i].v[2]->n + f[i].n;
+    */
   }
 
-  // fase tre: ciclo sui vertici; rinormalizzo
+  // fase tre: ciclo sui vertici e rinormalizzo:
   // la normale media rinormalizzata e' uguale alla somma delle normnali,
-  // rinormalizzata
-  for (int i = 0; i < v.size(); i++) {
-    v[i].n = v[i].n.Normalize();
+  // calcolata nel ciclo precedente, ma rinormalizzata
+  for (auto &vertex: m_verts) {
+    vertex.normal = vertex.normal.normalize();
   }
 }
 
@@ -50,14 +54,24 @@ void Mesh::renderWire() {
   glLineWidth(1.0);
   // (nota: ogni edge viene disegnato due volte.
   // sarebbe meglio avere ed usare la struttura edge)
-  for (int i = 0; i < f.size(); i++) {
+  glBegin(GL_LINE_LOOP);
+  for (auto &face: m_faces) {
+    face.normal.render();
+    for(auto vertex : face.verts) {
+      //render as vertex, don't send the normal
+      vertex->render(false);
+    }
+  }
+  glEnd();
+
+/*  {
     glBegin(GL_LINE_LOOP);
     f[i].n.getAsNormal();
     (f[i].v[0])->p.getAsVertex();
     (f[i].v[1])->p.getAsVertex();
     (f[i].v[2])->p.getAsVertex();
     glEnd();
-  }
+  }*/
 }
 
 // Render usando la normale per faccia (FLAT SHADING)
@@ -87,7 +101,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
       }
 
       for (auto vert : face.verts) {
-        vert->render(send_normals); // Render vertex (and normals if chosen)
+        vert->render(send_normals);
       }
     }
     /*
@@ -119,20 +133,27 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
   }
 
   // trova l'AXIS ALIGNED BOUNDIG BOX
-  void Mesh::ComputeBoundingBox() {
+  void Mesh::computeBoundingBox() {
     // basta trovare la min x, y, e z, e la max x, y, e z di tutti i vertici
     // (nota: non e' necessario usare le facce: perche?)
-    if (!v.size())
-      return;
-    bbmin = bbmax = v[0].p;
-    for (int i = 0; i < v.size(); i++) {
-      for (int k = 0; k < 3; k++) {
-        if (bbmin.coord[k] > v[i].p.coord[k])
-          bbmin.coord[k] = v[i].p.coord[k];
-        if (bbmax.coord[k] < v[i].p.coord[k])
-          bbmax.coord[k] = v[i].p.coord[k];
-      }
+    //init var to worse value
+    float min_x, min_y, min_z = INFINITY;
+    float max_x , max_y, max_z = -INFINITY;
+
+    //find maximum and minimum among vertices
+    for(const auto &vertex : m_verts) {
+        min_x = std::min(min_x, vertex.point.x);
+        min_y = std::min(min_y, vertex.point.y);
+        min_z = std::min(min_z, vertex.point.z);
+
+        max_x = std::max(max_x, vertex.point.x);
+        max_y = std::max(max_y, vertex.point.y);
+        max_z = std::max(max_z, vertex.point.z);
     }
+
+   bbmin = Point3(min_x, min_y, min_z);
+   bbmax = Point3(max_x, max_y, max_z);
+
   }
 
   // carica la mesh da un file in formato Obj

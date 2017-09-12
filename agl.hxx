@@ -112,13 +112,13 @@ public:
 
 struct Face {
 public:
-  Vertex *v[3]; // tre puntatori a Vertice (i tre vertici del triangolo)
+  Vertex *verts[3]; // tre puntatori a Vertice (i tre vertici del triangolo)
 
   // costruttore
   Face(Vertex *a, Vertex *b, Vertex *c) {
-    v[0] = a;
-    v[1] = b;
-    v[2] = c;
+    verts[0] = a;
+    verts[1] = b;
+    verts[2] = c;
   }
 
   // attributi per faccia
@@ -126,15 +126,16 @@ public:
 
       // computa la normale della faccia
       inline void
-      ComputeNormal() {
-    normal = -((v[1]->point - v[0]->point) % (v[2]->point - v[0]->point))
+      computeNormal() {
+    normal = -((verts[1]->point - verts[0]->point) % (verts[2]->point - verts[0]->point))
                   .normalize();
   }
 
-  // attributi per wedge
+  //forse aggiungere un metodo render anche a Face rende il codice più leggibile
+
 };
 
-// QUI VANNO FACE E MESH
+// QUI VA LA MESH
 
 /* The Env class represents the Environment of the game.
    It handles all the main components of the scene and all the callbacks
