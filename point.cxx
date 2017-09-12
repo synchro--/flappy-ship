@@ -55,13 +55,13 @@ void Normal3::render() const {
 // Vertex constructor, initialize both its "views"
 Vertex::Vertex(const Vec3 &v) : point(v), normal(0, 0, 0) {}
 
-//if send_normal true, renders also the normal, otherwise only vertices
+// if send_normal true, renders also the normal, otherwise only vertices
 void Vertex::render(bool send_normal) const {
-    if (send_normal) {
-      normal.render();
-    }
-
-    float coords[]{point.x, point.y, point.z};
-    glVertex3fv(coords);
+  if (send_normal) {
+    normal.render();
   }
+
+  float coords[]{point.x, point.y, point.z};
+  glVertex3fv(coords);
+}
 }

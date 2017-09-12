@@ -16,9 +16,8 @@ private:
   // bounding box: minumum and maximum coordinates
   void computeBoundingBox();
   void computeNormalsPerVertex();
-  //use the 2 methods above to setup the mesh
+  // use the 2 methods above to setup the mesh
   void init();
-
 
 public:
   // costruttore con caricamento

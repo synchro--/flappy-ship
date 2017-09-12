@@ -127,12 +127,13 @@ public:
       // computa la normale della faccia
       inline void
       computeNormal() {
-    normal = -((verts[1]->point - verts[0]->point) % (verts[2]->point - verts[0]->point))
+    normal = -((verts[1]->point - verts[0]->point) %
+               (verts[2]->point - verts[0]->point))
                   .normalize();
   }
 
-  //forse aggiungere un metodo render anche a Face rende il codice più leggibile
-
+  // forse aggiungere un metodo render anche a Face rende il codice più
+  // leggibile
 };
 
 // QUI VA LA MESH
