@@ -51,26 +51,42 @@ Floor *get_sky(const char *texture_filename) {
   return s_sky.get();
 }
 
+using namespace spaceship; 
+
 Spaceship::Spaceship(const char *texture_filename,
                      const char *mesh_filename) // da finire
     : m_tex(0),                                 // no texture for now
       m_env(agl::get_env), m_mesh(agl::loadMesh(mesh_filename)), // TODO
-      m_cmds(new std::std::queue<spaceship::Command>) {}         // empty cons
+      m_cmds(new std::queue<Command>) {}         // empty cons
 
-bool Spaceship::executeCommand() {
+void Spaceship::processCommand() {
   const static auto TAG = __func__;
-  // read and pop command
-  Command cmd = m_cmds.front();
-  m_cmds.pop();
+  
+  if(!m_cmds.empty()) {
+    // read and pop command
+    Command cmd = m_cmds.front();
+    m_cmds.pop();
 
-  // get command name in string in order to log
-  std::string mt = spaceship::motion_to_str(cmd.first);
-  lg::i(TAG, "Spaceship is executing command %s", mt)
+    // get command name in string in order to log
+    std::string mt = motion_to_str(cmd.first);
+    lg::i(TAG, "Spaceship is processing command %s", mt)
 
-      // set the state
-
-      m_state[cmd.first] = cmd.second;
+    // set the state
+    m_state[cmd.first] = cmd.second;
+  }
 }
+
+void sendCommand(Motion motion, bool on_off) {
+    if(motion > spaceship::num_actions) {
+      lg::panic(__func__, "Command not recognized!!");
+    }
+
+    //construct and submit a new pair 
+    m_cmds.emplace_back(motion, on_off); 
+}
+
+
+bool 
 
 void Spaceship::render() {}
 
