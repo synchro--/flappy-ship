@@ -123,8 +123,8 @@ public:
                                   const char *mesh_filename);
 
   // APIs to interact with the spaceship
-  bool executeCommand();
-  bool sendCommand(spaceship::Command);
+  void processCommand();
+  void sendCommand(spaceship::Motion motion, bool on_off);
   // render the Spaceship: TexID + Mesh
   void render();
 }

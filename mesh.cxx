@@ -14,6 +14,11 @@
 
 #include "agl.hxx"
 
+
+/*
+* Class implementing a Mesh. See agl.hxx
+*/
+
 namespace agl {
 // Face constructor, compute the normal of the face too
 Mesh::Face::Face(Vertex *v1, Vertex *v2, Vertex *v3) : verts{{v1, v2, v3}} {
@@ -160,7 +165,8 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
   // carica la mesh da un file in formato Obj
   //   Nota: nel file, possono essere presenti sia quads che tris
   //   ma nella rappresentazione interna (classe Mesh) abbiamo solo tris.
-  //   modificarlo per ritornare un oggetto mesh, farlo diventare load_mesh
+
+  //Friend class, must be used instead of the constructor   
   std::unique_ptr<Mesh> loadMesh(const char *filename) {
     static const auto TAG = __func__;
 

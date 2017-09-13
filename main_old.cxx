@@ -16,15 +16,20 @@ const int PHYS_SAMPLING_STEP =
 const int fpsSampling = 3000; // lunghezza intervallo di calcolo fps
 
 //non serve per ora
-//extern void drawPista();
+extern void drawPista();
 
 
 //questo rendering è spostato in varie classi
 /* Esegue il Rendering della scena */
-void rendering(SDL_Window *win, Env env, Floor floor, Sky sk, Spaceship sh) {
+void rendering(SDL_Window *win, Car car) {
    
+  int fpsNow = car.fpsNow;
+  int scrW = car.scrW;
+  int scrH = car.scrH;
+  float fps = car.fps;
+
   // un frame in piu'!!!
-  env.
+  fpsNow++;
 
   glLineWidth(3); // linee larghe
 
@@ -344,37 +349,3 @@ int main(int argc, char *argv[]) {
   SDL_Quit();
   return (0);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-what the main should look like, in the end
-
-#include "game.hh"
-#include "log.hh"
-
-#include <iostream>
-#include <cstdlib>
-
-
-int main(void) {
-    lg::set_level(lg::Level::INFO); 
-
-    game::Game game(); 
-    game.run(); 
-
-    //praying god everything's run ok
-    return EXIT_SUCCESS; 
-}
-
-*/

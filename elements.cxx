@@ -2,6 +2,10 @@
 
 // Implementation of the objects in elements.hxx
 namespace elements {
+
+/*
+* Floor
+*/
 Floor::Floor(const char *texture_filename)
     : m_size(100.0f), m_height(0.0f), m_env(agl::get_env()),
       // repat = true, linear interpolation
@@ -23,6 +27,10 @@ Floor *get_floor(const char *texture_filename) {
 
   return s_floor.get();
 }
+
+/*
+* Sky
+*/
 
 Sky::Sky(const char *texture_filename)
     : m_radius(100.0f), m_lats(20.0f), m_longs(20.0f), m_env(agl::get_env()),
@@ -51,28 +59,57 @@ Floor *get_sky(const char *texture_filename) {
   return s_sky.get();
 }
 
+/*
+*  Starring: Spaceship class.
+*/
+
+using namespace spaceship;
+
 Spaceship::Spaceship(const char *texture_filename,
                      const char *mesh_filename) // da finire
     : m_tex(0),                                 // no texture for now
       m_env(agl::get_env), m_mesh(agl::loadMesh(mesh_filename)), // TODO
-      m_cmds(new std::std::queue<spaceship::Command>) {}         // empty cons
+      m_cmds(new std::queue<Command>) {}                         // empty cons
 
-bool Spaceship::executeCommand() {
+void Spaceship::processCommand() {
   const static auto TAG = __func__;
-  // read and pop command
-  Command cmd = m_cmds.front();
-  m_cmds.pop();
 
-  // get command name in string in order to log
-  std::string mt = spaceship::motion_to_str(cmd.first);
-  lg::i(TAG, "Spaceship is executing command %s", mt)
+  if (!m_cmds.empty()) {
+    // read and pop command
+    Command cmd = m_cmds.front();
+    m_cmds.pop();
 
-      // set the state
-
-      m_state[cmd.first] = cmd.second;
+    // get command name in string in order to log
+    std::string mt = motion_to_str(cmd.first);
+    lg::i(TAG, "Spaceship is processing command %s", mt);
+    // set the state
+    m_state[cmd.first] = cmd.second;
+  }
 }
 
-void Spaceship::render() {}
+void sendCommand(Motion motion, bool on_off) {
+  if (motion > spaceship::num_actions) {
+    lg::panic(__func__, "Command not recognized!!");
+  }
+
+  // construct and submit a new pair
+  m_cmds.emplace_back(motion, on_off);
+}
+
+// draw the ship as a textured mesh, using the helper functions defined
+// in the Env class. 
+void Spaceship::draw() {
+  //m_env.textureDrawing(m_tex, [&]{
+    m_env.mat_scope([&] {
+      m_env.scale(m_scale_x, m_scale_y, m_scale_z);
+
+      m_mesh->render_goraud(m_env.isWireframe());
+    });
+  }, true); // use envmaps for the spacey effect
+}
+
+void
+    Spaceship::render() {}
 
 Spaceship *get_spaceship(const char *texture_filename,
                          const char *mesh_filename) {

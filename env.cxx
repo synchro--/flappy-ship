@@ -82,7 +82,7 @@ Env::TexID Env::loadTexture(const char *filename, bool repeat, bool nearest) {
   SDL_Surface *s = IMG_Load(filename);
   if (!s) {
     lg::e(__func__, "Error while loading texture from file %s", filename);
-    return false;
+    return EXIT_FAILURE;
   }
 
   TexID texbind;
