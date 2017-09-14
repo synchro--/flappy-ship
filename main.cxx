@@ -1,13 +1,9 @@
-#include <cmath>
+#include "game.hh"
+#include "log.hh"
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <iostream>
+#include <cstdlib>
 
-#include "car.hxx"
-#include "game.hxx"
-#include "types.hxx"
 
 //spostati in namespace game
 const int PHYS_SAMPLING_STEP =
@@ -378,3 +374,4 @@ int main(void) {
 }
 
 */
+

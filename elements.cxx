@@ -59,6 +59,7 @@ Floor *get_sky(const char *texture_filename) {
   return s_sky.get();
 }
 
+<<<<<<< HEAD
 /*
 *  Starring: Spaceship class.
 */
@@ -73,15 +74,16 @@ Spaceship::Spaceship(const char *texture_filename,
 
 void Spaceship::processCommand() {
   const static auto TAG = __func__;
-
-  if (!m_cmds.empty()) {
+  
+  if(!m_cmds.empty()) {
     // read and pop command
     Command cmd = m_cmds.front();
     m_cmds.pop();
 
     // get command name in string in order to log
     std::string mt = motion_to_str(cmd.first);
-    lg::i(TAG, "Spaceship is processing command %s", mt);
+    lg::i(TAG, "Spaceship is processing command %s", mt)
+
     // set the state
     m_state[cmd.first] = cmd.second;
   }
@@ -110,6 +112,7 @@ void Spaceship::draw() {
 
 void
     Spaceship::render() {}
+
 
 Spaceship *get_spaceship(const char *texture_filename,
                          const char *mesh_filename) {
