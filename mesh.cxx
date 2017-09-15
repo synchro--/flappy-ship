@@ -12,11 +12,10 @@
 #include <cstdio>
 #include <cstring>
 
-#include "agl.hxx"
-
+#include "agl.h"
 
 /*
-* Class implementing a Mesh. See agl.hxx
+* Class implementing a Mesh. See aglh
 */
 
 namespace agl {
@@ -166,7 +165,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
   //   Nota: nel file, possono essere presenti sia quads che tris
   //   ma nella rappresentazione interna (classe Mesh) abbiamo solo tris.
 
-  //Friend class, must be used instead of the constructor   
+  // Friend class, must be used instead of the constructor
   std::unique_ptr<Mesh> loadMesh(const char *filename) {
     static const auto TAG = __func__;
 

@@ -1,6 +1,6 @@
-#ifndef CAR_HXX
+#ifndef CAR_H_
 
-#define CAR_HXX
+#define CAR_H_
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -8,10 +8,10 @@
 #include <cstdio>
 #include <vector> // la classe vector di STL
 
-#include "point3.hxx"
+#include "point3h"
 
-#include "game.hxx"
-#include "mesh.hxx"
+#include "gameh"
+#include "meshh"
 
 class Controller {
 public:

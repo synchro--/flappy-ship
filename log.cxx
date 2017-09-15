@@ -1,4 +1,4 @@
-#include "log.hxx"
+#include "logh"
 
 namespace lg {
 

@@ -1,4 +1,4 @@
-#include "agl.hxx"
+#include "agl.h"
 
 /*
 * The Point3 class defines all the operations regarding a 3D-Point,

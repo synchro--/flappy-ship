@@ -1,4 +1,4 @@
-#include "agl.hxx"
+#include "aglh"
 #include <SDL2/SDL_ttf.h>
 
 namespace agl {

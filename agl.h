@@ -1,5 +1,5 @@
-#ifndef _AGL_HXX_
-#define _AGL_HXX_
+#ifndef _AGL_H_
+#define _AGL_H_
 
 #include <functional>
 #include <memory>
@@ -14,9 +14,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "game.hxx"
-#include "log.hxx"
-#include "types.hxx"
+#include "game.h"
+#include "log.h"
+#include "types.h"
 
 /*
 * AGL: Abstract Graphic Library
@@ -135,7 +135,6 @@ public:
   // leggibile
 };
 
-
 // A mesh object, loaded from a Wavefront Obj
 class Mesh {
 private:
@@ -157,7 +156,6 @@ private:
   void init();
 
 public:
-
   // friend function to load the mesh instead of exporting the cons
   friend std::unique_ptr<Mesh> loadMesh(char *mesh_filename);
 
@@ -170,7 +168,6 @@ public:
 
   Point3 bbmin, bbmax; // bounding box
 };
-
 
 /* The Env class represents the Environment of the game.
    It handles all the main components of the scene and all the callbacks
@@ -185,6 +182,7 @@ private:
   float m_eye_dist;
   int m_screenH, m_screenW;
   int m_camera_type;
+  // fps li metterei nella classe game
   float m_fps;     // fps value in the last interval
   float m_fps_now; // fps currently drawn
   int m_step;      // number of steps of Physics currently done
@@ -209,14 +207,21 @@ public:
   // destructor takes care of closing the SDL libraries
   virtual ~Env();
 
+  // abstraction on the creation of the windos
+  void createWindow();
+
   // drawing functions
   void drawFloor(TexID texbind, float sz, float height, size_t num_quads);
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
 
-  // Returns the current FPS.
+  // accessors
   inline decltype(m_fps) fps() { return m_fps; }
+  inline decltype(m_fps_now) fps_now() { return m_fps_now; }
+  inline void incrementFPS() { m_fps_now++; }
   inline decltype(m_wireframe) isWireframe() { return m_wireframe; }
+  inline void switch_wireframe() { m_wireframe = !m_wireframe; }
+  inline void switch_envmap() { m_envmap = !m_envmap; }
 
   using TexID = GLuint;
 

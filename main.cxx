@@ -1,26 +1,30 @@
-#include "game.hh"
-#include "log.hh"
+#include <cmath>
 
-#include <iostream>
-#include <cstdlib>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
+#include "car.h"
+#include "game.h"
+#include "types.h"
 
-//spostati in namespace game
+// spostati in namespace game
 const int PHYS_SAMPLING_STEP =
     10; // numero di millisec che un passo di fisica simula
 // Frames Per Seconds
 const int fpsSampling = 3000; // lunghezza intervallo di calcolo fps
 
-//non serve per ora
-//extern void drawPista();
+// non serve per ora
+// extern void drawPista();
 
-
-//questo rendering è spostato in varie classi
+// questo rendering è spostato in varie classi
 /* Esegue il Rendering della scena */
-void rendering(SDL_Window *win, Env env, Floor floor, Sky sk, Spaceship sh) {
-   
+void rendering(SDL_Window *m_win, Env m_env, Floor m_floor, Sky m_sk,
+               Spaceship m_sh) {
+
   // un frame in piu'!!!
-  env.
+  m_env.incrementFPS();
 
   glLineWidth(3); // linee larghe
 
@@ -47,27 +51,32 @@ void rendering(SDL_Window *win, Env env, Floor floor, Sky sk, Spaceship sh) {
 
   // drawAxis(); // disegna assi frame VISTA
 
+  //--- setup first light _0
+
   // setto la posizione luce
-  float tmpv[4] = {0, 1, 2, 0}; // ultima comp=0 => luce direzionale
-  glLightfv(GL_LIGHT0, GL_POSITION, tmpv);
+  float light_position[4] = {0, 1, 2, 0}; // ultima comp=0 => luce direzionale
+  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
   // settiamo matrice di vista
   // glTranslatef(0,0,-eyeDist);
   // glRotatef(view_beta,  1,0,0);
   // glRotatef(view_alpha, 0,1,0);
+  // da inserire nella ship
   car.setCamera();
 
   // drawAxis(); // disegna assi frame MONDO
 
-  static float tmpcol[4] = {1, 1, 1, 1};
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tmpcol);
+  //--- setup light for the model
+  static float params[4] = {1, 1, 1, 1};
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, params);
   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 127);
 
   glEnable(GL_LIGHTING);
 
-  // settiamo matrice di modellazione
-  // drawAxis(); // disegna assi frame OGGETTO
-  // drawCubeWire();
+  // chiamare questi metodi dentro GAME
+  // sky->render()
+  // floor-> render()
+  // ship -> render() e via dicendo
 
   drawSky(car); // disegna il cielo come sfondo
 
@@ -84,11 +93,14 @@ void rendering(SDL_Window *win, Env env, Floor floor, Sky sk, Spaceship sh) {
 
   // disegnamo i fps (frame x sec) come una barra a sinistra.
   // (vuota = 0 fps, piena = 100 fps)
+
+  // questa è una funzione di env
   SetCoordToPixel(car);
 
+  // fa parte del HUD
   glBegin(GL_QUADS);
-  float y = scrH * fps / 100;
-  float ramp = fps / 100;
+  float y = m_screenH * m_fps / 100;
+  float ramp = m_fps / 100;
   glColor3f(1 - ramp, 0, ramp);
   glVertex2d(10, 0);
   glVertex2d(10, y);
@@ -101,6 +113,8 @@ void rendering(SDL_Window *win, Env env, Floor floor, Sky sk, Spaceship sh) {
 
   glFinish();
   // ho finito: buffer di lavoro diventa visibile
+
+  // Swap buffer and update
   SDL_GL_SwapWindow(win);
 }
 
@@ -150,6 +164,7 @@ int main(int argc, char *argv[]) {
   glEnable(GL_LIGHT0);
   glEnable(GL_NORMALIZE); // opengl, per favore, rinormalizza le normali
                           // prima di usarle
+
   // glEnable(GL_CULL_FACE);
   glFrontFace(GL_CW); // consideriamo Front Facing le facce ClockWise
   glEnable(GL_COLOR_MATERIAL);
@@ -166,8 +181,9 @@ int main(int argc, char *argv[]) {
   if (!LoadTexture(2, (char *)"space1.jpg"))
     return -1;
 
-  bool done = 0;
-  while (!done) {
+  // main event loop
+
+  for (;;) {
 
     SDL_Event e;
 
@@ -180,6 +196,8 @@ int main(int argc, char *argv[]) {
           done = 1;
           break;
         }
+
+        // lo deve fare game_on_key
         car.controller.EatKey(e.key.keysym.sym, keymap, true);
 
         /*switch(e.key.keysym.sym) {
@@ -341,37 +359,24 @@ int main(int argc, char *argv[]) {
   return (0);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 /*
 what the main should look like, in the end
 
 #include "game.hh"
 #include "log.hh"
 
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
 
 
 int main(void) {
-    lg::set_level(lg::Level::INFO); 
+    lg::set_level(lg::Level::INFO);
 
-    game::Game game(); 
-    game.run(); 
+    game::Game game();
+    game.run();
 
     //praying god everything's run ok
-    return EXIT_SUCCESS; 
+    return EXIT_SUCCESS;
 }
 
 */
-

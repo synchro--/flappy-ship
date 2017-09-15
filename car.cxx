@@ -1,5 +1,5 @@
 // implementazione dei metodi definiti in car.h
-#include "car.hxx"
+#include "car.h"
 
 // Spaceship
 Mesh carlinga((char *)"Envos.obj");

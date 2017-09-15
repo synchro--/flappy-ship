@@ -5,24 +5,23 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "car.hxx"
-#include "game.hxx"
-#include "types.hxx"
+#include "car.h"
+#include "game.h"
+#include "types.h"
 
-//spostati in namespace game
+// spostati in namespace game
 const int PHYS_SAMPLING_STEP =
     10; // numero di millisec che un passo di fisica simula
 // Frames Per Seconds
 const int fpsSampling = 3000; // lunghezza intervallo di calcolo fps
 
-//non serve per ora
+// non serve per ora
 extern void drawPista();
 
-
-//questo rendering è spostato in varie classi
+// questo rendering è spostato in varie classi
 /* Esegue il Rendering della scena */
 void rendering(SDL_Window *win, Car car) {
-   
+
   int fpsNow = car.fpsNow;
   int scrW = car.scrW;
   int scrH = car.scrH;

@@ -1,12 +1,12 @@
-#ifndef _ELEMENTS_HXX_
-#define _ELEMENTS_HXX_
+#ifndef _ELEMENTS_H_
+#define _ELEMENTS_H_
 
-#include "agl.hxx"
-#include "log.hxx"
-#include "types.hxx"
+#include "agl.h"
+#include "log.h"
+#include "types.h"
 
 /*
-* elements.hxx describes the different objects (elements) of the game
+* elementsh describes the different objects (elements) of the game
 * Floor, Sky, ..., it will be expanded as the game gets more complex
 * and new elements gets added.
 */
@@ -128,6 +128,6 @@ public:
   // render the Spaceship: TexID + Mesh
   void render();
 }
-}
+};
 
-#endif //_ELEMENTS_HXX_
+#endif //_ELEMENTS_H_

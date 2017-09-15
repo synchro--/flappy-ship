@@ -1,6 +1,6 @@
-#include "elements.hxx"
+#include "elements.h"
 
-// Implementation of the objects in elements.hxx
+// Implementation of the objects in elementsh
 namespace elements {
 
 /*
@@ -74,8 +74,8 @@ Spaceship::Spaceship(const char *texture_filename,
 
 void Spaceship::processCommand() {
   const static auto TAG = __func__;
-  
-  if(!m_cmds.empty()) {
+
+  if (!m_cmds.empty()) {
     // read and pop command
     Command cmd = m_cmds.front();
     m_cmds.pop();
@@ -84,8 +84,8 @@ void Spaceship::processCommand() {
     std::string mt = motion_to_str(cmd.first);
     lg::i(TAG, "Spaceship is processing command %s", mt)
 
-    // set the state
-    m_state[cmd.first] = cmd.second;
+        // set the state
+        m_state[cmd.first] = cmd.second;
   }
 }
 
@@ -99,20 +99,18 @@ void sendCommand(Motion motion, bool on_off) {
 }
 
 // draw the ship as a textured mesh, using the helper functions defined
-// in the Env class. 
+// in the Env class.
 void Spaceship::draw() {
-  //m_env.textureDrawing(m_tex, [&]{
-    m_env.mat_scope([&] {
-      m_env.scale(m_scale_x, m_scale_y, m_scale_z);
+  // m_env.textureDrawing(m_tex, [&]{
+  m_env.mat_scope([&] {
+    m_env.scale(m_scale_x, m_scale_y, m_scale_z);
 
-      m_mesh->render_goraud(m_env.isWireframe());
-    });
-  }, true); // use envmaps for the spacey effect
+    m_mesh->render_goraud(m_env.isWireframe());
+  });
+}, true); // use envmaps for the spacey effect
 }
 
-void
-    Spaceship::render() {}
-
+void Spaceship::render() {}
 
 Spaceship *get_spaceship(const char *texture_filename,
                          const char *mesh_filename) {

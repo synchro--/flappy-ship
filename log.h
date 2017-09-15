@@ -1,14 +1,14 @@
-#ifndef _LOG_HXX
-#define _LOG_HXX
+#ifndef _LOG_H_
+#define _LOG_H_
 
 #include <cstdarg>
 #include <cstdio>
 #include <iostream>
-#include <types.hxx>
+#include <typesh>
 #include <unistd.h>
 
 // pretty simple logging utility with printf-like formatting
-// Levels are: INFO, ERROR, PANIC, defined in types.hxx
+// Levels are: INFO, ERROR, PANIC, defined in typesh
 
 // log is already in use by std Library
 namespace lg {
@@ -52,4 +52,4 @@ void e(const char *tag, const char *fmt, ...);
 void panic(const char *tag, const char *fmt, ...);
 }
 
-#endif
+#endif _LOG_H__
