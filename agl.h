@@ -234,9 +234,13 @@ public:
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
 
-  inline void disableLighting() {glDisable(GL_LIGHTING));
+  inline void disableLighting() { glDisable(GL_LIGHTING));
   }
   inline void enableLighting() { glEnable(GL_LIGHTING); }
+
+  void enableDoubleBuffering();
+  void enableZbuffer();
+  void enableJoystick();
 
   Uint32 getTicks();
 
@@ -277,6 +281,20 @@ public:
 
 // return singleton instance
 Env &get_env();
+}
+
+class SmartWindow {
+
+private:
+  SDL_Window *m_win;         // SDL window
+  SDL_GLContext m_GLcontext; // SDL OpenGL Context
+  std::string m_name;        // window name
+  Env &m_env;
+
+public:
+  size_t m_width, m_height;
+
+  SmartWindow(std::string &name, size_t x, size_t y, size_t w, size_t h);
 }
 
 #endif

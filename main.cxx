@@ -1,14 +1,14 @@
 #include <cmath>
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-
 #include "agl.h"
 #include "elements.h"
 #include "game.h"
 #include "types.h"
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 using namespace game;
 
@@ -36,15 +36,6 @@ int main(int argc, char *argv[]) {
   bool useShadow = car.useShadow;
   int cameraType = car.cameraType;
   Uint32 timeLastInterval = car.timeLastInterval;
-
-  // inizializzazione di SDL
-  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
-
-  SDL_JoystickEventState(SDL_ENABLE);
-  joystick = SDL_JoystickOpen(0);
-
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
   // facciamo una finestra di scrW x scrH pixels
   win = SDL_CreateWindow(argv[0], 0, 0, scrW, scrH,

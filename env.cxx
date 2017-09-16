@@ -31,20 +31,20 @@ Env::Env()
   // Don't let SDL set its signal() handlers - Ctrl+c and friends will work
   SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
 
-  lg::i(TAG, "initializing SDL and OpenGL");
+  lg::i(TAG, "init SDL and OpenGL");
 
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    lg::e(TAG, "Context::Context", SDL_GetError());
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0) {
+    lg::e(TAG, "Env::Env", SDL_GetError());
     exit(EXIT_FAILURE);
   }
 
   if (TTF_Init() < 0) {
-    lg::e(TAG, "Context::Context", SDL_GetError());
+    lg::e(TAG, "Env::Env", SDL_GetError());
     exit(EXIT_FAILURE);
   }
 
-  enable_zbuffer(16);
-  enable_double_buffering();
+  enableZbuffer(16);
+  enableDoubleBuffering();
 
   logs::i(TAG, "SDL and OpenGL Init: done");
 }
@@ -83,6 +83,24 @@ void Env::set_winevent_handler(decltype(m_window_event_handler) onwinev) {
 // Sets the m_render_handler callback, which is called to render the scene.
 void Env::set_render(decltype(m_render_handler) render) {
   m_render_handler = render;
+}
+
+void Env::enableZbuffer(int depth) {
+  lg::i(__func__, "Enabling Z-Buffer of depth %d", depth);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depth);
+}
+
+void Env::enableDoubleBuffering() {
+  lg::i(__func__, "Enabling double-buffer")
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+}
+
+// enables joystick
+void Env::enableJoystick() {
+  lg::i(__func__, "### Joystick is Enabled ###");
+
+  SDL_JoystickEventState(SDL_ENABLE);
+  joystick = SDL_JoystickOpen(0);
 }
 
 void Env::mat_scope(const std::function<void(void)> callback) {

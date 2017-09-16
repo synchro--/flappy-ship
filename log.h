@@ -4,9 +4,9 @@
 #include <cstdarg>
 #include <cstdio>
 #include <iostream>
-#include <typesh>
 #include <unistd.h>
 
+#include "types.h"
 // pretty simple logging utility with printf-like formatting
 // Levels are: INFO, ERROR, PANIC, defined in typesh
 
