@@ -29,6 +29,8 @@
 
 namespace agl {
 
+using TexID = GLuint; // out of clarity
+
 // represents a RGBA color.
 struct Color {
   float r, g, b, a;
@@ -178,16 +180,13 @@ class Env final {
 private:
   Env(); // constructs the Environment, intializing all the variables.
 
-  float m_view_alpha, m_view_beta;
+  double m_fps;     // fps value in the last interval
+  double m_fps_now; // fps currently drawn
   float m_eye_dist;
   int m_screenH, m_screenW;
   int m_camera_type;
-  // fps li metterei nella classe game
-  float m_fps;     // fps value in the last interval
-  float m_fps_now; // fps currently drawn
-  int m_step;      // number of steps of Physics currently done
+  int m_step; // number of steps of Physics currently done
   bool m_wireframe, m_envmap, m_headlight, m_shadow;
-  uint32_t m_last_time;
 
   /* Callbacks variables:
   *  they will be the handler for keys, windows events and rendering.
@@ -207,23 +206,39 @@ public:
   // destructor takes care of closing the SDL libraries
   virtual ~Env();
 
-  // abstraction on the creation of the windos
-  void createWindow();
+  // accessors
+  inline decltype(m_wireframe) isWireframe() { return m_wireframe; }
+  inline decltype(m_envmap) isEnvmap() { return m_envmap; }
+  inline decltype(m_headlight) isHeadlight() { return m_headlight; }
+  inline decltype(m_shadow) isShadow() { return m_shadow; }
+  inline decltype(m_eye_dist) eyeDist() { return m_eye_dist; }
+
+  inline void toggle_wireframe() { m_wireframe = !m_wireframe; }
+  inline void toggle_envmap() { m_envmap = !m_envmap; }
+  inline void toggle_headlight() { m_headlight = !m_headlight; }
+  inline void toggle_shadow() { m_shadow = !m_shadow; }
+
+  // Setters for all the callbacks
+  // Default: empty
+  void set_action(decltype(m_action_handler) actions = [] {});
+  void set_keydown_handler(decltype(m_key_down_handler) onkeydown = [](Key) {});
+  void set_keyup_handler(decltype(m_key_up_handler) onkeyup = [](Key) {});
+  void set_render(decltype(m_render_handler) render = [] {});
+  void set_winevent_handler(decltype(m_window_event_handler) onwinev = [] {});
+
+  void clearBuffer();
+  void setColor(const &Color color);
 
   // drawing functions
   void drawFloor(TexID texbind, float sz, float height, size_t num_quads);
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
 
-  // accessors
-  inline decltype(m_fps) fps() { return m_fps; }
-  inline decltype(m_fps_now) fps_now() { return m_fps_now; }
-  inline void incrementFPS() { m_fps_now++; }
-  inline decltype(m_wireframe) isWireframe() { return m_wireframe; }
-  inline void switch_wireframe() { m_wireframe = !m_wireframe; }
-  inline void switch_envmap() { m_envmap = !m_envmap; }
+  inline void disableLighting() {glDisable(GL_LIGHTING));
+  }
+  inline void enableLighting() { glEnable(GL_LIGHTING); }
 
-  using TexID = GLuint;
+  Uint32 getTicks();
 
   // Load texture from an image and return bool if success, should be changed to
   // return a texture ID --i.e. unsigned integer
@@ -234,21 +249,26 @@ public:
   // Saves time and ensures the matrix will be popped after
   // pushing
   void mat_scope(const std::function<void()> callback);
-  void redraw();
-  void setCoordToPixel();
-  void scale(int scale_x, scale_y, scale_z);
 
-  // Setters for all the callbacks
-  // Default: empty
-  void set_action(decltype(m_action_handler) actions = [] {});
-  void set_keydown_handler(decltype(m_key_down_handler) onkeydown = [](Key) {});
-  void set_keyup_handler(decltype(m_key_up_handler) onkeyup = [](Key) {});
-  void set_render(decltype(m_render_handler) render = [] {});
-  void set_winevent_handler(decltype(m_window_event_handler) onwinev = [] {});
+  void rotate(float angle, const Vec3 &axis);
+  void redraw();
+  void scale(float scale_x, float scale_y, float scale_z);
+
+  // set the camera to aim to reference frame (aim_x, aim_y, aim_z) from the
+  // observing frame (eye_x,y,z)
+  void setCamera(double eye_x, double eye_y, double eye_z, double aim_x,
+                 double aim_y, double aim_z);
+  void setCoordToPixel();
 
   // Model and Projection matrix setup
-  void setup_model();
-  void setup_persp(float width, float height);
+  void setupModel();
+  void setupPersp();
+
+  // Lights setup
+  void setupLightPosition();
+  void setupModelLights();
+
+  void translate(float scale_x, float scale_y, float scale_z);
 
   // texture drawing helper function
   void textureDrawing(TexID texbind, std::function<void()> callback,

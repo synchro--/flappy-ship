@@ -14,7 +14,7 @@ const agl::Color RED = {.768f, .109f, .109f};
 const agl::Color GREEN = {.447f, .643f, .074f};
 const agl::Color YELLOW = {.913f, .643f, .074f};
 
-// Macros
+// definitions
 #define CAMERA_BACK_CAR 0
 #define CAMERA_TOP_FIXED 1
 #define CAMERA_TOP_CAR 2
@@ -23,11 +23,28 @@ const agl::Color YELLOW = {.913f, .643f, .074f};
 #define CAMERA_TYPE_MAX 5
 
 namespace game {
-static const int PHYS_SAMPLING_STEP = 10; // millisec of a Physics simulated
-                                          // step
+static const int PHYS_SAMPLING_STEP =
+    10;                             // millisec of a Physics simulated step
 static const int FPS_SAMPLE = 3000; // interval length
 enum State { MENU, GAME, SETTINGS, RANKING };
-enum Key { W, A, S, D, UP, DOWN, LEFT, RIGHT, ESC, RETURN };
+enum Key {
+  W,
+  A,
+  S,
+  D,
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+  ESC,
+  RETURN,
+  F1,
+  F2,
+  F3,
+  F4,
+  F5,
+  N_KEYS
+};
 }
 
 namespace lg {
@@ -38,7 +55,7 @@ enum Level { INFO, ERROR, PANIC };
 namespace spaceship {
 // Actions available for the Spaceship
 // Note: can be expanded if the flying goes 3D, i.e. flying on the Y-axis too
-enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE; }
+enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE, N_MOTION };
 static const int num_actions = Motion::BRAKE;
 
 // Command data structure: a pair of <Enum Action, bool on/off>

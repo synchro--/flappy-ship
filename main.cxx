@@ -5,118 +5,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "car.h"
+#include "agl.h"
+#include "elements.h"
 #include "game.h"
 #include "types.h"
 
-// spostati in namespace game
-const int PHYS_SAMPLING_STEP =
-    10; // numero di millisec che un passo di fisica simula
-// Frames Per Seconds
-const int fpsSampling = 3000; // lunghezza intervallo di calcolo fps
-
-// non serve per ora
-// extern void drawPista();
-
-// questo rendering è spostato in varie classi
-/* Esegue il Rendering della scena */
-void rendering(SDL_Window *m_win, Env m_env, Floor m_floor, Sky m_sk,
-               Spaceship m_sh) {
-
-  // un frame in piu'!!!
-  m_env.incrementFPS();
-
-  glLineWidth(3); // linee larghe
-
-  // settiamo il viewport
-  glViewport(0, 0, scrW, scrH);
-
-  // colore sfondo = bianco
-  glClearColor(1, 1, 1, 1);
-
-  // settiamo la matrice di proiezione
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(70,                   // fovy,
-                 ((float)scrW) / scrH, // aspect Y/X,
-                 0.2, // distanza del NEAR CLIPPING PLANE in coordinate vista
-                 1000 // distanza del FAR CLIPPING PLANE in coordinate vista
-                 );
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  // riempe tutto lo screen buffer di pixel color sfondo
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // drawAxis(); // disegna assi frame VISTA
-
-  //--- setup first light _0
-
-  // setto la posizione luce
-  float light_position[4] = {0, 1, 2, 0}; // ultima comp=0 => luce direzionale
-  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-  // settiamo matrice di vista
-  // glTranslatef(0,0,-eyeDist);
-  // glRotatef(view_beta,  1,0,0);
-  // glRotatef(view_alpha, 0,1,0);
-  // da inserire nella ship
-  car.setCamera();
-
-  // drawAxis(); // disegna assi frame MONDO
-
-  //--- setup light for the model
-  static float params[4] = {1, 1, 1, 1};
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, params);
-  glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 127);
-
-  glEnable(GL_LIGHTING);
-
-  // chiamare questi metodi dentro GAME
-  // sky->render()
-  // floor-> render()
-  // ship -> render() e via dicendo
-
-  drawSky(car); // disegna il cielo come sfondo
-
-  drawFloor(); // disegna il suolo
-  drawPista(); // disegna la pista
-
-  car.Render(); // disegna la macchina
-
-  // attendiamo la fine della rasterizzazione di
-  // tutte le primitive mandate
-
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_LIGHTING);
-
-  // disegnamo i fps (frame x sec) come una barra a sinistra.
-  // (vuota = 0 fps, piena = 100 fps)
-
-  // questa è una funzione di env
-  SetCoordToPixel(car);
-
-  // fa parte del HUD
-  glBegin(GL_QUADS);
-  float y = m_screenH * m_fps / 100;
-  float ramp = m_fps / 100;
-  glColor3f(1 - ramp, 0, ramp);
-  glVertex2d(10, 0);
-  glVertex2d(10, y);
-  glVertex2d(0, y);
-  glVertex2d(0, 0);
-  glEnd();
-
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_LIGHTING);
-
-  glFinish();
-  // ho finito: buffer di lavoro diventa visibile
-
-  // Swap buffer and update
-  SDL_GL_SwapWindow(win);
-}
+using namespace game;
 
 int main(int argc, char *argv[]) {
   SDL_Window *win;
@@ -132,9 +26,9 @@ int main(int argc, char *argv[]) {
   int fpsNow = car.fpsNow;
   int scrW = car.scrW;
   int scrH = car.scrH;
-  float view_alpha = car.view_alpha;
-  float view_beta = car.view_beta;
-  float eyeDist = car.eyeDist;
+  float m_view_alpha = car.m_view_alpha;
+  float m_view_beta = car.m_view_beta;
+  float m_eye_dist = car.m_eye_dist;
   int nstep = car.nstep;
   bool useWireframe = car.useWireframe;
   bool useEnvmap = car.useEnvmap;
@@ -157,7 +51,7 @@ int main(int argc, char *argv[]) {
                          SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
   // Create our opengl Env and attach it to our window
-  mainEnv = SDL_GL_CreateEnv(win);
+  mainEnv = SDL_GL_CreateContext(win);
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
@@ -169,82 +63,119 @@ int main(int argc, char *argv[]) {
   glFrontFace(GL_CW); // consideriamo Front Facing le facce ClockWise
   glEnable(GL_COLOR_MATERIAL);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glEnable(GL_POLYGON_OFFSET_FILL); // caro openGL sposta i
-                                    // frammenti generati dalla
-                                    // rasterizzazione poligoni
-  glPolygonOffset(1, 1);            // indietro di 1
+  glEnable(GL_POLYGON_OFFSET_FILL);
 
-  if (!LoadTexture(0, (char *)"logo.jpg"))
-    return 0;
-  if (!LoadTexture(1, (char *)"envmap_flipped.jpg"))
-    return 0;
-  if (!LoadTexture(2, (char *)"space1.jpg"))
-    return -1;
+  // Sposta i frammenti generati dalla rasterizzazione dei poligoni
+  // indietro di 1
+  glPolygonOffset(1, 1);
 
   // main event loop
+  // in un metodo della classe Env
+  // verrà utilizzato poi da game
 
-  for (;;) {
+  bool quit = false;
+  while (!quit) {
 
     SDL_Event e;
 
     // check and process events
     if (SDL_PollEvent(&e)) {
       switch (e.type) {
-      case SDL_KEYDOWN:
+
+      case SDL_KEYUP:
+      case SDL_KEYDOWN: {
+
+        // choose the proper callback handler according if key is pressed or
+        // released
+        auto handler =
+            (e.type == SDL_KEYUP) ? m_key_up_handler : m_key_down_handler;
+
         switch (e.key.keysym.sym) {
-        case SDLK_c:
-          done = 1;
+        case SDLK_w:
+          handler(Key::W);
+          break;
+
+        case SDLK_a:
+          handler(Key::A);
+          break;
+
+        case SDLK_s:
+          handler(Key::S);
+          break;
+
+        case SDLK_d:
+          handler(Key::D);
+          break;
+
+        case SDLK_UP:
+          handler(Key::UP);
+          break;
+
+        case SDLK_LEFT:
+          handler(Key::LEFT);
+          break;
+
+        case SDLK_DOWN:
+          handler(Key::DOWN);
+          break;
+
+        case SDLK_RIGHT:
+          handler(Key::RIGHT);
+          break;
+
+        case SDLK_ESCAPE:
+          handler(Key::ESC);
+          break;
+
+        case SDLK_RETURN:
+          handler(Key::RETURN);
+          break;
+
+        case SDLK_F1:
+          handler(Key::F1);
+          break;
+
+        case SDLK_F2:
+          handler(Key::F2);
+          break;
+
+        case SDLK_F3:
+          handler(Key::F3);
+          break;
+
+        case SDLK_F4:
+          handler(Key::F4);
+          break;
+
+        case SDLK_F5:
+          handler(Key::F5);
+          break;
+
+        default:
           break;
         }
 
-        // lo deve fare game_on_key
-        car.controller.EatKey(e.key.keysym.sym, keymap, true);
-
-        /*switch(e.key.keysym.sym) {
-          case SDLK_F1:
-                    cameraType = (cameraType + 1) % CAMERA_TYPE_MAX;
-          case SDLK_F2:
-                    useWireframe = !useWireframe;
-
-          case SDLK_F3:
-                    useEnvmap = !useEnvmap;
-
-          case SDLK_F4:
-                    useHeadlight = !useHeadlight;
-
-          case SDLK_F5:
-                    useShadow = !useShadow;
-                    break;
-        } */
-
-        if (e.key.keysym.sym == SDLK_F1)
-          cameraType = (cameraType + 1) % CAMERA_TYPE_MAX;
-        if (e.key.keysym.sym == SDLK_F2)
-          useWireframe = !useWireframe;
-        if (e.key.keysym.sym == SDLK_F3)
-          useEnvmap = !useEnvmap;
-        if (e.key.keysym.sym == SDLK_F4)
-          useHeadlight = !useHeadlight;
-        if (e.key.keysym.sym == SDLK_F5)
-          useShadow = !useShadow;
         break;
-      case SDL_KEYUP:
-        car.controller.EatKey(e.key.keysym.sym, keymap, false);
-        break;
+      }
+
       case SDL_QUIT:
-        done = 1;
+        quit = true;
         break;
+
       case SDL_WINDOWEVENT:
         // let's redraw the window
         if (e.window.event == SDL_WINDOWEVENT_EXPOSED)
-          rendering(win, car);
+          m_window_event_handler();
+
+        // da modificare
         else {
           windowID = SDL_GetWindowID(win);
           if (e.window.windowID == windowID) {
             switch (e.window.event) {
             case SDL_WINDOWEVENT_SIZE_CHANGED: {
-              scrW = e.window.data1;
-              scrH = e.window.data2;
+
+              m_screenW = e.window.data1;
+              m_screenH = e.window.data2;
               glViewport(0, 0, scrW, scrH);
               rendering(win, car);
               // redraw(); // richiedi ridisegno
@@ -254,129 +185,144 @@ int main(int argc, char *argv[]) {
           }
         }
         break;
-
-      case SDL_MOUSEMOTION:
-        if (e.motion.state & SDL_BUTTON(1) & cameraType == CAMERA_MOUSE) {
-          view_alpha += e.motion.xrel;
-          view_beta += e.motion.yrel;
-          // if (view_beta<-90) view_beta=-90;
-          if (view_beta < +5)
-            view_beta = +5; // per non andare sotto la macchina
-          if (view_beta > +90)
-            view_beta = +90;
-          // redraw(); // richiedi un ridisegno (non c'e' bisongo: si ridisegna
-          // gia'
-          // al ritmo delle computazioni fisiche)
-        }
-        break;
-
-      case SDL_MOUSEWHEEL:
-        if (e.wheel.y < 0) {
-          // avvicino il punto di vista (zoom in)
-          eyeDist = eyeDist * 0.9;
-          eyeDist = eyeDist < 1 ? 1 : eyeDist; // eyedist can't less than 1
-        };
-        if (e.wheel.y > 0) {
-          // allontano il punto di vista (zoom out)
-          eyeDist = eyeDist / 0.9;
-        };
-        break;
-
-      case SDL_JOYAXISMOTION: /* Handle Joystick Motion */
-        if (e.jaxis.axis == 0) {
-          if (e.jaxis.value < -3200) {
-            car.controller.Joy(0, true);
-            car.controller.Joy(1, false);
-            //	      printf("%d <-3200 \n",e.jaxis.value);
-          }
-          if (e.jaxis.value > 3200) {
-            car.controller.Joy(0, false);
-            car.controller.Joy(1, true);
-            //	      printf("%d >3200 \n",e.jaxis.value);
-          }
-          if (e.jaxis.value >= -3200 && e.jaxis.value <= 3200) {
-            car.controller.Joy(0, false);
-            car.controller.Joy(1, false);
-            //	      printf("%d in [-3200,3200] \n",e.jaxis.value);
-          }
-          rendering(win, car);
-          // redraw();
-        }
-        break;
-      case SDL_JOYBUTTONDOWN: /* Handle Joystick Button Presses */
-        if (e.jbutton.button == 0) {
-          car.controller.Joy(2, true);
-          //	   printf("jbutton 0\n");
-        }
-        if (e.jbutton.button == 2) {
-          car.controller.Joy(3, true);
-          //	   printf("jbutton 2\n");
-        }
-        break;
-      case SDL_JOYBUTTONUP: /* Handle Joystick Button Presses */
-        car.controller.Joy(2, false);
-        car.controller.Joy(3, false);
-        break;
-      }
-    } else {
-      // nessun evento: siamo IDLE
-
-      Uint32 timeNow = SDL_GetTicks(); // che ore sono?
-
-      if (timeLastInterval + fpsSampling < timeNow) {
-        car.fps = 1000.0 * ((float)fpsNow) / (timeNow - timeLastInterval);
-        fpsNow = 0;
-        timeLastInterval = timeNow;
       }
 
-      bool doneSomething = false;
-      int guardia = 0; // sicurezza da loop infinito
+      /*
+      TODO: handle joystick and mouse motion
 
-      // finche' il tempo simulato e' rimasto indietro rispetto
-      // al tempo reale...
-      while (nstep * PHYS_SAMPLING_STEP < timeNow) {
-        car.DoStep();
-        nstep++;
-        doneSomething = true;
-        timeNow = SDL_GetTicks();
-        if (guardia++ > 1000) {
-          done = true;
-          break;
-        } // siamo troppo lenti!
-      }
+     case SDL_MOUSEMOTION:
+       handler = m_mouse_event_handler();
+       if (e.motion.state & SDL_BUTTON(1) & m_camera_type == CAMERA_MOUSE) {
+         view_alpha += e.motion.xrel;
+         view_beta += e.motion.yrel;
+         // if (m_view_beta<-90) m_view_beta=-90;
+         if (view_beta < +5)
+           view_beta = +5; // per non andare sotto la macchina
+         if (view_beta > +90)
+           view_beta = +90;
 
-      if (doneSomething)
-        rendering(win, car);
-      // redraw();
+
+       }
+       break;
+
+     case SDL_MOUSEWHEEL:
+       if (e.wheel.y < 0) {
+         // avvicino il punto di vista (zoom in)
+         m_eye_dist = m_eye_dist * 0.9;
+         m_eye_dist =
+             m_eye_dist < 1 ? 1 : m_eye_dist; // eyedist can't less than 1
+       };
+       if (e.wheel.y > 0) {
+         // allontano il punto di vista (zoom out)
+         m_eye_dist = m_eye_dist / 0.9;
+       };
+       break;
+
+     case SDL_JOYAXISMOTION: // Handle Joystick Motion
+       if (e.jaxis.axis == 0) {
+         if (e.jaxis.value < -3200) {
+           car.controller.Joy(0, true);
+           car.controller.Joy(1, false);
+           //	      printf("%d <-3200 \n",e.jaxis.value);
+         }
+         if (e.jaxis.value > 3200) {
+           car.controller.Joy(0, false);
+           car.controller.Joy(1, true);
+           //	      printf("%d >3200 \n",e.jaxis.value);
+         }
+         if (e.jaxis.value >= -3200 && e.jaxis.value <= 3200) {
+           car.controller.Joy(0, false);
+           car.controller.Joy(1, false);
+           //	      printf("%d in [-3200,3200] \n",e.jaxis.value);
+         }
+         rendering(win, car);
+         // redraw();
+       }
+       break;
+
+       //handle joystick buttons
+     case SDL_JOYBUTTONDOWN:
+       if (e.jbutton.button == 0) {
+         car.controller.Joy(2, true);
+         //	   printf("jbutton 0\n");
+       }
+       if (e.jbutton.button == 2) {
+         car.controller.Joy(3, true);
+         //	   printf("jbutton 2\n");
+       }
+       break;
+     case SDL_JOYBUTTONUP:
+       car.controller.Joy(2, false);
+       car.controller.Joy(3, false);
+       break;
+     }
+   }
+
+   */
+
       else {
-        // tempo libero!!!
+        // nessun evento: siamo IDLE
+
+        // dentro env
+        Uint32 time_now = m_env.getTicks();
+
+        if (m_time_last_interval + FPS_SAMPLE < time_now) {
+          car.fps =
+              1000.0 * ((float)m_fps_now) / (time_now - m_time_last_interval);
+          m_fps_now = 0;
+          m_time_last_interval = time_now;
+        }
+
+        bool doneSomething = false;
+        int guardia = 0; // sicurezza da loop infinito
+
+        // finche' il tempo simulato e' rimasto indietro rispetto
+        // al tempo reale...
+        while (nstep * PHYS_SAMPLING_STEP < timeNow) {
+          car.DoStep();
+          nstep++;
+          doneSomething = true;
+          timeNow = SDL_GetTicks();
+          if (guardia++ > 1000) {
+            quit = true;
+            break;
+          } // siamo troppo lenti!
+        }
+
+        if (doneSomething)
+          rendering(win, car);
+        // redraw();
+        else {
+          // tempo libero!!!
+        }
       }
     }
+
+    // Se ne occupa la distruzione della Window
+    SDL_GL_DeleteContext(mainEnv);
+    SDL_DestroyWindow(win);
+
+    return (0);
   }
-  SDL_GL_DeleteEnv(mainEnv);
-  SDL_DestroyWindow(win);
-  SDL_Quit();
-  return (0);
-}
 
-/*
-what the main should look like, in the end
+  /*
+  what the main should look like, in the end
 
-#include "game.hh"
-#include "log.hh"
+  #include "game.hh"
+  #include "log.hh"
 
-#include <cstdlib>
-#include <iostream>
+  #include <cstdlib>
+  #include <iostream>
 
 
-int main(void) {
-    lg::set_level(lg::Level::INFO);
+  int main(void) {
+      lg::set_level(lg::Level::INFO);
 
-    game::Game game();
-    game.run();
+      game::Game game();
+      game.run();
 
-    //praying god everything's run ok
-    return EXIT_SUCCESS;
-}
+      //praying god everything's run ok
+      return EXIT_SUCCESS;
+  }
 
-*/
+  */

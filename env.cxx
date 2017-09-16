@@ -1,4 +1,4 @@
-#include "aglh"
+#include "agl.h"
 #include <SDL2/SDL_ttf.h>
 
 namespace agl {
@@ -22,10 +22,8 @@ Env::Env()
       m_key_up_handler([](Key) {}),
 
       // all environment variables
-      m_view_alpha(20), m_view_beta(40), m_eye_dist(5.0), m_screenH(750),
-      m_screenW(750), m_wireframe(false), m_envmap(true), m_headlight(false),
-      m_shadow(true), m_camera_type(0), m_step(0), m_fps(0.0), m_fps_now(0.0),
-      m_last_time(0.0) {
+      m_eye_dist(5.0), m_screenH(750), m_screenW(750), m_wireframe(false),
+      m_envmap(true), m_headlight(false), m_shadow(true), m_step(0) {
 
   // "__func__" == function name
   static const auto TAG = __func__;
@@ -59,49 +57,52 @@ Env::~Env() {
   SDL_Quit();
 }
 
+// Sets the action callback which is called once in every iteration. Before the
+// actual rendering.
+void Env::set_action(decltype(m_action_handler) actions) {
+  m_action_handler = actions;
+}
+
+// Sets the onkeydown callback.
+void Env::set_keydown_handler(decltype(m_key_down_handler) onkeydown) {
+  m_key_down_handler = onkeydown;
+}
+
+// Sets the onkeyup callback.
+void Env::set_keyup_handler(decltype(m_key_up_handler) onkeyup) {
+  m_key_up_handler = onkeyup;
+}
+
+// Sets the onwindowevent callback, which is called when the window is exposed
+// again after being covered - usually it is set to the same as
+// m_render_handler.
+void Env::set_winevent_handler(decltype(m_window_event_handler) onwinev) {
+  m_window_event_handler = onwinev;
+}
+
+// Sets the m_render_handler callback, which is called to render the scene.
+void Env::set_render(decltype(m_render_handler) render) {
+  m_render_handler = render;
+}
+
 void Env::mat_scope(const std::function<void(void)> callback) {
   glPushMatrix();
   callback();
   glPopMatrix();
 }
 
-// Load texture from image file.
-// repeat == true --> GL_REPEAT for s and t coordinates
-// nearest == true --> apply neareast neighbour interpolation
-/*
-* N.B: While linear interpolation gives a smoother result,
-* it isn't always the most ideal option. Nearest neighbour interpolation
-* is more suited in games that want to mimic 8 bit graphics,
-* because of the pixelated look.
-*/
+Uint32 Env::getTicks() { return SDL_GetTicks(); }
 
-Env::TexID Env::loadTexture(const char *filename, bool repeat, bool nearest) {
+void setColor(const Color &color) {
+  glColor4f(color.r, color.g, color.b, color.a);
+}
 
-  lg::i(__func__, "Loading texture from file %s", filename);
-
-  SDL_Surface *s = IMG_Load(filename);
-  if (!s) {
-    lg::e(__func__, "Error while loading texture from file %s", filename);
-    return EXIT_FAILURE;
-  }
-
-  TexID texbind;
-  // generate a name for the texture (i.e. an unsigned int)
-  glGenTextures(1, &texbind);
-  glBindTexture(GL_TEXTURE_2D, texbind);
-  gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, s->w, s->h, GL_RGB, GL_UNSIGNED_BYTE,
-                    s->pixels);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                  nearest ? GL_NEAREST : GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-
-  if (repeat) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  }
-
-  return texbind;
+void Env::clearBuffer() {
+  Color c = Color::WHITE;
+  // colore sfondo = bianco
+  glClearColor(c.r, c.g, c.b, c.a);
+  // riempe tutto lo screen buffer di pixel color sfondo
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
@@ -140,7 +141,9 @@ void Env::drawSky(TexID texbind, double radius, int lats, int longs) {
                      glColor3f(BLACK.r, BLACK.g, BLACK.b);
                      glDisable(GL_LIGHTING);
                      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                     drawSphere(100.0, 20, 20);
+
+                     drawSphere(radius, lats, longs);
+
                      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                      glColor3f(WHITE.r, WHITE.g, WHITE.b);
                      glEnable(GL_LIGHTING);
@@ -194,6 +197,45 @@ void Env::drawSphere(double radius, int lats, int longs) {
   }
 }
 
+// Load texture from image file.
+// repeat == true --> GL_REPEAT for s and t coordinates
+// nearest == true --> apply neareast neighbour interpolation
+/*
+* N.B: While linear interpolation gives a smoother result,
+* it isn't always the most ideal option. Nearest neighbour interpolation
+* is more suited in games that want to mimic 8 bit graphics,
+* because of the pixelated look.
+*/
+
+Env::TexID Env::loadTexture(const char *filename, bool repeat, bool nearest) {
+
+  lg::i(__func__, "Loading texture from file %s", filename);
+
+  SDL_Surface *s = IMG_Load(filename);
+  if (!s) {
+    lg::e(__func__, "Error while loading texture from file %s", filename);
+    return EXIT_FAILURE;
+  }
+
+  TexID texbind;
+  // generate a name for the texture (i.e. an unsigned int)
+  glGenTextures(1, &texbind);
+  glBindTexture(GL_TEXTURE_2D, texbind);
+  gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, s->w, s->h, GL_RGB, GL_UNSIGNED_BYTE,
+                    s->pixels);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                  nearest ? GL_NEAREST : GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                  GL_LINEAR_MIPMAP_LINEAR);
+
+  if (repeat) {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  }
+
+  return texbind;
+}
+
 // probabilmente da eliminare e gestire diversamente in seguito
 void Env::redraw() {
   // ci automandiamo un messaggio che (s.o. permettendo)
@@ -202,6 +244,18 @@ void Env::redraw() {
   e.type = SDL_WINDOWEVENT;
   e.window.event = SDL_WINDOWEVENT_EXPOSED;
   SDL_PushEvent(&e);
+}
+
+void Env::rotate(float angle, const Vec3 &axis) {
+  glRotatef(angle, axis.x, axis.y, axis.z);
+}
+
+void Env::scale(float x, float y, float z) { glScalef(x, y, z); }
+
+void Env::set_camera(double eye_x, double eye_y, double eye_z, double aim_x,
+                     double aim_y, double aim_z) {
+  // up vector looking at the sky (0,+y,0)
+  gluLookAt(eye_x, eye_y, eye_z, aim_x, aim_y, aim_z, 0, 1, 0);
 }
 
 // setta le matrici di trasformazione in modo
@@ -216,46 +270,37 @@ void Env::setCoordToPixel() {
   glScalef(2.0 / m_screenW, 2.0 / m_screenH, 1);
 }
 
+void Env::setupLightPosition() {
+  // setto la posizione luce
+  float light_position[4] = {0, 1, 2, 0}; // ultima comp=0 => luce direzionale
+  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+}
+
+void Env::setupModelLights() {
+  // setup lights for the model
+  static float params[4] = {1, 1, 1, 1};
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, params);
+  glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 127);
+
+  glEnable(GL_LIGHTING);
+}
+
 // Switches mode into GL_MODELVIEW, and then loads an identity matrix.
-void Env::setup_model() {
+void Env::setupModel() {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 }
 
 // Switches mode into GL_PERSPECTIVE, and then loads an identity matrix.
 // The perspective is then arbitrarily set up.
-void Env::setup_persp(float width, float height) {
+// Height and Width are hardcoded for now
+void Env::setupPersp() {
+  double fovy = 70.0, // field of view angle, in deegres, along y direction
+      zNear = .2, zFar = 1000; // clipping plane distance
+
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(70, width / height, .2, 1000.0);
-}
-
-// Sets the action callback which is called once in every iteration. Before the
-// actual rendering.
-void Env::set_action(decltype(m_action_handler) actions) {
-  m_action_handler = actions;
-}
-
-// Sets the onkeydown callback.
-void Env::set_keydown_handler(decltype(m_key_down_handler) onkeydown) {
-  m_key_down_handler = onkeydown;
-}
-
-// Sets the onkeyup callback.
-void Env::set_keyup_handler(decltype(m_key_up_handler) onkeyup) {
-  m_key_up_handler = onkeyup;
-}
-
-// Sets the onwindowevent callback, which is called when the window is exposed
-// again after being covered - usually it is set to the same as
-// m_render_handler.
-void Env::set_winevent_handler(decltype(m_window_event_handler) onwinev) {
-  m_window_event_handler = onwinev;
-}
-
-// Sets the m_render_handler callback, which is called to render the scene.
-void Env::set_render(decltype(m_render_handler) render) {
-  m_render_handler = render;
+  gluPerspective(fovy, m_screenW / m_screenH, zNear, zFar);
 }
 
 // Helper function to draw textured objects
@@ -289,4 +334,6 @@ void Env::textureDrawing(TexID texbind, std::function<void()> callback,
   // disable texturing
   glDisable(GL_TEXTURE_2D);
 }
+
+void Env::translate(float x, float y, float z) { glTranslatef(x, y, z); }
 }

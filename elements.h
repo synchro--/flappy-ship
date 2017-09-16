@@ -65,9 +65,8 @@ public:
   inline decltype(m_radius) radius(){return m_radius};
 }
 
-// get singleton instance of floor
-Floor *
-get_sky(const char *filename);
+// get singleton instance of sky
+Sky *get_sky(const char *filename);
 
 /*
  TODO class RING coming soon
@@ -98,10 +97,11 @@ get_sky(const char *filename);
 
 class Spaceship {
 private:
-  agl::Env &m_env;
-  agl::TexID m_tex;
-  agl::Mesh m_mesh; // mesh structure for the Aventador Spaceship
-  // angles, grip and friction
+  // position
+  float m_px, m_py, m_pz, m_facing, m_angle, m_view_alpha, m_view_beta;
+  // speed and movements
+  float m_speedX, m_speedY, m_speedZ, m_steering_speed, m_backsteering_speed,
+      m_grip, m_frictionX, m_frictionY, m_frictionZ;
 
   // state
   bool m_state[5];
@@ -109,24 +109,46 @@ private:
   // commands will be stored in a queue and processed with callbacks
   std::queue<spaceship::Command> m_cmds;
 
+  agl::Env &m_env;
+  agl::TexID m_tex;
+  agl::Mesh m_mesh; // mesh structure for the Aventador Spaceship
+  // angles, grip and friction
+
   // private constructor to ensure singleton instance
   // instance is obtained through get_spaceship()
   Spaceship(const char *texture_filename, const char *mesh_filename);
 
   // internal logic and physics of the spaceship
 
-  bool updateNeeded();
+  bool draw(bool wireFrame_on = false, bool headlight_on = false) const;
   bool doMotion();
+  void processCommand();
+  void shadow();
+
+  bool updateNeeded();
+  bool updatePhysics();
+  bool updateSteering();
+  bool updatePosition();
 
 public:
   friend Spaceship *get_spaceship(const char *texture_filename,
                                   const char *mesh_filename);
 
+  inline float angle() const { return m_angle; }
+  inline float x() const { return m_px; }
+  inline float y() const { return m_py; }
+  inline float z() const { return m_pz; }
+  inline float facing() const { return m_facing; }
+
   // APIs to interact with the spaceship
-  void processCommand();
+  void drawHeadlight(float x, float y, float z, int lightN);
+  bool execute();
   void sendCommand(spaceship::Motion motion, bool on_off);
+  void setScale(float x, float y, float z);
   // render the Spaceship: TexID + Mesh
-  void render();
+  void render(bool wireFrame_on = false, bool headlight_on = false) const;
+  // rotate the view around the ship, to be used only on CAMERA_MOUSE mode
+  void rotateView();
 }
 };
 

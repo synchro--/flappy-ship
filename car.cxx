@@ -20,6 +20,7 @@ void Controller::Joy(int keymap, bool pressed_or_released) {
 }
 
 // Funzione che prepara tutto per usare un env map
+// CONFRONTARE CON QUELLE CHE USO IO PER LE TEXTURE
 void SetupEnvmapTexture() {
   // facciamo binding con la texture 1
   glBindTexture(GL_TEXTURE_2D, 1);
@@ -115,9 +116,6 @@ void Car::DoStep() {
   py += vy;
   pz += vz;
 }
-
-// void drawCube(); // questa e' definita altrove (quick hack)
-void drawAxis(); // anche questa
 
 void drawPista() {
   mat_scope([](void) {
@@ -331,62 +329,63 @@ void Car::Shadow() const {
   glEnable(GL_LIGHTING);
 }
 
+// già fatto prenderlo così come per la ship
 // setto la posizione della camera
 void Car::setCamera() {
   double angle = this->facing;
   double cosf = cos(angle * M_PI / 180.0);
   double sinf = sin(angle * M_PI / 180.0);
-  double camd, camh, ex, ey, ez, cx, cy, cz;
+  double cam_d, cam_h, eye_x, eye_y, eye_z, cen_x, cen_y, cen_z;
   double cosff, sinff;
 
   // controllo la posizione della camera a seconda dell'opzione selezionata
-  switch (this->cameraType) {
+  switch (m_camera_type) {
   case CAMERA_BACK_CAR:
-    camd = 2.5;
-    camh = 1.0;
-    ex = px + camd * sinf;
-    ey = py + camh;
-    ez = pz + camd * cosf;
-    cx = px - camd * sinf;
-    cy = py + camh;
-    cz = pz - camd * cosf;
-    gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
+    cam_d = 2.5;
+    cam_h = 1.0;
+    eye_x = px + cam_d * sinf;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosf;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    gluLookAt(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
     break;
   case CAMERA_TOP_FIXED:
-    camd = 0.5;
-    camh = 0.55;
+    cam_d = 0.5;
+    cam_h = 0.55;
     angle = facing + 40.0;
     cosff = cos(angle * M_PI / 180.0);
     sinff = sin(angle * M_PI / 180.0);
-    ex = px + camd * sinff;
-    ey = py + camh;
-    ez = pz + camd * cosff;
-    cx = px - camd * sinf;
-    cy = py + camh;
-    cz = pz - camd * cosf;
-    gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
+    eye_x = px + cam_d * sinff;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosff;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    gluLookAt(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
     break;
   case CAMERA_TOP_CAR:
-    camd = 2.5;
-    camh = 1.0;
-    ex = px + camd * sinf;
-    ey = py + camh;
-    ez = pz + camd * cosf;
-    cx = px - camd * sinf;
-    cy = py + camh;
-    cz = pz - camd * cosf;
-    gluLookAt(ex, ey + 5, ez, cx, cy, cz, 0.0, 1.0, 0.0);
+    cam_d = 2.5;
+    cam_h = 1.0;
+    eye_x = px + cam_d * sinf;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosf;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    gluLookAt(eye_x, eye_y + 5, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
     break;
   case CAMERA_PILOT:
-    camd = 0.2;
-    camh = 0.55;
-    ex = px + camd * sinf;
-    ey = py + camh;
-    ez = pz + camd * cosf;
-    cx = px - camd * sinf;
-    cy = py + camh;
-    cz = pz - camd * cosf;
-    gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
+    cam_d = 0.2;
+    cam_h = 0.55;
+    eye_x = px + cam_d * sinf;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosf;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    gluLookAt(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
     break;
   case CAMERA_MOUSE:
     glTranslatef(0, 0, -eyeDist);
@@ -394,14 +393,29 @@ void Car::setCamera() {
     glRotatef(view_alpha, 0, 1, 0);
     /*
     printf("%f %f %f\n",view_alpha,view_beta,eyeDist);
-                    ex=eyeDist*cos(view_alpha)*sin(view_beta);
-                    ey=eyeDist*sin(view_alpha)*sin(view_beta);
-                    ez=eyeDist*cos(view_beta);
-                    cx = px - camd*sinf;
-                    cy = py + camh;
-                    cz = pz - camd*cosf;
-                    gluLookAt(ex,ey,ez,cx,cy,cz,0.0,1.0,0.0);
+                    eye_x=eyeDist*cos(view_alpha)*sin(view_beta);
+                    eye_y=eyeDist*sin(view_alpha)*sin(view_beta);
+                    eye_z=eyeDist*cos(view_beta);
+                    cen_x = px - cam_d*sinf;
+                    cen_y = py + cam_h;
+                    cen_z = pz - cam_d*cosf;
+                    gluLookAt(eye_x,eye_y,eye_z,cen_x,cen_y,cen_z,0.0,1.0,0.0);
     */
     break;
   }
+}
+
+// Sets up the camera according to the ship's position.
+void Game::setup_camera() {
+  double cam_d = 2.9, cam_h = 1.0;
+
+  double cos_angle = cos(m_ship->angle() * M_PI / 180.0),
+         sin_angle = sin(m_ship->angle() * M_PI / 180.0);
+
+  double eye_x = m_ship->x() + cam_d * sin_angle, eye_y = m_ship->y() + cam_h,
+         eye_z = m_ship->z() + cam_d * cos_angle,
+         c_x = m_ship->x() - cam_d * sin_angle, c_y = m_ship->y() + cam_h,
+         c_z = m_ship->z() - cam_d * cos_angle;
+
+  m_ctx.set_camera(eye_x, eye_y, eye_z, c_x, c_y, c_z);
 }

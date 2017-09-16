@@ -59,7 +59,6 @@ Floor *get_sky(const char *texture_filename) {
   return s_sky.get();
 }
 
-<<<<<<< HEAD
 /*
 *  Starring: Spaceship class.
 */
@@ -68,7 +67,10 @@ using namespace spaceship;
 
 Spaceship::Spaceship(const char *texture_filename,
                      const char *mesh_filename) // da finire
-    : m_tex(0),                                 // no texture for now
+    : m_px(), m_view_alpha(20), m_view_beta(40),
+      m_angle()
+
+          m_tex(0), // no texture for now
       m_env(agl::get_env), m_mesh(agl::loadMesh(mesh_filename)), // TODO
       m_cmds(new std::queue<Command>) {}                         // empty cons
 
@@ -90,7 +92,7 @@ void Spaceship::processCommand() {
 }
 
 void sendCommand(Motion motion, bool on_off) {
-  if (motion > spaceship::num_actions) {
+  if (motion >= Motion::N_MOTIONS) {
     lg::panic(__func__, "Command not recognized!!");
   }
 
@@ -111,6 +113,14 @@ void Spaceship::draw() {
 }
 
 void Spaceship::render() {}
+
+void Spaceship::rotateView() {
+  Vec3 axisX = Vec3(1, 0, 0);
+  Vec3 axisY = Vec3(0, 1, 0);
+
+  m_env.rotate(m_view_beta, axisX);
+  m_env.rotate(m_view_alpha, axisY);
+}
 
 Spaceship *get_spaceship(const char *texture_filename,
                          const char *mesh_filename) {

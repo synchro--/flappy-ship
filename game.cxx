@@ -1,1 +1,230 @@
 #include "game.h"
+
+namespace game {
+
+Game::Game(int gameID)
+    : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACk_CAR),
+      m_start_time(0.0), m_deadline_time(0.0), m_last_time(.0),
+      m_env(agl::getEnv()), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
+
+/*
+* Init the game:
+* 1. Obtain main window from the environment
+* 2. Load textures and mesh
+*/
+void Game::init() {
+  m_main_win = m_env.getWindow(0, 0, 800, 600);
+  m_main_win->show();
+
+  m_ssh = elements::get_spaceship("envmap_flipped.jpg", "Envos.obj");
+  m_floor = elements::get_floor("nrm.tga");
+  m_sky = elements::get_sky("sky_ok.jpg");
+}
+
+void Game::gameAction() {}
+
+void Game::gameOnKey(Key key, bool pressed) {
+  using spaceship::Motion;
+  Motion mt;
+  bool game_triggered = false;
+
+  switch (key) {
+  case Key::W:
+    mt = spaceship::Motion::THROTTLE;
+    game_triggered = true;
+
+  case Key::A:
+    mt = spaceship::Motion::STEER_L;
+    game_triggered = true;
+
+  case Key::S:
+    mt = spaceship::Motion::BRAKE;
+    game_triggered = true;
+
+  case Key::D:
+    mt = spaceship::Motion::STEER_R;
+    game_triggered = true;
+
+  case Key::ESC:
+    if (pressed) {
+      change_state(State::MENU);
+    }
+
+  // environment change handlers!
+  // Only on key down
+  case Key::F1:
+    if (pressed) {
+      change_camera_type();
+    }
+
+  case Key::F2:
+    if (pressed) {
+      m_env.toggle_wireframe();
+    }
+
+  case Key::F3:
+    if (pressed) {
+      m_env.toggle_envmap();
+    }
+
+  case Key::F4:
+    if (pressed) {
+      m_env.toggle_headlight();
+    }
+
+  case Key::F5:
+    if (pressed) {
+      m_env.toggle_shadow();
+    }
+
+  default:
+    break;
+  }
+
+  if (game_triggered) {
+    if (m_start_time = -1.0) {
+      m_start_time = m_last_time = m_env.getTicks();
+    }
+  }
+
+  m_ship->sendCommand(mt, pressed);
+}
+
+/* Esegue il Rendering della scena */
+void Game::gameRender() {
+
+  m_env.lineWidth(3);
+  // settiamo il viewport
+  // glViewport(0, 0, scrW, scrH); //-- DENTRO WINDOW
+  m_main_win->setupViewport();
+
+  m_env.clearBuffer();
+
+  m_env.setup_persp();
+  m_env.setup_model();
+
+  setupShipCamera();
+
+  m_floor->render();
+  m_sky->render();
+  m_ssh->render(m_env.isWireframe(), m_env.isHeadlight());
+
+  // m_env.setCoordToPixel(); //serve??
+
+  // attendiamo la fine della rasterizzazione di
+  // tutte le primitive mandate
+  // DA METTERE DENTRO WINDOW!!!!! <---------
+
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_LIGHTING);
+
+  // disegnamo i fps (frame x sec) come una barra a sinistra.
+  // (vuota = 0 fps, piena = 100 fps)
+
+  // questa è una funzione di env
+
+  // fa parte del HUD
+  /*
+  glBegin(GL_QUADS);
+  float y = m_screenH * m_fps / 100;
+  float ramp = m_fps / 100;
+  glColor3f(1 - ramp, 0, ramp);
+  glVertex2d(10, 0);
+  glVertex2d(10, y);
+  glVertex2d(0, y);
+  glVertex2d(0, 0);
+  glEnd();
+  */
+
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHTING);
+
+  // m_main_win->refresh();
+  glFinish();
+  // ho finito: buffer di lavoro diventa visibile
+  // Swap buffer and update
+  SDL_GL_SwapWindow(win);
+}
+
+void Game::setupShipCamera() {
+  double angle = m_ssh->facing();
+  double cosf = cos(angle * M_PI / 180.0);
+  double sinf = sin(angle * M_PI / 180.0);
+  double cam_d, cam_h, eye_x, eye_y, eye_z, cen_x, cen_y, cen_z;
+  double cosff, sinff;
+
+  float px = m_ssh->x();
+  float py = m_ssh->y();
+  float pz = m_ssh->z();
+
+  // controllo la posizione della camera a seconda dell'opzione selezionata
+  switch (m_camera_type) {
+
+  case CAMERA_BACK_CAR:
+    cam_d = 2.5;
+    cam_h = 1.0;
+    eye_x = px + cam_d * sinf;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosf;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    break;
+
+  case CAMERA_TOP_FIXED:
+    cam_d = 0.5;
+    cam_h = 0.55;
+    angle = facing + 40.0;
+    cosff = cos(angle * M_PI / 180.0);
+    sinff = sin(angle * M_PI / 180.0);
+    eye_x = px + cam_d * sinff;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosff;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    break;
+
+  case CAMERA_TOP_CAR:
+    cam_d = 2.5;
+    cam_h = 1.0;
+    eye_x = px + cam_d * sinf;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosf;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    break;
+
+  case CAMERA_PILOT:
+    cam_d = 0.2;
+    cam_h = 0.55;
+    eye_x = px + cam_d * sinf;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosf;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    break;
+
+  case CAMERA_MOUSE:
+    m_env.translate(0, 0, -(m_env.eyeDist()));
+    m_ssh->rotateView();
+    /*
+    lg::i("%f %f %f\n",view_alpha,view_beta,eyeDist);
+                    eye_x=eyeDist*cos(view_alpha)*sin(view_beta);
+                    eye_y=eyeDist*sin(view_alpha)*sin(view_beta);
+                    eye_z=eyeDist*cos(view_beta);
+                    cen_x = px - cam_d*sinf;
+                    cen_y = py + cam_h;
+                    cen_z = pz - cam_d*cosf;
+                    gluLookAt(eye_x,eye_y,eye_z,cen_x,cen_y,cen_z,0.0,1.0,0.0);
+    */
+    break;
+  }
+}
+}
