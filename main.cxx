@@ -13,14 +13,7 @@
 using namespace game;
 
 int main(int argc, char *argv[]) {
-  SDL_Window *win;
-  SDL_GLEnv mainEnv;
-  Uint32 windowID;
   SDL_Joystick *joystick;
-  static int keymap[Controller::NKEYS] = {SDLK_a, SDLK_d, SDLK_w, SDLK_s};
-
-  Car car; // our SpaceShip!
-  Game gs; // current state of the game!
 
   // temporary
   int fpsNow = car.fpsNow;
@@ -37,28 +30,7 @@ int main(int argc, char *argv[]) {
   int cameraType = car.cameraType;
   Uint32 timeLastInterval = car.timeLastInterval;
 
-  // facciamo una finestra di scrW x scrH pixels
-  win = SDL_CreateWindow(argv[0], 0, 0, scrW, scrH,
-                         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-
-  // Create our opengl Env and attach it to our window
-  mainEnv = SDL_GL_CreateContext(win);
-
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  glEnable(GL_NORMALIZE); // opengl, per favore, rinormalizza le normali
-                          // prima di usarle
-
-  // glEnable(GL_CULL_FACE);
-  glFrontFace(GL_CW); // consideriamo Front Facing le facce ClockWise
-  glEnable(GL_COLOR_MATERIAL);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glEnable(GL_POLYGON_OFFSET_FILL);
-
-  // Sposta i frammenti generati dalla rasterizzazione dei poligoni
-  // indietro di 1
-  glPolygonOffset(1, 1);
+  // facciamo
 
   // main event loop
   // in un metodo della classe Env

@@ -123,6 +123,11 @@ void Env::clearBuffer() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x, size_t y, 
+size_t w, size_t h) {
+  return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h); 
+}
+
 void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
 
   textureDrawing(texbind,
@@ -354,4 +359,9 @@ void Env::textureDrawing(TexID texbind, std::function<void()> callback,
 }
 
 void Env::translate(float x, float y, float z) { glTranslatef(x, y, z); }
+
+void Env::mainLoop() {
+  
+  
+ }
 }

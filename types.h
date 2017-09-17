@@ -22,11 +22,18 @@ const agl::Color YELLOW = {.913f, .643f, .074f};
 #define CAMERA_MOUSE 4
 #define CAMERA_TYPE_MAX 5
 
+namespace agl {
+  static const int PHYS_SAMPLING_STEP = 10; // millisec of a Physics simulated step
+  static const int FPS_SAMPLE = 3000U; // interval length
+}
+
+
 namespace game {
-static const int PHYS_SAMPLING_STEP =
-    10;                             // millisec of a Physics simulated step
-static const int FPS_SAMPLE = 3000; // interval length
-enum State { MENU, GAME, SETTINGS, RANKING };
+
+static const double RING_TIME = 5.0; 
+static const double BONUS_TIME = 4.0; 
+
+enum State { SPLASH, MENU, GAME, SETTINGS, END };
 enum Key {
   W,
   A,

@@ -2,7 +2,7 @@
 
 namespace game {
 
-Game::Game(int gameID)
+Game::Game(std::string gameID)
     : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACk_CAR),
       m_start_time(0.0), m_deadline_time(0.0), m_last_time(.0),
       m_env(agl::getEnv()), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
@@ -13,7 +13,8 @@ Game::Game(int gameID)
 * 2. Load textures and mesh
 */
 void Game::init() {
-  m_main_win = m_env.getWindow(0, 0, 800, 600);
+  set_state(game::Splash); 
+  m_main_win = m_env.getWindow("main", 0, 0, 800, 600);
   m_main_win->show();
 
   m_ssh = elements::get_spaceship("envmap_flipped.jpg", "Envos.obj");
@@ -21,7 +22,28 @@ void Game::init() {
   m_sky = elements::get_sky("sky_ok.jpg");
 }
 
-void Game::gameAction() {}
+void Game::gameAction() {
+  // Azioni del gioco: 
+  // passano i secondi --> i frame sono da far mostrare ad Env  
+  bool done_smth = ship->execute(); 
+  if(done_smth) {
+    time_now = m_env.GetTicks(); 
+    m_deadline_time -= time_now - m_last_time;  
+  }
+  
+  if(m_deadline_time)
+  
+  // check se gli anelli sono stati attraversati 
+  // spawn nuovo anello + bonus time || crea porta finale (time diventa rosso)
+  bool ring_crossed = true;
+  if(ring_crossed) {
+    m_deadline_time+= game::BONUS_TIME; 
+  }
+  
+  
+  //richiamo a invocare di nuovo questa funzione 
+  
+}
 
 void Game::gameOnKey(Key key, bool pressed) {
   using spaceship::Motion;
@@ -84,6 +106,7 @@ void Game::gameOnKey(Key key, bool pressed) {
   if (game_triggered) {
     if (m_start_time = -1.0) {
       m_start_time = m_last_time = m_env.getTicks();
+      m_deadline_time = game::RING_TIME;
     }
   }
 
@@ -139,11 +162,7 @@ void Game::gameRender() {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
 
-  // m_main_win->refresh();
-  glFinish();
-  // ho finito: buffer di lavoro diventa visibile
-  // Swap buffer and update
-  SDL_GL_SwapWindow(win);
+  m_main_win->refresh();
 }
 
 void Game::setupShipCamera() {
@@ -227,4 +246,36 @@ void Game::setupShipCamera() {
     break;
   }
 }
+}
+
+void Geme::change_state(game::State state) {
+  
+  if(state == m_state) return; 
+  
+  if(m_state == State::Game && state == State::Splash) {
+    lg::e("Can't go back to Splash while playing!"); 
+    return; 
+  }
+  
+  if(m_state == State::Splash && state == State::END) {
+    lg::e("Can't go from Splash screen directly to the end. You can't skip to the conclusion.."); 
+  } 
+  
+  //dalla fine al menu pure non si può fare, da aggiungere
+  
+  //change state and callback functions 
+  if(state == State::MENU) {
+  //  m_env.set_render = gameMenuRender(); 
+  //  m_env.set_keydown_handler = gameMenuKeyHandler();
+  //  m_env.set_winevent_handler = gameWindowRender();
+  }
+  
+  if(state == State::Game) {
+    m_env.set_render = gameRender(); 
+    m_env.set_keydown_handler = gameOnKey(); 
+    m_
+  }
+  
+  //finally change state 
+  m_state = state; 
 }
