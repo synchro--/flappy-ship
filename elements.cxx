@@ -36,12 +36,12 @@ Sky::Sky(const char *texture_filename)
     : m_radius(100.0f), m_lats(20.0f), m_longs(20.0f), m_env(agl::get_env()),
       m_tex(m_env.loadTexture(texture_filename, false)) {}
 
-void Sky::render {
+void Sky::render() {
   lg::i(__func__, "Rendering Sky...");
   m_env.drawSky(m_tex, m_radius, m_lats, m_longs);
 }
 
-void set_params(double radius, int lats, int longs) {
+void Sky::set_params(double radius, int lats, int longs) {
   m_radius = radius;
   m_lats = lats;
   m_longs = longs;
@@ -66,8 +66,8 @@ Floor *get_sky(const char *texture_filename) {
 using namespace spaceship;
 
 // get Singleton
-Spaceship *get_spaceship(const char *texture_filename,
-                         const char *mesh_filename) {
+std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
+                                         const char *mesh_filename) {
   const static auto TAG = __func__;
   lg::i(TAG, "Loading Spaceship --> texture: %s Mesh: %s", texture_filename,
         mesh_filename);
@@ -77,7 +77,7 @@ Spaceship *get_spaceship(const char *texture_filename,
     s_Spaceship.reset(new Spaceship(texture_filename, mesh_filename)); // Init
   }
 
-  return s_Spaceship.get();
+  return s_Spaceship;
 }
 
 Spaceship::Spaceship(const char *texture_filename,

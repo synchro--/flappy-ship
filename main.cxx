@@ -10,29 +10,18 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-using namespace game;
+int main(int argc, char **argv) {
 
-int main(int argc, char *argv[]) {
-  SDL_Joystick *joystick;
-
-#include "game.h"
-#include "log.h"
-
-#include <cstdlib>
-#include <iostream>
-
-  int main(int argc, char **argv) {
-
-    if (argc != 2) {
-      lg::e("Usage: ./game <player_name>");
-      return EXIT_FAILURE;
-    }
-    lg::set_level(lg::Level::INFO);
-
-    std::string name(argv[1]);
-    game::Game game(name);
-    game.run();
-
-    // praying god everything's run ok
-    return EXIT_SUCCESS;
+  if (argc != 2) {
+    lg::e("Usage: ./game <player_name>");
+    return EXIT_FAILURE;
   }
+  lg::set_level(lg::Level::INFO);
+
+  std::string name(argv[1]);
+  game::Game game(name);
+  game.run();
+
+  // praying god everything's run ok
+  return EXIT_SUCCESS;
+}

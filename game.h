@@ -19,7 +19,7 @@ private:
   bool m_restart_game;
   int m_camera_type;
   double m_deadline_time; // fps currently drawn
-  Uint32_t m_last_time;
+  uint32_t m_last_time;
 
   agl::Env &m_env;
   std::unique_ptr<elements::Floor> m_floor;
@@ -40,7 +40,6 @@ private:
   }
 
 public:
-  void init();
   Game(std::string gameID); // constructor
 };
 }

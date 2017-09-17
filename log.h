@@ -53,4 +53,4 @@ void e(const char *tag, const char *fmt, ...);
 void panic(const char *tag, const char *fmt, ...);
 }
 
-#endif _LOG_H__
+#endif //_LOG_H__

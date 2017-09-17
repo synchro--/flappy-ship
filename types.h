@@ -80,9 +80,10 @@ const std::string motion_to_str(Motion m) {
   case Motion::STEER_L:
     return "LEFT STEERING";
 
-  case Motion::BRAKE return "BRAKE";
+  case Motion::BRAKE:
+    return "BRAKE";
 
-      default:
+  default:
     // shouldn't arrive here
     lg::panic(__func__, "!! Motion not recognized !!");
   }

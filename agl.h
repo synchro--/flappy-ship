@@ -97,10 +97,10 @@ struct Normal3 : public Vec3 {
 };
 
 struct Vertex {
-  Vec3 point;
+  Point3 point;
   Normal3 normal;
 
-  Vertex(const Vec3 &v = Vec3());
+  Vertex(const Point3 &v = Point3());
 
   void render(bool send_normal = false) const;
 };
@@ -198,7 +198,7 @@ private:
   */
   std::function<void()> m_action_handler, m_render_handler,
       m_window_event_handler;
-  std::function<void(Key)> m_key_up_handler, m_key_down_handler;
+  std::function<void(game::Key)> m_key_up_handler, m_key_down_handler;
 
 public:
   // Friends can touch your private parts.
@@ -301,4 +301,4 @@ public:
   SmartWindow(std::string &name, size_t x, size_t y, size_t w, size_t h);
 }
 
-#endif
+#endif // AGL_H_

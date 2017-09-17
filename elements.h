@@ -134,8 +134,8 @@ private:
   bool updatePosition();*/
 
 public:
-  friend Spaceship *get_spaceship(const char *texture_filename,
-                                  const char *mesh_filename);
+  friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
+                                                  const char *mesh_filename);
 
   inline float angle() const { return m_angle; }
   inline float x() const { return m_px; }
