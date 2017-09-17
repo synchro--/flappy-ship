@@ -11,7 +11,7 @@ Floor::Floor(const char *texture_filename)
       // repat = true, linear interpolation
       m_tex(m_env.loadTexture(texture_filename, true)) {}
 
-void Floor::render {
+void Floor::render() {
   lg::i(__func__, "Rendering floor...");
   m_env.drawFloor(m_tex, m_size, m_height, 150);
 }
@@ -65,14 +65,55 @@ Floor *get_sky(const char *texture_filename) {
 
 using namespace spaceship;
 
+// get Singleton
+Spaceship *get_spaceship(const char *texture_filename,
+                         const char *mesh_filename) {
+  const static auto TAG = __func__;
+  lg::i(TAG, "Loading Spaceship --> texture: %s Mesh: %s", texture_filename,
+        mesh_filename);
+
+  static std::unique_ptr<Sky> s_Spaceship(nullptr);
+  if (!s_sky) {
+    s_Spaceship.reset(new Spaceship(texture_filename, mesh_filename)); // Init
+  }
+
+  return s_Spaceship.get();
+}
+
 Spaceship::Spaceship(const char *texture_filename,
                      const char *mesh_filename) // da finire
-    : m_px(), m_view_alpha(20), m_view_beta(40),
-      m_angle()
-
-          m_tex(0), // no texture for now
+    : m_tex(0),                                 // no texture for now
       m_env(agl::get_env), m_mesh(agl::loadMesh(mesh_filename)), // TODO
-      m_cmds(new std::queue<Command>) {}                         // empty cons
+{
+  init();
+}
+
+void Spaceship::init() {
+  m_scaleX = m_scaleY = m_scaleZ = 1.0;
+
+  m_px = m_pz = 0;
+  m_py = 1.5; // Spaceship skills™
+
+  m_facing = m_steering = m_angle = 0.0;
+  m_speedX = m_speedY = m_speedZ = 0.0;
+
+  // strong friction on X-axis, if you wanna drift, go buy Need For Speed
+  m_frictionX = 0.9;
+  // no fritcion on Y-axis, we're not gonna fly vertical. For now.
+  m_frictionY = 1.0;
+  // small friction on Z-axis
+  m_frictionZ = 0.991;
+
+  m_steer_speed = 3.4;         // A
+  m_steer_return_speed = 0.93; // B ==> max steering = A*B / (1-B) == 2.4
+
+  m_max_acceleration = 0.0011;
+
+  // reset command queue
+  m_cmds(new std::queue<Command>)
+}
+
+bool get_state(Motion mt) { return m_state[mt]; }
 
 void Spaceship::processCommand() {
   const static auto TAG = __func__;
@@ -91,13 +132,31 @@ void Spaceship::processCommand() {
   }
 }
 
-void sendCommand(Motion motion, bool on_off) {
-  if (motion >= Motion::N_MOTISONS) {
+void Spaceship::sendCommand(Motion motion, bool on_off) {
+  if (motion >= Motion::N_MOTION) {
     lg::panic(__func__, "Command not recognized!!");
   }
 
   // construct and submit a new pair
   m_cmds.emplace_back(motion, on_off);
+}
+
+void Spaceship::setScale(float x, float y, float z) {
+  m_scaleX = x;
+  m_scaleY = y;
+  m_scaleZ = z;
+}
+
+void Spaceship::shadow() const {
+  Color c = Color::SHADOW;
+
+  m_env.setColor(c);
+  m_env.translate(0, 0.01, 0); // avoid z-fighting with the floor(
+  m_env.scale(1.01, 0, 1.01);  // squash on Y, 1% scaling-up on X and Z
+
+  m_env.disableLighting();
+  // renderAllParts
+  m_env.enableLighting();
 }
 
 // draw the ship as a textured mesh, using the helper functions defined
@@ -110,9 +169,54 @@ void Spaceship::draw() {
     m_mesh->render_goraud(m_env.isWireframe());
   });
   //}, true); // generate coords automatically
+
+  // if headlight is on in the Env, then draw headlights
+  if (m_env.isHeadlight()) {
+    drawHeadlight(0, 0, -1, 10);
+  }
 }
 
-void Spaceship::render() {}
+// attiva una luce di openGL per simulare un faro
+void Spaceship::drawHeadlight(float x, float y, float z, int lightN) const {
+
+  int usedLight = GL_LIGHT1 + lightN;
+
+  glEnable(usedLight);
+
+  float col0[4] = {0.8, 0.8, 0.0, 1};
+  glLightfv(usedLight, GL_DIFFUSE, col0);
+
+  float col1[4] = {0.5, 0.5, 0.0, 1};
+  glLightfv(usedLight, GL_AMBIENT, col1);
+
+  float tmpPos[4] = {x, y, z, 1}; // ultima comp=1 => luce posizionale
+  glLightfv(usedLight, GL_POSITION, tmpPos);
+
+  float tmpDir[4] = {0, 0, -1, 0}; // ultima comp=1 => luce posizionale
+  glLightfv(usedLight, GL_SPOT_DIRECTION, tmpDir);
+
+  glLightf(usedLight, GL_SPOT_CUTOFF, 30);
+  glLightf(usedLight, GL_SPOT_EXPONENT, 5);
+
+  glLightf(usedLight, GL_CONSTANT_ATTENUATION, 0);
+  glLightf(usedLight, GL_LINEAR_ATTENUATION, 1);
+}
+
+void Spaceship::render() {
+  m_env.mat_scope([&] {
+    Vec3 viewUP = Vec3(0, 1, 0);
+    Vec3 front = Vec3(0, 0, 1)
+                 // translate the ship according to its coordinates
+                 m_env.translate(m_px, m_py, m_pz);
+    // rotate the ship according to its angle and facing
+    m_env.rotate(m_angle, viewUP);
+    // steering
+
+    m_env(-m_steering, front);
+
+    draw();
+  })
+}
 
 void Spaceship::rotateView() {
   Vec3 axisX = Vec3(1, 0, 0);
@@ -122,17 +226,64 @@ void Spaceship::rotateView() {
   m_env.rotate(m_view_alpha, axisY);
 }
 
-Spaceship *get_spaceship(const char *texture_filename,
-                         const char *mesh_filename) {
-  const static auto TAG = __func__;
-  lg::i(TAG, "Loading Spaceship --> texture: %s Mesh: %s", texture_filename,
-        mesh_filename);
+// DA FARE + MODULARE
+void Spaceship::doMotion() {
 
-  static std::unique_ptr<Sky> s_Spaceship(nullptr);
-  if (!s_sky) {
-    s_Spaceship.reset(new Spaceship(texture_filename, mesh_filename)); // Init
+  // computiamo l'evolversi della macchina
+  float speed_xm, speed_ym, speed_zm; // velocita' in spazio macchina
+
+  // da vel frame mondo a vel frame macchina
+  float cosf = cos(m_facing * M_PI / 180.0);
+  float sinf = sin(m_facing * M_PI / 180.0);
+  speed_xm = +cosf * m_speedX - sinf * m_speedZ;
+  speed_ym = m_speedY;
+  speed_zm = +sinf * m_speedX + cosf * m_speedZ;
+
+  bool left = get_state(Motion::STEER_L);
+  bool right = get_state(Motion::STEER_R);
+
+  if (left ^ right) {
+    int sign = left ? 1 : -1;
+
+    m_steering += sign * m_steer_speed;
+    m_steering *= m_steer_return_speed;
   }
 
-  return s_Spaceship.get();
+  bool throttle = get_state(Motion::THROTTLE);
+  bool brake = get_state(Motion::BRAKE);
+
+  if (throttle ^ brake) {
+    int sign = throttle ? 1 : -1;
+
+    m_speedZ -= sign * m_max_acceleration;
+
+    // Spaceships don't fly backwards
+    m_speedZ = (m_speedZ > 0.05) ? 0 : m_speedZ;
+  }
+
+  speed_xm *= m_frictionX;
+  speed_ym *= m_frictionY;
+  speed_zm *= m_frictionZ;
+
+  // l'orientamento della macchina segue quello dello sterzo
+  // (a seconda della velocita' sulla z)
+  m_facing = m_facing - (speed_zm * m_grip) * m_steering;
+
+  /* // rotazione mozzo ruote (a seconda della velocita' sulla z)
+   float da; // delta angolo
+   da = (360.0 * speed_zm) / (2.0 * M_PI * raggioRuotaA);
+   mozzoA += da;
+   da = (360.0 * speed_zm) / (2.0 * M_PI * raggioRuotaP);
+   mozzoP += da; */
+
+  // ritorno a vel coord mondo
+  m_speedX = +cosf * speed_xm + sinf * speed_zm;
+  m_speedY = speed_ym;
+  m_speedZ = -sinf * speed_xm + cosf * speed_zm;
+
+  // posizione = posizione + velocita * delta t (ma delta t e' costante)
+  m_px += m_speedX;
+  m_py += m_speedY;
+  m_pz += m_speedZ;
 }
 }

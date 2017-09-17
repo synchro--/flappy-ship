@@ -13,6 +13,7 @@ const agl::Color BLACK = {.0f, .0f, .0f, 1.0f};
 const agl::Color RED = {.768f, .109f, .109f};
 const agl::Color GREEN = {.447f, .643f, .074f};
 const agl::Color YELLOW = {.913f, .643f, .074f};
+const agl::Color SHADOW = {.4f, .4f, .4f};
 
 // definitions
 #define CAMERA_BACK_CAR 0

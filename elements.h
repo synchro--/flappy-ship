@@ -36,11 +36,10 @@ public:
   friend Floor *get_floor(const char *filename);
 
   void render();
-}
+};
 
 // get singleton instance of floor
-Floor *
-get_floor(const char *filename);
+Floor *get_floor(const char *filename);
 
 // The Sky. Same mechanism as above
 class Sky {
@@ -51,7 +50,7 @@ private:
   int m_lats, m_longs;
 
   // construct the floor loading the texture
-  Sky(const char *texture_filename, double radius);
+  Sky(const char *texture_filename);
 
 public:
   // friend function to load the texture and create a singleton
@@ -63,7 +62,7 @@ public:
   void set_params(double radius = 100.0, int lats = 20, int longs = 20);
 
   inline decltype(m_radius) radius(){return m_radius};
-}
+};
 
 // get singleton instance of sky
 Sky *get_sky(const char *filename);
@@ -98,10 +97,13 @@ Sky *get_sky(const char *filename);
 class Spaceship {
 private:
   // position
-  float m_px, m_py, m_pz, m_facing, m_angle, m_view_alpha, m_view_beta;
+  float m_px, m_py, m_pz, m_facing, m_angle, m_steering, m_view_alpha,
+      m_view_beta;
   // speed and movements
-  float m_speedX, m_speedY, m_speedZ, m_steering_speed, m_backsteering_speed,
-      m_grip, m_frictionX, m_frictionY, m_frictionZ;
+  float m_speedX, m_speedY, m_speedZ, m_steer_speed, m_steer_return_speed,
+      m_grip, m_frictionX, m_frictionY, m_frictionZ, m_max_acceleration;
+  // shape
+  float m_scaleX, m_scaleY, m_scaleZ;
 
   // state
   bool m_state[5];
@@ -121,14 +123,15 @@ private:
   // internal logic and physics of the spaceship
 
   bool draw(bool wireFrame_on = false, bool headlight_on = false) const;
+  void drawHeadlight(float x, float y, float z, int lightN);
   bool doMotion();
   void processCommand();
   void shadow();
 
-  bool updateNeeded();
+  /*bool updateNeeded();
   bool updatePhysics();
   bool updateSteering();
-  bool updatePosition();
+  bool updatePosition();*/
 
 public:
   friend Spaceship *get_spaceship(const char *texture_filename,
@@ -141,7 +144,6 @@ public:
   inline float facing() const { return m_facing; }
 
   // APIs to interact with the spaceship
-  void drawHeadlight(float x, float y, float z, int lightN);
   bool execute();
   void sendCommand(spaceship::Motion motion, bool on_off);
   void setScale(float x, float y, float z);
@@ -149,7 +151,7 @@ public:
   void render(bool wireFrame_on = false, bool headlight_on = false) const;
   // rotate the view around the ship, to be used only on CAMERA_MOUSE mode
   void rotateView();
-}
 };
+}
 
 #endif //_ELEMENTS_H_

@@ -80,6 +80,7 @@ void Game::gameAction() {
 }
 
 void Game::gameOnKey(Key key, bool pressed) {
+  using namespace spaceship;
   using spaceship::Motion;
   Motion mt;
   bool game_triggered = false;
