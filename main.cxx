@@ -13,7 +13,7 @@
 int main(int argc, char **argv) {
 
   if (argc != 2) {
-    lg::e("Usage: ./game <player_name>");
+    lg::e(__func__, "Usage: ./game <player_name>");
     return EXIT_FAILURE;
   }
   lg::set_level(lg::Level::INFO);

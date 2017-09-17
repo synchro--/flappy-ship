@@ -1,3 +1,4 @@
+
 #include "elements.h"
 
 // Implementation of the objects in elementsh
@@ -47,7 +48,7 @@ void Sky::set_params(double radius, int lats, int longs) {
   m_longs = longs;
 }
 
-Floor *get_sky(const char *texture_filename) {
+Sky *get_sky(const char *texture_filename) {
   const static auto TAG = __func__;
   lg::i(TAG, "Loading Sky texture from %s", texture_filename);
 
@@ -72,8 +73,8 @@ std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
   lg::i(TAG, "Loading Spaceship --> texture: %s Mesh: %s", texture_filename,
         mesh_filename);
 
-  static std::unique_ptr<Sky> s_Spaceship(nullptr);
-  if (!s_sky) {
+  static std::unique_ptr<Spaceship> s_Spaceship(nullptr);
+  if (!s_Spaceship) {
     s_Spaceship.reset(new Spaceship(texture_filename, mesh_filename)); // Init
   }
 

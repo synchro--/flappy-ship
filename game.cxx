@@ -3,9 +3,10 @@
 namespace game {
 
 Game::Game(std::string gameID)
-    : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACk_CAR),
-      m_game_started(false), m_deadline_time(agl::RING_TIME), m_last_time(.0),
-      m_env(agl::getEnv()), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
+    : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACK_CAR),
+      m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0),
+      m_env(agl::get_env()), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) 
+      {}
 
 /*
 * Init the game:
@@ -14,7 +15,8 @@ Game::Game(std::string gameID)
 */
 void Game::init() {
   // changeState(game::Splash);
-  m_main_win = m_env.getWindow("main", 0, 0, 800, 600);
+  std::string win_name = "Main Window";
+  m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
   m_main_win->show();
 
   m_ssh = elements::get_spaceship("envmap_flipped.jpg", "Envos.obj");
@@ -22,18 +24,20 @@ void Game::init() {
   m_sky = elements::get_sky("sky_ok.jpg");
 }
 
-void Geme::changeState(game::State state) {
+void Game::changeState(game::State state) {
+
+  static const auto TAG = __func__; 
 
   if (state == m_state)
     return;
 
-  if (m_state == State::Game && state == State::Splash) {
-    lg::e("Can't go back to Splash while playing!");
+  if (m_state == State::GAME && state == State::SPLASH) {
+    lg::e(TAG, "Can't go back to Splash while playing!");
     return;
   }
 
-  if (m_state == State::Splash && state == State::END) {
-    lg::e("Can't go from Splash screen directly to the end. You can't skip to "
+  if (m_state == State::SPLASH && state == State::END) {
+    lg::e(TAG, "Can't go from Splash screen directly to the end. You can't skip to "
           "the conclusion..");
   }
 
@@ -42,17 +46,17 @@ void Geme::changeState(game::State state) {
   // change state and callback functions
   if (state == State::MENU && m_state == State::GAME) {
     m_state = state;
-    openMenu();
+  //  openMenu();
   }
 
-  if (state == State::Game && m_state == State::MENU) {
+  if (state == State::GAME && m_state == State::MENU) {
     m_state = state;
     playGame();
   }
 
   if (state == State::END && m_state == State::GAME) {
     m_state = state;
-    gameOver();
+   // gameOver();
   }
 
   // shoudln't arrive here
@@ -62,9 +66,9 @@ void Geme::changeState(game::State state) {
 void Game::gameAction() {
   // Azioni del gioco:
   // passano i secondi --> i frame sono da far mostrare ad Env
-  ship->execute();
+  m_ssh->execute();
 
-  auto time_now = m_env.GetTicks();
+  auto time_now = m_env.getTicks();
   m_deadline_time -= time_now - m_last_time;
 
   if (m_deadline_time < 0) { // let's leave a last second hope
@@ -145,21 +149,23 @@ void Game::gameOnKey(Key key, bool pressed) {
     }
   }
 
-  m_ship->sendCommand(mt, pressed);
+  m_ssh->sendCommand(mt, pressed);
 }
 
 /* Esegue il Rendering della scena */
 void Game::gameRender() {
 
-  m_env.lineWidth(3);
+  m_env.lineWidth(3.0);
   // settiamo il viewport
   // glViewport(0, 0, scrW, scrH); //-- DENTRO WINDOW
   m_main_win->setupViewport();
 
   m_env.clearBuffer();
 
-  m_env.setup_persp();
-  m_env.setup_model();
+  m_env.setupPersp();
+  m_env.setupModel();
+  m_env.setupLightPosition();
+  m_env.setupModelLights(); 
 
   setupShipCamera();
 
@@ -173,8 +179,6 @@ void Game::gameRender() {
   // tutte le primitive mandate
   // DA METTERE DENTRO WINDOW!!!!! <---------
 
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_LIGHTING);
 
   // disegnamo i fps (frame x sec) come una barra a sinistra.
   // (vuota = 0 fps, piena = 100 fps)
@@ -194,8 +198,7 @@ void Game::gameRender() {
   glEnd();
   */
 
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_LIGHTING);
+  m_env.enableLighting(); 
 
   m_main_win->refresh();
 }
@@ -215,8 +218,8 @@ void Game::playGame() {
   m_env.set_render(std::bind(&Game::gameRender, this));
   m_env.set_action(std::bind(&Game::gameAction, this));
 
-  m_env.set_keydown_handler(std::bind(&Game::gameOnKey(_1, true), this));
-  m_env.set_keyup_handler(std::bind(&Game::gameOnKey(_1, false), this));
+  m_env.set_keydown_handler(std::bind(&Game::gameOnKey, this, _1, true));
+  m_env.set_keyup_handler(std::bind(&Game::gameOnKey, this, _1, false));
 }
 
 /*
@@ -260,7 +263,7 @@ void Game::setupShipCamera() {
   case CAMERA_TOP_FIXED:
     cam_d = 0.5;
     cam_h = 0.55;
-    angle = facing + 40.0;
+    angle = m_ssh->facing() + 40.0;
     cosff = cos(angle * M_PI / 180.0);
     sinff = sin(angle * M_PI / 180.0);
     eye_x = px + cam_d * sinff;

@@ -1,17 +1,3 @@
-#include <GL/gl.h>
-#include <cmath>
-#include <stdio.h>
-#include <string.h>
-#include <vector>
-
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-#include <string>
-
-#include <cstdio>
-#include <cstring>
-
 #include "agl.h"
 
 /*
@@ -20,23 +6,23 @@
 
 namespace agl {
 // Face constructor, compute the normal of the face too
-Mesh::Face::Face(Vertex *v1, Vertex *v2, Vertex *v3) : verts{{v1, v2, v3}} {
+Face::Face(Vertex *v1, Vertex *v2, Vertex *v3) : verts{v1, v2, v3} {
   computeNormal();
 }
 
 // Computo normali per vertice
 // (come media rinormalizzata delle normali delle facce adjacenti)
-void Mesh::ComputeNormalsPerVertex() {
+void Mesh::computeNormalsPerVertex() {
   // uso solo le strutture di navigazione FV (da Faccia a Vertice)!
 
   // fase uno: ciclo sui vertici, azzero tutte le normali
-  for (auto &vertex: m_verts {
+  for (auto &vertex: m_verts) {
     vertex.normal = Normal3();
   }
 
   // fase due: ciclo sulle facce: accumulo le normali di F nei 3 V
   // corrispondenti
-  for (auto &face : m_faces {
+  for (auto &face : m_faces) {
     for (auto vertex : f.verts) {
       vertex->normal += face.normal;
     }
@@ -110,6 +96,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
         vert->render(send_normals);
       }
     }
+  }
     /*
           for (int i = 0; i < f.size(); i++) {
             (f[i].v[0])->n.getAsNormal();

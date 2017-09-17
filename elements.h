@@ -1,9 +1,11 @@
 #ifndef _ELEMENTS_H_
 #define _ELEMENTS_H_
 
+#include "types.h"
+
+
 #include "agl.h"
 #include "log.h"
-#include "types.h"
 
 /*
 * elementsh describes the different objects (elements) of the game
@@ -61,7 +63,7 @@ public:
   // accessors
   void set_params(double radius = 100.0, int lats = 20, int longs = 20);
 
-  inline decltype(m_radius) radius(){return m_radius};
+  inline decltype(m_radius) radius(){ return m_radius; }
 };
 
 // get singleton instance of sky
@@ -152,6 +154,9 @@ public:
   // rotate the view around the ship, to be used only on CAMERA_MOUSE mode
   void rotateView();
 };
+
+std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
+                                                  const char *mesh_filename);
 }
 
 #endif //_ELEMENTS_H_

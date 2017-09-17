@@ -12,7 +12,7 @@ namespace agl {
 Point3::Point3(float x, float y, float z) : x(x), y(y), z(z) {}
 
 // empty constructor:
-Point3::Point3() : x(0), y(0), z(0) {}
+//Point3::Point3() : x(0), y(0), z(0) {}
 
 // restituisce il modulo
 float Point3::modulo() const { return sqrt(x * x + y * y + z * z); }
@@ -53,7 +53,7 @@ void Normal3::render() const {
 }
 
 // Vertex constructor, initialize both its "views"
-Vertex::Vertex(const Vec3 &v) : point(v), normal(0, 0, 0) {}
+Vertex::Vertex(const Point3 &p) : point(p), normal(0, 0, 0) {}
 
 // if send_normal true, renders also the normal, otherwise only vertices
 void Vertex::render(bool send_normal) const {

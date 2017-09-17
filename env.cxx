@@ -46,11 +46,13 @@ Env::Env()
   enableZbuffer(16);
   enableDoubleBuffering();
 
-  logs::i(TAG, "SDL and OpenGL Init: done");
+  lg::i(TAG, "SDL and OpenGL Init: done");
 }
 
 // quit gracefully
 Env::~Env() {
+  const static auto TAG = __func__; 
+
   lg::i(TAG, "Quit...");
 
   TTF_Quit();
@@ -91,17 +93,18 @@ void Env::enableZbuffer(int depth) {
 }
 
 void Env::enableDoubleBuffering() {
-  lg::i(__func__, "Enabling double-buffer")
-      SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  lg::i(__func__, "Enabling double-buffer"); 
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 }
 
-// enables joystick
+/* enables joystick
 void Env::enableJoystick() {
   lg::i(__func__, "### Joystick is Enabled ###");
 
   SDL_JoystickEventState(SDL_ENABLE);
   joystick = SDL_JoystickOpen(0);
 }
+*/ 
 
 void Env::mat_scope(const std::function<void(void)> callback) {
   glPushMatrix();
@@ -116,16 +119,15 @@ void setColor(const Color &color) {
 }
 
 void Env::clearBuffer() {
-  Color c = Color::WHITE;
   // colore sfondo = bianco
-  glClearColor(c.r, c.g, c.b, c.a);
+  glClearColor(WHITE.r, WHITE.g, WHITE.b, WHITE.a);
   // riempe tutto lo screen buffer di pixel color sfondo
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x,
                                                size_t y, size_t w, size_t h) {
-  return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h);
+  return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h));
 }
 
 void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
@@ -150,7 +152,7 @@ void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
                    glEnd();
 
                  },
-                 false)
+                 false);
 }
 
 // hint: should be 100.0 20.0 20.0 --> see Sky constructor
@@ -190,7 +192,7 @@ void Env::drawSky(TexID texbind, double radius, int lats, int longs) {
                    }
 
                  },
-                 true)
+                 true);
 }
 
 void Env::drawSphere(double radius, int lats, int longs) {
@@ -220,6 +222,11 @@ void Env::drawSphere(double radius, int lats, int longs) {
   }
 }
 
+
+void Env::lineWidth(float width) {
+  glLineWidth(width); 
+}
+
 // Load texture from image file.
 // repeat == true --> GL_REPEAT for s and t coordinates
 // nearest == true --> apply neareast neighbour interpolation
@@ -230,7 +237,7 @@ void Env::drawSphere(double radius, int lats, int longs) {
 * because of the pixelated look.
 */
 
-Env::TexID Env::loadTexture(const char *filename, bool repeat, bool nearest) {
+TexID Env::loadTexture(const char *filename, bool repeat, bool nearest) {
 
   lg::i(__func__, "Loading texture from file %s", filename);
 
@@ -272,10 +279,10 @@ void Env::redraw() {
 // 1. Compute FPS
 // 2. Calls rendering callback
 void Env::render() {
-  auto time_now = m_env.getTicks();
+  auto time_now = getTicks();
 
   if (m_last_time + FPS_SAMPLE < time_now) {
-    m_fps = 1000.0 * ((double)m_fps_now) / (time_now - m_time_last_interval);
+    m_fps = 1000.0 * ((double)m_fps_now) / (time_now - m_last_time);
     m_fps_now = 0;
     m_last_time = time_now;
   } else {
@@ -292,10 +299,12 @@ void Env::rotate(float angle, const Vec3 &axis) {
 
 void Env::scale(float x, float y, float z) { glScalef(x, y, z); }
 
-void Env::set_camera(double eye_x, double eye_y, double eye_z, double aim_x,
-                     double aim_y, double aim_z) {
+void Env::setCamera(double eye_x, double eye_y, double eye_z, double aim_x,
+                     double aim_y, double aim_z, 
+                     double upX, double upY, double upZ) {
   // up vector looking at the sky (0,+y,0)
-  gluLookAt(eye_x, eye_y, eye_z, aim_x, aim_y, aim_z, 0, 1, 0);
+  gluLookAt(eye_x, eye_y, eye_z, aim_x, aim_y, aim_z, 
+    upX, upY, upZ);
 }
 
 // setta le matrici di trasformazione in modo
@@ -361,7 +370,7 @@ void Env::textureDrawing(TexID texbind, std::function<void()> callback,
   glTexGeni(GL_S, GL_TEXTURE_GEN_MODE,
             m_envmap ? GL_SPHERE_MAP : GL_OBJECT_LINEAR); // EnvMap
   glTexGeni(GL_T, GL_TEXTURE_GEN_MODE,
-            envmap ? GL_SPHERE_MAP : GL_OBJECT_LINEAR);
+            m_envmap ? GL_SPHERE_MAP : GL_OBJECT_LINEAR);
 
   //--- call the callback drawing function --- //
   callback();
@@ -610,4 +619,6 @@ void Env::mainLoop() {
     m_action_handler();
 
   } // while loop
-}
+ } //function mainLoop
+
+} //namespace agl

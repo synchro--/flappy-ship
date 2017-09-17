@@ -8,15 +8,15 @@
 #include <utility>
 #include <vector>
 
-#include <GL/gl.h>
 #include <GL/glew.h>
+
+#include <GL/gl.h>
 #include <GL/glu.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "game.h"
-#include "log.h"
 #include "types.h"
+#include "log.h"
 
 /*
 * AGL: Abstract Graphic Library
@@ -28,17 +28,6 @@
 */
 
 namespace agl {
-
-using TexID = GLuint; // out of clarity
-
-// represents a RGBA color.
-struct Color {
-  float r, g, b, a;
-
-  Color(float r = 0, float g = 0, float b = 0, float a = 1);
-};
-
-extern const Color WHITE, BLACK, RED, GREEN, YELLOW;
 
 // Enables double buffering
 void enable_double_buffering() {
@@ -64,7 +53,7 @@ struct Point3 {
   float x, y, z;
 
   Point3(float x = 0.0f, float y = 0.0f, float z = 0.0f);
-  Point3();
+ // Point3();
 
   inline void gl_translate() { glTranslatef(x, y, z); }
 
@@ -100,7 +89,7 @@ struct Vertex {
   Point3 point;
   Normal3 normal;
 
-  Vertex(const Point3 &v = Point3());
+  Vertex(const Point3 &p = Point3());
 
   void render(bool send_normal = false) const;
 };
@@ -116,14 +105,10 @@ public:
   Vertex *verts[3]; // tre puntatori a Vertice (i tre vertici del triangolo)
 
   // costruttore
-  Face(Vertex *a, Vertex *b, Vertex *c) {
-    verts[0] = a;
-    verts[1] = b;
-    verts[2] = c;
-  }
+  Face(Vertex *a, Vertex *b, Vertex *c);
 
   // attributi per faccia
-  Normal3 normal // normale (per faccia)
+  Normal3 normal; // normale (per faccia)
 
       // computa la normale della faccia
       inline void
@@ -159,7 +144,7 @@ private:
 
 public:
   // friend function to load the mesh instead of exporting the cons
-  friend std::unique_ptr<Mesh> loadMesh(char *mesh_filename);
+  friend std::unique_ptr<Mesh> loadMesh(const char *mesh_filename);
 
   // frontend for the render method
   void renderFlat(bool wireframe = false);
@@ -170,6 +155,11 @@ public:
 
   Point3 bbmin, bbmax; // bounding box
 };
+
+std::unique_ptr<Mesh> loadMesh(char *mesh_filename);
+
+using game::Key; // type for game keys
+class SmartWindow; //pre-declared to be used in Env
 
 /* The Env class represents the Environment of the game.
    It handles all the main components of the scene and all the callbacks
@@ -227,24 +217,26 @@ public:
   void set_render(decltype(m_render_handler) render = [] {});
   void set_winevent_handler(decltype(m_window_event_handler) onwinev = [] {});
 
+  std::unique_ptr<SmartWindow> createWindow(std::string &name, size_t x,
+                                               size_t y, size_t w, size_t h);
   void clearBuffer();
-  void setColor(const &Color color);
+  void setColor(const Color &color);
 
   // drawing functions
   void drawFloor(TexID texbind, float sz, float height, size_t num_quads);
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
 
-  inline void disableLighting() { glDisable(GL_LIGHTING));
-  }
+  inline void disableLighting() { glDisable(GL_LIGHTING); }
   inline void enableLighting() { glEnable(GL_LIGHTING); }
 
   void enableDoubleBuffering();
-  void enableZbuffer();
+  void enableZbuffer(int depth);
   void enableJoystick();
 
   Uint32 getTicks();
 
+  void lineWidth(float width);
   // Load texture from an image and return bool if success, should be changed to
   // return a texture ID --i.e. unsigned integer
   TexID loadTexture(const char *filename, bool repeat = false,
@@ -254,6 +246,13 @@ public:
   // Saves time and ensures the matrix will be popped after
   // pushing
   void mat_scope(const std::function<void()> callback);
+
+  /*
+  * Important function: main loop, it runs forever till it encounters an
+  * SDL_Quit event and dispatch everything.
+  */
+  void mainLoop();
+
   void redraw();
 
   // compute the FPS and Renders!
@@ -265,7 +264,9 @@ public:
   // set the camera to aim to reference frame (aim_x, aim_y, aim_z) from the
   // observing frame (eye_x,y,z)
   void setCamera(double eye_x, double eye_y, double eye_z, double aim_x,
-                 double aim_y, double aim_z);
+                     double aim_y, double aim_z,
+                     double upX, double upY, double upZ);
+
   void setCoordToPixel();
 
   // Model and Projection matrix setup
@@ -285,7 +286,6 @@ public:
 
 // return singleton instance
 Env &get_env();
-}
 
 class SmartWindow {
 
@@ -298,7 +298,14 @@ private:
 public:
   size_t m_width, m_height;
 
-  SmartWindow(std::string &name, size_t x, size_t y, size_t w, size_t h);
+  SmartWindow(std::string name, size_t x, size_t y, size_t w, size_t h);
+  virtual ~SmartWindow();
+
+  void hide();
+  void refresh();
+  void setupViewport();
+  void show();
+ };
 }
 
 #endif // AGL_H_

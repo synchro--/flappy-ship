@@ -1,19 +1,17 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 
-#include "agl.h"
+#include <string>
+#include <utility>
+
+#include <GL/glew.h>
+
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 // This header contains different data types used in the game.
 // It's structured in different namespaces according to whom
 // uses the defined types.
-
-// Default colors
-const agl::Color WHITE = {1.0f, 1.0f, 1.0f, 1.0f};
-const agl::Color BLACK = {.0f, .0f, .0f, 1.0f};
-const agl::Color RED = {.768f, .109f, .109f};
-const agl::Color GREEN = {.447f, .643f, .074f};
-const agl::Color YELLOW = {.913f, .643f, .074f};
-const agl::Color SHADOW = {.4f, .4f, .4f};
 
 // definitions
 #define CAMERA_BACK_CAR 0
@@ -23,11 +21,34 @@ const agl::Color SHADOW = {.4f, .4f, .4f};
 #define CAMERA_MOUSE 4
 #define CAMERA_TYPE_MAX 5
 
+// AGL TYPES 
 namespace agl {
+
+//defining texture ID val, out of clarity
+using TexID = GLuint;
+
+// represents a RGBA color.
+struct Color {
+  float r, g, b, a;
+
+  Color(float r = 0, float g = 0, float b = 0, float a = 1) 
+  : r(r), g(g), b(b), a(a) {}
+};
+
+// Default colors
+const Color WHITE = {1.0f, 1.0f, 1.0f, 1.0f};
+const Color BLACK = {.0f, .0f, .0f, 1.0f};
+const Color RED = {.768f, .109f, .109f};
+const Color GREEN = {.447f, .643f, .074f};
+const Color YELLOW = {.913f, .643f, .074f};
+const Color SHADOW = {.4f, .4f, .4f};
+
 static const auto PHYS_SAMPLING_STEP = 10; // millisec of a Physics sim step
 static const auto FPS_SAMPLE = 30U;        // interval length
 }
 
+
+// GAME TYPES 
 namespace game {
 
 static const double RING_TIME = 5.0;
@@ -54,11 +75,15 @@ enum Key {
 };
 }
 
+
+//LOGGING TYPES 
 namespace lg {
 // logging levels
 enum Level { INFO, ERROR, PANIC };
 }
 
+
+// SPACESHIP TYPES 
 namespace spaceship {
 // Actions available for the Spaceship
 // Note: can be expanded if the flying goes 3D, i.e. flying on the Y-axis too
@@ -85,7 +110,8 @@ const std::string motion_to_str(Motion m) {
 
   default:
     // shouldn't arrive here
-    lg::panic(__func__, "!! Motion not recognized !!");
+    return "Motion not recognized!!";
+    //lg::panic(__func__, "!! Motion not recognized !!");
   }
 }
 }

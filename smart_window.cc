@@ -65,7 +65,7 @@ namespace agl {
   }
 
   // sets up the viewport to match the window size.
-  void SmartWindow::setup_viewport() {
+  void SmartWindow::setupViewport() {
     glViewport(0, 0, m_width, m_height);
   }
 
@@ -84,6 +84,7 @@ namespace agl {
 
   // executes fn() in pixel coordinates mode, after coloring the whole window
   // with a solid color c.
+  /*
   void SmartWindow::color_whole_area(const Color& c, std::function<void()> fn) {
     draw_on_pixels([&]{
       glColor3f(c.r, c.g, c.b);
@@ -134,7 +135,7 @@ namespace agl {
 
 
   // Like color_whole_area() but with a texture. Useful to show images.
-  void SmartWindow::texture_whole_area(Texture t, std::function<void()> fn) {
+  void SmartWindow::texture_whole_area(TexID t, std::function<void()> fn) {
     draw_on_pixels([&]{
       glColor3f(1.0f, 1.0f, 1.0f);
 
@@ -161,5 +162,5 @@ namespace agl {
 
       fn();
     });
-  }
+  }*/
 }

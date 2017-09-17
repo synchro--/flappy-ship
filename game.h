@@ -1,19 +1,20 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
+#include "types.h"
+
 #include "agl.h"
 #include "elements.h"
-#include "types.h"
 
 /*The logic of the game, putting all together*/
 
 namespace game {
 
-class Game {
+class Game final {
 
 private:
   // variables
-  int m_gameID;
+  std::string m_gameID;
   State m_state;
   bool m_game_started;
   bool m_restart_game;
@@ -22,15 +23,17 @@ private:
   uint32_t m_last_time;
 
   agl::Env &m_env;
-  std::unique_ptr<elements::Floor> m_floor;
-  std::unique_ptr<elements::Sky> m_sky;
+  std::unique_ptr<agl::SmartWindow> m_main_win; 
   std::unique_ptr<elements::Spaceship> m_ssh;
-
+  elements::Floor *m_floor;
+  elements::Sky *m_sky;
+  
+  void changeState(game::State state);
+  void setupShipCamera(); 
   void gameOnKey(game::Key, bool pressed);
   void gameRender();
   void gameAction();
   void playGame();
-  void changeState(game::State state);
 
   void init();
   void setupObjectCamera();
@@ -41,6 +44,7 @@ private:
 
 public:
   Game(std::string gameID); // constructor
-};
+  void run(); 
+ };
 }
 #endif // GAME_H_
