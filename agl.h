@@ -182,6 +182,7 @@ private:
 
   double m_fps;     // fps value in the last interval
   double m_fps_now; // fps currently drawn
+  uint m_last_time;
   float m_eye_dist;
   int m_screenH, m_screenW;
   int m_camera_type;
@@ -253,9 +254,12 @@ public:
   // Saves time and ensures the matrix will be popped after
   // pushing
   void mat_scope(const std::function<void()> callback);
+  void redraw();
+
+  // compute the FPS and Renders!
+  void render();
 
   void rotate(float angle, const Vec3 &axis);
-  void redraw();
   void scale(float scale_x, float scale_y, float scale_z);
 
   // set the camera to aim to reference frame (aim_x, aim_y, aim_z) from the

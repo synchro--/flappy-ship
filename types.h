@@ -23,15 +23,14 @@ const agl::Color YELLOW = {.913f, .643f, .074f};
 #define CAMERA_TYPE_MAX 5
 
 namespace agl {
-  static const int PHYS_SAMPLING_STEP = 10; // millisec of a Physics simulated step
-  static const int FPS_SAMPLE = 3000U; // interval length
+static const auto PHYS_SAMPLING_STEP = 10; // millisec of a Physics sim step
+static const auto FPS_SAMPLE = 30U;        // interval length
 }
-
 
 namespace game {
 
-static const double RING_TIME = 5.0; 
-static const double BONUS_TIME = 4.0; 
+static const double RING_TIME = 5.0;
+static const double BONUS_TIME = 4.0;
 
 enum State { SPLASH, MENU, GAME, SETTINGS, END };
 enum Key {

@@ -15,19 +15,22 @@ private:
   // variables
   int m_gameID;
   State m_state;
+  bool m_game_started;
+  bool m_restart_game;
   int m_camera_type;
-  double m_start_time;    // fps value in the last interval
   double m_deadline_time; // fps currently drawn
-  uint32_t m_last_time;
+  Uint32_t m_last_time;
 
   agl::Env &m_env;
   std::unique_ptr<elements::Floor> m_floor;
   std::unique_ptr<elements::Sky> m_sky;
   std::unique_ptr<elements::Spaceship> m_ssh;
 
-  void gameOnKey();
+  void gameOnKey(game::Key, bool pressed);
   void gameRender();
   void gameAction();
+  void playGame();
+  void changeState(game::State state);
 
   void init();
   void setupObjectCamera();
@@ -38,11 +41,7 @@ private:
 
 public:
   void init();
-  Game(int gameID); // constructor
-
-  inline decltype(m_fps) fps() { return m_fps; }
-  inline decltype(m_fps_now) fps_now() { return m_fps_now; }
-  inline void incrementFPS() { m_fps_now++; }
+  Game(std::string gameID); // constructor
 };
 }
 #endif // GAME_H_

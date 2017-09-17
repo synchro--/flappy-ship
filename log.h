@@ -1,12 +1,13 @@
 #ifndef _LOG_H_
 #define _LOG_H_
 
+#include "types.h"
+
 #include <cstdarg>
 #include <cstdio>
 #include <iostream>
 #include <unistd.h>
 
-#include "types.h"
 // pretty simple logging utility with printf-like formatting
 // Levels are: INFO, ERROR, PANIC, defined in typesh
 

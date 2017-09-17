@@ -92,7 +92,7 @@ void Spaceship::processCommand() {
 }
 
 void sendCommand(Motion motion, bool on_off) {
-  if (motion >= Motion::N_MOTIONS) {
+  if (motion >= Motion::N_MOTISONS) {
     lg::panic(__func__, "Command not recognized!!");
   }
 
@@ -109,7 +109,7 @@ void Spaceship::draw() {
 
     m_mesh->render_goraud(m_env.isWireframe());
   });
-}, true); // use envmaps for the spacey effect
+  //}, true); // generate coords automatically
 }
 
 void Spaceship::render() {}

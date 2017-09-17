@@ -92,7 +92,7 @@ void Env::enableZbuffer(int depth) {
 
 void Env::enableDoubleBuffering() {
   lg::i(__func__, "Enabling double-buffer")
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+      SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 }
 
 // enables joystick
@@ -123,9 +123,9 @@ void Env::clearBuffer() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x, size_t y, 
-size_t w, size_t h) {
-  return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h); 
+std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x,
+                                               size_t y, size_t w, size_t h) {
+  return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h);
 }
 
 void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
@@ -269,6 +269,23 @@ void Env::redraw() {
   SDL_PushEvent(&e);
 }
 
+// 1. Compute FPS
+// 2. Calls rendering callback
+void Env::render() {
+  auto time_now = m_env.getTicks();
+
+  if (m_last_time + FPS_SAMPLE < time_now) {
+    m_fps = 1000.0 * ((double)m_fps_now) / (time_now - m_time_last_interval);
+    m_fps_now = 0;
+    m_last_time = time_now;
+  } else {
+    m_fps_now++;
+  }
+
+  // finally, the rendering we were all waiting for!
+  m_render_handler();
+}
+
 void Env::rotate(float angle, const Vec3 &axis) {
   glRotatef(angle, axis.x, axis.y, axis.z);
 }
@@ -361,7 +378,236 @@ void Env::textureDrawing(TexID texbind, std::function<void()> callback,
 void Env::translate(float x, float y, float z) { glTranslatef(x, y, z); }
 
 void Env::mainLoop() {
-  
-  
- }
+  // main event loop
+
+  m_render_handler();
+
+  bool quit = false;
+  while (!quit) {
+
+    SDL_Event e;
+
+    // check and process events
+    if (SDL_PollEvent(&e)) {
+      switch (e.type) {
+
+      case SDL_KEYUP:
+      case SDL_KEYDOWN: {
+
+        // choose the proper callback handler according if key is pressed or
+        // released
+        auto handler =
+            (e.type == SDL_KEYUP) ? m_key_up_handler : m_key_down_handler;
+
+        switch (e.key.keysym.sym) {
+        case SDLK_w:
+          handler(Key::W);
+          break;
+
+        case SDLK_a:
+          handler(Key::A);
+          break;
+
+        case SDLK_s:
+          handler(Key::S);
+          break;
+
+        case SDLK_d:
+          handler(Key::D);
+          break;
+
+        case SDLK_UP:
+          handler(Key::UP);
+          break;
+
+        case SDLK_LEFT:
+          handler(Key::LEFT);
+          break;
+
+        case SDLK_DOWN:
+          handler(Key::DOWN);
+          break;
+
+        case SDLK_RIGHT:
+          handler(Key::RIGHT);
+          break;
+
+        case SDLK_ESCAPE:
+          handler(Key::ESC);
+          break;
+
+        case SDLK_RETURN:
+          handler(Key::RETURN);
+          break;
+
+        case SDLK_F1:
+          handler(Key::F1);
+          break;
+
+        case SDLK_F2:
+          handler(Key::F2);
+          break;
+
+        case SDLK_F3:
+          handler(Key::F3);
+          break;
+
+        case SDLK_F4:
+          handler(Key::F4);
+          break;
+
+        case SDLK_F5:
+          handler(Key::F5);
+          break;
+
+        default:
+          break;
+        } // switch(key)
+
+        break;
+      } // SDL_KEYDOWN
+
+      case SDL_QUIT: {
+        quit = true;
+        break;
+      }
+
+      case SDL_WINDOWEVENT: {
+        // let's redraw the window
+        if (e.window.event == SDL_WINDOWEVENT_EXPOSED ||
+            SDL_WINDOWEVENT_SIZE_CHANGED) {
+          m_window_event_handler();
+        }
+        break;
+      }
+
+      /* DOVREBBE ESSERE INUTILE
+      else {
+        windowID = SDL_GetWindowID(win);
+        if (e.window.windowID == windowID) {
+          switch (e.window.event) {
+          case SDL_WINDOWEVENT_SIZE_CHANGED: {
+
+            m_win.
+            glViewport(0, 0, scrW, scrH);
+            rendering(win, car);
+            // redraw(); // richiedi ridisegno
+            break;
+          }
+          }
+        }
+      } //ELSE */
+
+      /*
+      TODO: handle joystick and mouse motion
+
+     case SDL_MOUSEMOTION:
+       handler = m_mouse_event_handler();
+       if (e.motion.state & SDL_BUTTON(1) & m_camera_type == CAMERA_MOUSE) {
+         view_alpha += e.motion.xrel;
+         view_beta += e.motion.yrel;
+         // if (m_view_beta<-90) m_view_beta=-90;
+         if (view_beta < +5)
+           view_beta = +5; // per non andare sotto la macchina
+         if (view_beta > +90)
+           view_beta = +90;
+
+
+       }
+       break;
+
+     case SDL_MOUSEWHEEL:
+       if (e.wheel.y < 0) {
+         // avvicino il punto di vista (zoom in)
+         m_eye_dist = m_eye_dist * 0.9;
+         m_eye_dist =
+             m_eye_dist < 1 ? 1 : m_eye_dist; // eyedist can't less than 1
+       };
+       if (e.wheel.y > 0) {
+         // allontano il punto di vista (zoom out)
+         m_eye_dist = m_eye_dist / 0.9;
+       };
+       break;
+
+     case SDL_JOYAXISMOTION: // Handle Joystick Motion
+       if (e.jaxis.axis == 0) {
+         if (e.jaxis.value < -3200) {
+           car.controller.Joy(0, true);
+           car.controller.Joy(1, false);
+           //	      printf("%d <-3200 \n",e.jaxis.value);
+         }
+         if (e.jaxis.value > 3200) {
+           car.controller.Joy(0, false);
+           car.controller.Joy(1, true);
+           //	      printf("%d >3200 \n",e.jaxis.value);
+         }
+         if (e.jaxis.value >= -3200 && e.jaxis.value <= 3200) {
+           car.controller.Joy(0, false);
+           car.controller.Joy(1, false);
+           //	      printf("%d in [-3200,3200] \n",e.jaxis.value);
+         }
+         rendering(win, car);
+         // redraw();
+       }
+       break;
+
+       //handle joystick buttons
+     case SDL_JOYBUTTONDOWN:
+       if (e.jbutton.button == 0) {
+         car.controller.Joy(2, true);
+         //	   printf("jbutton 0\n");
+       }
+       if (e.jbutton.button == 2) {
+         car.controller.Joy(3, true);
+         //	   printf("jbutton 2\n");
+       }
+       break;
+     case SDL_JOYBUTTONUP:
+       car.controller.Joy(2, false);
+       car.controller.Joy(3, false);
+       break;
+     }
+   }
+
+   */
+
+      /** da eliminare **
+         else {
+           // nessun evento: siamo IDLE
+
+
+           bool doneSomething = false;
+           int guardia = 0; // sicurezza da loop infinito
+
+           // finche' il tempo simulato e' rimasto indietro rispetto
+           // al tempo reale...
+           while (nstep * PHYS_SAMPLING_STEP < timeNow) {
+             car.DoStep();
+             nstep++;
+             doneSomething = true;
+             timeNow = SDL_GetTicks();
+             if (guardia++ > 1000) {
+               quit = true;
+               break;
+             } // siamo troppo lenti!
+           }
+
+           if (doneSomething)
+             rendering(win, car);
+           // redraw();
+           else {
+             // tempo libero!!!
+           }
+         }*/
+
+      default:
+        break;
+
+      } // switch(e.type)
+
+    } // if(SDL_PollEvent)
+
+    m_action_handler();
+
+  } // while loop
 }
