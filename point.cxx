@@ -36,6 +36,14 @@ Point3 Point3::operator+(const Point3 &other) const {
   return Point3(x + other.x, y + other.y, z + other.z);
 }
 
+Point3& Point3::operator+=(const Point3& other) {
+  x += other.x;
+  y += other.y;
+  z += other.z;
+
+  return *this;
+}
+
 // ridefinisco l'operatore binario "%" per fare il CROSS PRODUCT
 Point3 Point3::operator%(const Point3 &other) const {
   return Point3(y * other.z - z * other.y, -(x * other.z - z * other.x),

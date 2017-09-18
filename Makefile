@@ -1,8 +1,8 @@
-CXXFLAGS = -std=gnu++11 -O2 '-DGAME_NAME="Space Runners"'
+CXXFLAGS = -std=gnu++11 
 LDFLAGS = -lm -lSDL2 -lSDL2_ttf -lSDL2_image -lGLU -lGL
 SRCS = $(wildcard *.cxx)
 OBJS = $(patsubst %.cxx,%.o,$(SRCS))
-BNAME = glgame
+BNAME = start_game
 
 CXX ?= c++
 

@@ -21,18 +21,18 @@
 #define CAMERA_MOUSE 4
 #define CAMERA_TYPE_MAX 5
 
-// AGL TYPES 
+// AGL TYPES
 namespace agl {
 
-//defining texture ID val, out of clarity
+// defining texture ID val, out of clarity
 using TexID = GLuint;
 
 // represents a RGBA color.
 struct Color {
   float r, g, b, a;
 
-  Color(float r = 0, float g = 0, float b = 0, float a = 1) 
-  : r(r), g(g), b(b), a(a) {}
+  Color(float r = 0, float g = 0, float b = 0, float a = 1)
+      : r(r), g(g), b(b), a(a) {}
 };
 
 // Default colors
@@ -45,10 +45,9 @@ const Color SHADOW = {.4f, .4f, .4f};
 
 static const auto PHYS_SAMPLING_STEP = 10; // millisec of a Physics sim step
 static const auto FPS_SAMPLE = 30U;        // interval length
-}
+} // namespace agl
 
-
-// GAME TYPES 
+// GAME TYPES
 namespace game {
 
 static const double RING_TIME = 5.0;
@@ -73,47 +72,24 @@ enum Key {
   F5,
   N_KEYS
 };
-}
+} // namespace game
 
-
-//LOGGING TYPES 
+// LOGGING TYPES
 namespace lg {
 // logging levels
 enum Level { INFO, ERROR, PANIC };
-}
+} // namespace lg
 
-
-// SPACESHIP TYPES 
+// SPACESHIP TYPES
 namespace spaceship {
 // Actions available for the Spaceship
 // Note: can be expanded if the flying goes 3D, i.e. flying on the Y-axis too
 enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE, N_MOTION };
-static const int num_actions = Motion::BRAKE;
 
 // Command data structure: a pair of <Enum Action, bool on/off>
 // to be submitted to the Spaceship
 using Command = std::pair<Motion, bool>;
 
-const std::string motion_to_str(Motion m) {
-  switch (m) {
-  case Motion::THROTTLE:
-    return "THROTTLE";
-
-  case Motion::STEER_R:
-    return "RIGHT STEERING";
-
-  case Motion::STEER_L:
-    return "LEFT STEERING";
-
-  case Motion::BRAKE:
-    return "BRAKE";
-
-  default:
-    // shouldn't arrive here
-    return "Motion not recognized!!";
-    //lg::panic(__func__, "!! Motion not recognized !!");
-  }
-}
-}
+} // namespace spaceship
 
 #endif //_TYPES_H_

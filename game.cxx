@@ -5,7 +5,7 @@ namespace game {
 Game::Game(std::string gameID)
     : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACK_CAR),
       m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0),
-      m_env(agl::get_env()), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) 
+      m_env(agl::get_env()), m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr)
       {}
 
 /*
@@ -20,13 +20,15 @@ void Game::init() {
   m_main_win->show();
 
   m_ssh = elements::get_spaceship("envmap_flipped.jpg", "Envos.obj");
-  m_floor = elements::get_floor("nrm.tga");
-  m_sky = elements::get_sky("sky_ok.jpg");
+  m_floor = elements::get_floor("truman-texture.jpg");
+  m_sky = elements::get_sky("truman.jpg");
+
+  m_ssh->setScale(0.6, 0.6, 0.6);
 }
 
 void Game::changeState(game::State state) {
 
-  static const auto TAG = __func__; 
+  static const auto TAG = __func__;
 
   if (state == m_state)
     return;
@@ -87,69 +89,78 @@ void Game::gameOnKey(Key key, bool pressed) {
   using namespace spaceship;
   using spaceship::Motion;
   Motion mt;
-  bool game_triggered = false;
+  bool trig_motion = false;
 
   switch (key) {
   case Key::W:
     mt = spaceship::Motion::THROTTLE;
-    game_triggered = true;
+    trig_motion = true;
+    break;
 
   case Key::A:
     mt = spaceship::Motion::STEER_L;
-    game_triggered = true;
+    trig_motion = true;
+    break;
 
   case Key::S:
     mt = spaceship::Motion::BRAKE;
-    game_triggered = true;
+    trig_motion = true;
+    break;
 
   case Key::D:
     mt = spaceship::Motion::STEER_R;
-    game_triggered = true;
+    trig_motion = true;
+    break;
 
   case Key::ESC:
     if (pressed) {
       changeState(State::MENU);
     }
+    break;
 
   // environment change handlers!
   // Only on key down
   case Key::F1:
     if (pressed) {
+        lg::i(__func__, "Changing camera");
       change_camera_type();
-    }
+  } break;
 
   case Key::F2:
     if (pressed) {
       m_env.toggle_wireframe();
-    }
+  } break;
 
   case Key::F3:
     if (pressed) {
       m_env.toggle_envmap();
-    }
+  } break;
 
   case Key::F4:
     if (pressed) {
       m_env.toggle_headlight();
-    }
+  } break;
 
   case Key::F5:
     if (pressed) {
       m_env.toggle_shadow();
-    }
+  } break;
 
   default:
     break;
   }
 
-  if (game_triggered) {
+  //send a command to the spaceship only if triggered
+  if (trig_motion) {
     if (!m_game_started) {
       m_last_time = m_env.getTicks();
+      m_game_started = true;
       //     m_deadline_time = game::RING_TIME;
     }
+
+    m_ssh->sendCommand(mt, pressed);
   }
 
-  m_ssh->sendCommand(mt, pressed);
 }
 
 /* Esegue il Rendering della scena */
@@ -161,17 +172,17 @@ void Game::gameRender() {
   m_main_win->setupViewport();
 
   m_env.clearBuffer();
-
+  m_env.disableLighting();
   m_env.setupPersp();
   m_env.setupModel();
   m_env.setupLightPosition();
-  m_env.setupModelLights(); 
+  m_env.setupModelLights();
 
   setupShipCamera();
 
   m_floor->render();
   m_sky->render();
-  m_ssh->render(m_env.isWireframe(), m_env.isHeadlight());
+  m_ssh->render();
 
   // m_env.setCoordToPixel(); //serve??
 
@@ -198,7 +209,7 @@ void Game::gameRender() {
   glEnd();
   */
 
-  m_env.enableLighting(); 
+  m_env.enableLighting();
 
   m_main_win->refresh();
 }
@@ -230,6 +241,7 @@ void Game::run() {
   init();
 
   // splash();
+  playGame();
 
   m_env.mainLoop();
 }

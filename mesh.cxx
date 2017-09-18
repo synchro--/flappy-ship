@@ -1,7 +1,15 @@
 #include "agl.h"
 
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <string>
+
+#include <cstdio>
+#include <cstring>
+
 /*
-* Class implementing a Mesh. See aglh
+* Class implementing a Mesh. See agl.h
 */
 
 namespace agl {
@@ -9,6 +17,8 @@ namespace agl {
 Face::Face(Vertex *v1, Vertex *v2, Vertex *v3) : verts{v1, v2, v3} {
   computeNormal();
 }
+
+Mesh::Mesh() {}
 
 // Computo normali per vertice
 // (come media rinormalizzata delle normali delle facce adjacenti)
@@ -23,7 +33,7 @@ void Mesh::computeNormalsPerVertex() {
   // fase due: ciclo sulle facce: accumulo le normali di F nei 3 V
   // corrispondenti
   for (auto &face : m_faces) {
-    for (auto vertex : f.verts) {
+    for (auto vertex : face.verts) {
       vertex->normal += face.normal;
     }
     /*
@@ -148,7 +158,16 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
     bbmax = Point3(max_x, max_y, max_z);
   }
 
-  // carica la mesh da un file in formato Obj
+  //Point3 Mesh::center() { return (bbmin + bbmax) / 2.0; };
+
+  //init vertex normals and bounding box
+  void Mesh::init() {
+      computeNormalsPerVertex();
+      computeBoundingBox();
+  }
+
+
+  //   carica la mesh da un file in formato Obj
   //   Nota: nel file, possono essere presenti sia quads che tris
   //   ma nella rappresentazione interna (classe Mesh) abbiamo solo tris.
 
@@ -164,7 +183,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
     if (!file) {
       // whenever I've spare time, an exception class must be added
       lg::e(TAG, "Cannot load mesh from %s", filename);
-      return EXIT_FAILURE;
+      exit(EXIT_FAILURE);
     }
 
     // make a first pass through the file to get a count of the number
@@ -269,7 +288,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
         switch (buf[1]) {
         case '\0': // vertex
           std::fscanf(file, "%f %f %f", &x, &y, &z);
-          m_verts[nv] = Point3(x, y, z);
+          ret->m_verts[nv] = Point3(x, y, z);
           nv++;
           break;
         default:
@@ -291,14 +310,15 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
           // create on place a new face and save it at the end of the face
           // vector
           ret->m_faces.emplace_back(
-              &(ret->m_verts[va], &(ret->m_verts[vc]), &(ret->m_verts[vb])));
+              &(ret->m_verts[va]), &(ret->m_verts[vc]), &(ret->m_verts[vb]));
 
           nt++;
           vb = vc;
           while (std::fscanf(file, "%d//%d", &vc, &nc) > 0) {
             vc--;
             ret->m_faces.emplace_back(
-                &(ret->m_verts[va], &(ret->m_verts[vc]), &(ret->m_verts[vb])));
+                &(ret->m_verts[va]), &(ret->m_verts[vc]), &(ret->m_verts[vb]));
+
 
             nt++;
             vb = vc;
@@ -312,7 +332,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
           vc--;
 
           ret->m_faces.emplace_back(
-              &(ret->m_verts[va], &(ret->m_verts[vc]), &(ret->m_verts[vb])));
+              &(ret->m_verts[va]), &(ret->m_verts[vc]), &(ret->m_verts[vb]));
 
           nt++;
           vb = vc;
@@ -320,7 +340,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
             vc--;
 
             ret->m_faces.emplace_back(
-                &(ret->m_verts[va], &(ret->m_verts[vc]), &(ret->m_verts[vb])));
+                &(ret->m_verts[va]), &(ret->m_verts[vc]), &(ret->m_verts[vb]));
 
             nt++;
             vb = vc;
@@ -334,7 +354,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
           vc--;
 
           ret->m_faces.emplace_back(
-              &(ret->m_verts[va], &(ret->m_verts[vc]), &(ret->m_verts[vb])));
+              &(ret->m_verts[va]), &(ret->m_verts[vc]), &(ret->m_verts[vb]));
 
           nt++;
           vb = vc;
@@ -342,7 +362,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
             vc--;
 
             ret->m_faces.emplace_back(
-                &(ret->m_verts[va], &(ret->m_verts[vc]), &(ret->m_verts[vb])));
+                &(ret->m_verts[va]), &(ret->m_verts[vc]), &(ret->m_verts[vb]));
 
             nt++;
             vb = vc;
@@ -357,7 +377,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
           vc--;
 
           ret->m_faces.emplace_back(
-              &(ret->m_verts[va], &(ret->m_verts[vc]), &(ret->m_verts[vb])));
+              &(ret->m_verts[va]), &(ret->m_verts[vc]), &(ret->m_verts[vb]));
 
           nt++;
           vb = vc;
@@ -365,7 +385,7 @@ void Mesh::render(bool wireframe_on, bool goraud_shading) {
             vc--;
 
             ret->m_faces.emplace_back(
-                &(ret->m_verts[va], &(ret->m_verts[vc]), &(ret->m_verts[vb])));
+                &(ret->m_verts[va]), &(ret->m_verts[vc]), &(ret->m_verts[vb]));
 
             nt++;
             vb = vc;

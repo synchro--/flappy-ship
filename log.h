@@ -51,6 +51,6 @@ void i(const char *tag, const char *fmt, ...);
 void e(const char *tag, const char *fmt, ...);
 // Panic: GET OUTTA HERE
 void panic(const char *tag, const char *fmt, ...);
-}
+} // namespace lg
 
 #endif //_LOG_H__

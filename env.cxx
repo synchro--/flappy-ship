@@ -51,7 +51,7 @@ Env::Env()
 
 // quit gracefully
 Env::~Env() {
-  const static auto TAG = __func__; 
+  const static auto TAG = __func__;
 
   lg::i(TAG, "Quit...");
 
@@ -93,7 +93,7 @@ void Env::enableZbuffer(int depth) {
 }
 
 void Env::enableDoubleBuffering() {
-  lg::i(__func__, "Enabling double-buffer"); 
+  lg::i(__func__, "Enabling double-buffer");
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 }
 
@@ -104,7 +104,7 @@ void Env::enableJoystick() {
   SDL_JoystickEventState(SDL_ENABLE);
   joystick = SDL_JoystickOpen(0);
 }
-*/ 
+*/
 
 void Env::mat_scope(const std::function<void(void)> callback) {
   glPushMatrix();
@@ -224,7 +224,7 @@ void Env::drawSphere(double radius, int lats, int longs) {
 
 
 void Env::lineWidth(float width) {
-  glLineWidth(width); 
+  glLineWidth(width);
 }
 
 // Load texture from image file.
@@ -300,11 +300,15 @@ void Env::rotate(float angle, const Vec3 &axis) {
 void Env::scale(float x, float y, float z) { glScalef(x, y, z); }
 
 void Env::setCamera(double eye_x, double eye_y, double eye_z, double aim_x,
-                     double aim_y, double aim_z, 
+                     double aim_y, double aim_z,
                      double upX, double upY, double upZ) {
   // up vector looking at the sky (0,+y,0)
-  gluLookAt(eye_x, eye_y, eye_z, aim_x, aim_y, aim_z, 
+  gluLookAt(eye_x, eye_y, eye_z, aim_x, aim_y, aim_z,
     upX, upY, upZ);
+}
+
+void Env::setColor(const Color &c) {
+    glColor4f(c.r, c.g, c.b, c.a);
 }
 
 // setta le matrici di trasformazione in modo
@@ -355,8 +359,7 @@ void Env::setupPersp() {
 // Helper function to draw textured objects
 // Accepts a lambda as a drawing function to be called afte the texture
 // is applied.
-void Env::textureDrawing(TexID texbind, std::function<void()> callback,
-                         bool gen_coordinates) {
+void Env::textureDrawing(TexID texbind, std::function<void()> callback, bool gen_coordinates) {
 
   glBindTexture(GL_TEXTURE_2D, texbind);
   glEnable(GL_TEXTURE_2D);
@@ -617,6 +620,7 @@ void Env::mainLoop() {
     } // if(SDL_PollEvent)
 
     m_action_handler();
+    render();
 
   } // while loop
  } //function mainLoop

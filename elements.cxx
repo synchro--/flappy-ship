@@ -13,7 +13,7 @@ Floor::Floor(const char *texture_filename)
       m_tex(m_env.loadTexture(texture_filename, true)) {}
 
 void Floor::render() {
-  lg::i(__func__, "Rendering floor...");
+  //lg::i(__func__, "Rendering floor...");
   m_env.drawFloor(m_tex, m_size, m_height, 150);
 }
 
@@ -38,7 +38,7 @@ Sky::Sky(const char *texture_filename)
       m_tex(m_env.loadTexture(texture_filename, false)) {}
 
 void Sky::render() {
-  lg::i(__func__, "Rendering Sky...");
+  //lg::i(__func__, "Rendering Sky...");
   m_env.drawSky(m_tex, m_radius, m_lats, m_longs);
 }
 
@@ -73,27 +73,27 @@ std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
   lg::i(TAG, "Loading Spaceship --> texture: %s Mesh: %s", texture_filename,
         mesh_filename);
 
-  static std::unique_ptr<Spaceship> s_Spaceship(nullptr);
+  /*static std::unique_ptr<Spaceship> s_Spaceship(nullptr);
   if (!s_Spaceship) {
     s_Spaceship.reset(new Spaceship(texture_filename, mesh_filename)); // Init
-  }
+} */
 
-  return s_Spaceship;
+  return std::unique_ptr<Spaceship>(new Spaceship(texture_filename, mesh_filename));
 }
 
 Spaceship::Spaceship(const char *texture_filename,
                      const char *mesh_filename) // da finire
-    : m_tex(0),                                 // no texture for now
-      m_env(agl::get_env), m_mesh(agl::loadMesh(mesh_filename)), // TODO
-{
-  init();
-}
+    : m_env(agl::get_env()), m_tex(m_env.loadTexture(texture_filename)),                                 // no texture for now
+       m_mesh(agl::loadMesh(mesh_filename)) // TODO
+      {
+          init();
+      }
 
 void Spaceship::init() {
-  m_scaleX = m_scaleY = m_scaleZ = 1.0;
+  m_scaleX = m_scaleY = m_scaleZ = 0.6;
 
   m_px = m_pz = 0;
-  m_py = 1.5; // Spaceship skills™
+  m_py = 1.0; // Spaceship skills™
 
   m_facing = m_steering = m_angle = 0.0;
   m_speedX = m_speedY = m_speedZ = 0.0;
@@ -110,11 +110,18 @@ void Spaceship::init() {
 
   m_max_acceleration = 0.0011;
 
-  // reset command queue
-  m_cmds(new std::queue<Command>)
+  //init internal states
+  m_state = {false};
 }
 
-bool get_state(Motion mt) { return m_state[mt]; }
+bool Spaceship::get_state(Motion mt) { return m_state[mt]; }
+
+void Spaceship::execute() {
+    //later on will be added an abstraction on doMotion
+    //and doMotion will be divided into several modular method
+    processCommand();
+    doMotion();
+}
 
 void Spaceship::processCommand() {
   const static auto TAG = __func__;
@@ -126,10 +133,10 @@ void Spaceship::processCommand() {
 
     // get command name in string in order to log
     std::string mt = motion_to_str(cmd.first);
-    lg::i(TAG, "Spaceship is processing command %s", mt)
+    lg::i(TAG, "Spaceship is processing command %s", mt.c_str());
 
-        // set the state
-        m_state[cmd.first] = cmd.second;
+    // set the state
+    m_state[cmd.first] = cmd.second;
   }
 }
 
@@ -139,7 +146,7 @@ void Spaceship::sendCommand(Motion motion, bool on_off) {
   }
 
   // construct and submit a new pair
-  m_cmds.emplace_back(motion, on_off);
+  m_cmds.emplace(motion, on_off);
 }
 
 void Spaceship::setScale(float x, float y, float z) {
@@ -149,7 +156,7 @@ void Spaceship::setScale(float x, float y, float z) {
 }
 
 void Spaceship::shadow() const {
-  Color c = Color::SHADOW;
+  const auto c = agl::SHADOW;
 
   m_env.setColor(c);
   m_env.translate(0, 0.01, 0); // avoid z-fighting with the floor(
@@ -162,18 +169,18 @@ void Spaceship::shadow() const {
 
 // draw the ship as a textured mesh, using the helper functions defined
 // in the Env class.
-void Spaceship::draw() {
-  // m_env.textureDrawing(m_tex, [&]{
-  m_env.mat_scope([&] {
-    m_env.scale(m_scale_x, m_scale_y, m_scale_z);
+void Spaceship::draw() const {
+   m_env.textureDrawing(m_tex, [&]{
+          m_env.mat_scope([&] {
+            m_env.scale(m_scaleX, m_scaleY, m_scaleZ);
 
-    m_mesh->render_goraud(m_env.isWireframe());
-  });
-  //}, true); // generate coords automatically
+            m_mesh->renderGouraud(m_env.isWireframe());
+           });
+  }); // generate coords automatically, true by default
 
   // if headlight is on in the Env, then draw headlights
   if (m_env.isHeadlight()) {
-    drawHeadlight(0, 0, -1, 10);
+    //drawHeadlight(0, 0, -1, 10);
   }
 }
 
@@ -203,25 +210,26 @@ void Spaceship::drawHeadlight(float x, float y, float z, int lightN) const {
   glLightf(usedLight, GL_LINEAR_ATTENUATION, 1);
 }
 
-void Spaceship::render() {
+void Spaceship::render() const {
   m_env.mat_scope([&] {
-    Vec3 viewUP = Vec3(0, 1, 0);
-    Vec3 front = Vec3(0, 0, 1)
+    agl::Vec3 viewUP = agl::Vec3(0, 1, 0);
+    agl::Vec3 front = agl::Vec3(0, 0, 1);
+    lg::i(__func__, "translating to position %f %f %f", m_px, m_py, m_pz);
                  // translate the ship according to its coordinates
                  m_env.translate(m_px, m_py, m_pz);
     // rotate the ship according to its angle and facing
     m_env.rotate(m_angle, viewUP);
     // steering
 
-    m_env(-m_steering, front);
+    m_env.rotate(-m_steering, front);
 
     draw();
-  })
+});
 }
 
 void Spaceship::rotateView() {
-  Vec3 axisX = Vec3(1, 0, 0);
-  Vec3 axisY = Vec3(0, 1, 0);
+  agl::Vec3 axisX = agl::Vec3(1, 0, 0);
+  agl::Vec3 axisY = agl::Vec3(0, 1, 0);
 
   m_env.rotate(m_view_beta, axisX);
   m_env.rotate(m_view_alpha, axisY);
@@ -254,6 +262,7 @@ void Spaceship::doMotion() {
   bool brake = get_state(Motion::BRAKE);
 
   if (throttle ^ brake) {
+     lg::i(__func__, "lolo");
     int sign = throttle ? 1 : -1;
 
     m_speedZ -= sign * m_max_acceleration;
@@ -287,4 +296,25 @@ void Spaceship::doMotion() {
   m_py += m_speedY;
   m_pz += m_speedZ;
 }
+
+const std::string motion_to_str(Motion m) {
+  switch (m) {
+  case Motion::THROTTLE:
+    return "THROTTLE";
+
+  case Motion::STEER_R:
+    return "RIGHT STEERING";
+
+  case Motion::STEER_L:
+    return "LEFT STEERING";
+
+  case Motion::BRAKE:
+    return "BRAKE";
+
+  default:
+    // shouldn't arrive here
+    return "Motion not recognized!!";
+    lg::panic(__func__, "!! Motion not recognized !!");
+  }
+ }
 }

@@ -3,17 +3,19 @@
 
 #include "types.h"
 
-
 #include "agl.h"
 #include "log.h"
 
 /*
-* elementsh describes the different objects (elements) of the game
-* Floor, Sky, ..., it will be expanded as the game gets more complex
-* and new elements gets added.
-*/
+ * elementsh describes the different objects (elements) of the game
+ * Floor, Sky, ..., it will be expanded as the game gets more complex
+ * and new elements gets added.
+ */
 
 namespace elements {
+
+// utility function, returns the string related to the motion
+const std::string motion_to_str(spaceship::Motion mt);
 
 /*
  * The floor.
@@ -63,7 +65,7 @@ public:
   // accessors
   void set_params(double radius = 100.0, int lats = 20, int longs = 20);
 
-  inline decltype(m_radius) radius(){ return m_radius; }
+  inline decltype(m_radius) radius() { return m_radius; }
 };
 
 // get singleton instance of sky
@@ -80,21 +82,21 @@ Sky *get_sky(const char *filename);
 */
 
 /*
-* The Spaceship class.
-*
-* STATE and MOTION:
-* The motion of the spaceship is defined by the 4 state variables:
-* THROTTLE - STEER_L - STEER_R - BRAKE that are either 'off' or 'on'.
-* When the player send a key, the action will be stored in a queue in the form
-* of <State Variable , on/off > (here called Motion).
-* Thus, the Spaceship execute commands by simply reading from the queue
-* and set the respective state var to on-off.
-*
-* RENDERING:
-* When the state of the spaceship change, we need to redraw the ship.
-* Hence, the rendering will be updated according to the state and ultimately
-* to the commands given by the player.
-*/
+ * The Spaceship class.
+ *
+ * STATE and MOTION:
+ * The motion of the spaceship is defined by the 4 state variables:
+ * THROTTLE - STEER_L - STEER_R - BRAKE that are either 'off' or 'on'.
+ * When the player send a key, the action will be stored in a queue in the form
+ * of <State Variable , on/off > (here called Motion).
+ * Thus, the Spaceship execute commands by simply reading from the queue
+ * and set the respective state var to on-off.
+ *
+ * RENDERING:
+ * When the state of the spaceship change, we need to redraw the ship.
+ * Hence, the rendering will be updated according to the state and ultimately
+ * to the commands given by the player.
+ */
 
 class Spaceship {
 private:
@@ -107,15 +109,17 @@ private:
   // shape
   float m_scaleX, m_scaleY, m_scaleZ;
 
-  // state
-  bool m_state[5];
+  // internal state of the spaceship. Each element represent a motion (on-off),
+  // as described above.
+  std::array<bool, spaceship::Motion::N_MOTION> m_state;
 
   // commands will be stored in a queue and processed with callbacks
   std::queue<spaceship::Command> m_cmds;
 
   agl::Env &m_env;
   agl::TexID m_tex;
-  agl::Mesh m_mesh; // mesh structure for the Aventador Spaceship
+  std::unique_ptr<agl::Mesh>
+      m_mesh; // mesh structure for the Aventador Spaceship
   // angles, grip and friction
 
   // private constructor to ensure singleton instance
@@ -124,16 +128,14 @@ private:
 
   // internal logic and physics of the spaceship
 
-  bool draw(bool wireFrame_on = false, bool headlight_on = false) const;
-  void drawHeadlight(float x, float y, float z, int lightN);
-  bool doMotion();
-  void processCommand();
-  void shadow();
+  void draw() const;
+  void drawHeadlight(float x, float y, float z, int lightN) const;
+  void doMotion();
+  bool get_state(spaceship::Motion mt);
 
-  /*bool updateNeeded();
-  bool updatePhysics();
-  bool updateSteering();
-  bool updatePosition();*/
+  void init();
+  void processCommand();
+  void shadow() const;
 
 public:
   friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
@@ -146,17 +148,17 @@ public:
   inline float facing() const { return m_facing; }
 
   // APIs to interact with the spaceship
-  bool execute();
+  void execute();
   void sendCommand(spaceship::Motion motion, bool on_off);
   void setScale(float x, float y, float z);
   // render the Spaceship: TexID + Mesh
-  void render(bool wireFrame_on = false, bool headlight_on = false) const;
+  void render() const;
   // rotate the view around the ship, to be used only on CAMERA_MOUSE mode
   void rotateView();
 };
 
 std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
-                                                  const char *mesh_filename);
-}
+                                         const char *mesh_filename);
+} // namespace elements
 
 #endif //_ELEMENTS_H_

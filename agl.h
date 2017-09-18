@@ -15,33 +15,19 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "types.h"
 #include "log.h"
+#include "types.h"
 
 /*
-* AGL: Abstract Graphic Library
-* The purpose is to create an abstract layer on the top of OpenGL in order to
-* simplify the usage of all the graphic functions in the project
-*
-* Note: methods have camelCase usually.
-*       Small ones like accessors, however, have _underscore_ case.
-*/
+ * AGL: Abstract Graphic Library
+ * The purpose is to create an abstract layer on the top of OpenGL in order to
+ * simplify the usage of all the graphic functions in the project
+ *
+ * Note: methods have camelCase usually.
+ *       Small ones like accessors, however, have _underscore_ case.
+ */
 
 namespace agl {
-
-// Enables double buffering
-void enable_double_buffering() {
-  lg::i(__func__, "enabling double buffer");
-
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-}
-
-// Enables the depth buffer at depth 'depth'
-void enable_zbuffer(size_t depth) {
-  lg::i(__func__, "setting up Z-buffer of depth = %zu bits", depth);
-
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depth);
-}
 
 // a 2D Point (or horizontal vector)
 struct Point2 {
@@ -53,7 +39,7 @@ struct Point3 {
   float x, y, z;
 
   Point3(float x = 0.0f, float y = 0.0f, float z = 0.0f);
- // Point3();
+  // Point3();
 
   inline void gl_translate() { glTranslatef(x, y, z); }
 
@@ -110,9 +96,8 @@ public:
   // attributi per faccia
   Normal3 normal; // normale (per faccia)
 
-      // computa la normale della faccia
-      inline void
-      computeNormal() {
+  // computa la normale della faccia
+  inline void computeNormal() {
     normal = -((verts[1]->point - verts[0]->point) %
                (verts[2]->point - verts[0]->point))
                   .normalize();
@@ -136,30 +121,30 @@ private:
   void renderWire();
   void render(bool wireframe = false, bool gouraud_shading = true);
 
+  // use the 2 methods below to setup the mesh
+  void init();
   // bounding box: minumum and maximum coordinates
   void computeBoundingBox();
   void computeNormalsPerVertex();
-  // use the 2 methods above to setup the mesh
-  void init();
 
 public:
   // friend function to load the mesh instead of exporting the cons
   friend std::unique_ptr<Mesh> loadMesh(const char *mesh_filename);
+  Point3 bbmin, bbmax; // bounding box
 
   // frontend for the render method
   void renderFlat(bool wireframe = false);
   void renderGouraud(bool wireframe = false);
 
   // center of the axis-aligned bounding box
-  inline Point3 center() { return (bbmin + bbmax) / 2.0; };
-
-  Point3 bbmin, bbmax; // bounding box
+  // Point3 center();
+  Point3 center() { return (bbmin + bbmax) / 2.0; }
 };
 
-std::unique_ptr<Mesh> loadMesh(char *mesh_filename);
+std::unique_ptr<Mesh> loadMesh(const char *mesh_filename);
 
-using game::Key; // type for game keys
-class SmartWindow; //pre-declared to be used in Env
+using game::Key;   // type for game keys
+class SmartWindow; // pre-declared to be used in Env
 
 /* The Env class represents the Environment of the game.
    It handles all the main components of the scene and all the callbacks
@@ -180,12 +165,12 @@ private:
   bool m_wireframe, m_envmap, m_headlight, m_shadow;
 
   /* Callbacks variables:
-  *  they will be the handler for keys, windows events and rendering.
-  *  The actual callback function will vary according to the current
-  *  state of the game.
-  *  For example, if we are on Menù, the rendering callback will be different
-  *  wrt when we are actually playing.
-  */
+   *  they will be the handler for keys, windows events and rendering.
+   *  The actual callback function will vary according to the current
+   *  state of the game.
+   *  For example, if we are on Menù, the rendering callback will be different
+   *  wrt when we are actually playing.
+   */
   std::function<void()> m_action_handler, m_render_handler,
       m_window_event_handler;
   std::function<void(game::Key)> m_key_up_handler, m_key_down_handler;
@@ -218,7 +203,7 @@ public:
   void set_winevent_handler(decltype(m_window_event_handler) onwinev = [] {});
 
   std::unique_ptr<SmartWindow> createWindow(std::string &name, size_t x,
-                                               size_t y, size_t w, size_t h);
+                                            size_t y, size_t w, size_t h);
   void clearBuffer();
   void setColor(const Color &color);
 
@@ -248,9 +233,9 @@ public:
   void mat_scope(const std::function<void()> callback);
 
   /*
-  * Important function: main loop, it runs forever till it encounters an
-  * SDL_Quit event and dispatch everything.
-  */
+   * Important function: main loop, it runs forever till it encounters an
+   * SDL_Quit event and dispatch everything.
+   */
   void mainLoop();
 
   void redraw();
@@ -264,8 +249,8 @@ public:
   // set the camera to aim to reference frame (aim_x, aim_y, aim_z) from the
   // observing frame (eye_x,y,z)
   void setCamera(double eye_x, double eye_y, double eye_z, double aim_x,
-                     double aim_y, double aim_z,
-                     double upX, double upY, double upZ);
+                 double aim_y, double aim_z, double upX, double upY,
+                 double upZ);
 
   void setCoordToPixel();
 
@@ -298,14 +283,14 @@ private:
 public:
   size_t m_width, m_height;
 
-  SmartWindow(std::string name, size_t x, size_t y, size_t w, size_t h);
+  SmartWindow(std::string &name, size_t x, size_t y, size_t w, size_t h);
   virtual ~SmartWindow();
 
   void hide();
   void refresh();
   void setupViewport();
   void show();
- };
-}
+};
+} // namespace agl
 
 #endif // AGL_H_

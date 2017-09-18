@@ -23,13 +23,13 @@ private:
   uint32_t m_last_time;
 
   agl::Env &m_env;
-  std::unique_ptr<agl::SmartWindow> m_main_win; 
+  std::unique_ptr<agl::SmartWindow> m_main_win;
   std::unique_ptr<elements::Spaceship> m_ssh;
   elements::Floor *m_floor;
   elements::Sky *m_sky;
-  
+
   void changeState(game::State state);
-  void setupShipCamera(); 
+  void setupShipCamera();
   void gameOnKey(game::Key, bool pressed);
   void gameRender();
   void gameAction();
@@ -44,7 +44,7 @@ private:
 
 public:
   Game(std::string gameID); // constructor
-  void run(); 
- };
-}
+  void run();
+};
+} // namespace game
 #endif // GAME_H_
