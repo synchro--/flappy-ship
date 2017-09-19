@@ -302,7 +302,7 @@ void Car::Render() const {
   // sono nello spazio mondo
 
   // drawAxis(); // disegno assi spazio mondo
-  glPushMatrix();
+   glPushMatrix();
   // sono nello spazio MACCHINA
 
   glTranslatef(px, py, pz);
@@ -320,7 +320,7 @@ void Car::Render() const {
     Shadow();
   }
 
-  glPopMatrix();
+  //glPopMatrix();
   glPopMatrix();
 }
 
