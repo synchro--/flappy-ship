@@ -130,52 +130,70 @@ std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x,
   return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h));
 }
 
+void Env::drawPlane(float sz, float height, size_t num_quads) {
+  glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
+  auto ratio = (double) sz / num_quads; 
+  glBegin(GL_QUADS); {
+    for (size_t x = 0; x < num_quads; ++x) {
+      for (size_t z = 0; z < num_quads; ++z) {
+        float x0 = -sz + 2 * (x + 0) * ratio; 
+        float x1 = -sz + 2 * (x + 1) * ratio; 
+        float z0 = -sz + 2 * (z + 0) * ratio; 
+        float z1 = -sz + 2 * (z + 1) * ratio; 
+
+        if(!m_wireframe) {
+        // bottom left
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(x0, height, z1);
+
+        // top left 
+        glTexCoord2f(0.0f, 0.0f); 
+        glVertex3d(x0, height, z0);
+        
+        // top right 
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(x1, height, z0);
+
+        //bottom right
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(x1, height, z1);
+       } 
+        else {
+        glVertex3d(x0, height, z1);
+        glVertex3d(x0, height, z0);
+        glVertex3d(x1, height, z0);
+        glVertex3d(x1, height, z1);
+       }
+      }
+    }
+  }
+  glEnd();
+}
+
 void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
 
   textureDrawing(texbind,
                  [&] {
                    // draw num_quads^2 number of quads
-                   glBegin(GL_QUADS);
-                   {
-                   //glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i quads
-                   glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
-                   auto ratio = (double) sz / num_quads; 
 
-                   for (size_t x = 0; x < num_quads; ++x) {
-                     for (size_t z = 0; z < num_quads; ++z) {
-                       float x0 = -sz + 2 * (x + 0) * ratio; 
-                       float x1 = -sz + 2 * (x + 1) * ratio; 
-                       float z0 = -sz + 2 * (z + 0) * ratio; 
-                       float z1 = -sz + 2 * (z + 1) * ratio; 
+                   if(m_wireframe) {
+                     glDisable(GL_TEXTURE_2D);
+                     glColor3f(BLACK.r, BLACK.g, BLACK.b);
 
-                       // set coords for the texture manually 
-                       // (so, remember to specify false in textureDrawing)
+                     glDisable(GL_LIGHTING);
+                     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                     drawPlane(sz, height, num_quads);
 
-                       // bottom left
-                       glTexCoord2f(0.0f, 1.0f);
-                       glVertex3d(x0, height, z1);
-
-                       // top left 
-                       glTexCoord2f(0.0f, 0.0f); 
-                       glVertex3d(x0, height, z0);
-                       
-                       // top right 
-                       glTexCoord2f(1.0f, 0.0f);
-                       glVertex3d(x1, height, z0);
-                       
-
-
-                       //bottom right
-                       glTexCoord2f(1.0f, 1.0f);
-                       glVertex3d(x1, height, z1);
-                      }
-                     }
-
+                     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                     glColor3f(WHITE.r, WHITE.g, WHITE.b);
+                     glEnable(GL_LIGHTING);
+                   } else {
+                     //glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i quads
+                     glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
+                     drawPlane(sz, height, num_quads);
                     }
-                   glEnd();
 
-                 },
-                 false);
+                 }, false);
 }
 
 // hint: should be 100.0 20.0 20.0 --> see Sky constructor
@@ -196,21 +214,11 @@ void Env::drawSky(TexID texbind, double radius, int lats, int longs) {
                      glColor3f(WHITE.r, WHITE.g, WHITE.b);
                      glEnable(GL_LIGHTING);
                    } else {
-                     glBindTexture(GL_TEXTURE_2D, texbind);
-                     glEnable(GL_TEXTURE_2D);
-                     glEnable(GL_TEXTURE_GEN_S);
-                     glEnable(GL_TEXTURE_GEN_T);
-                     glTexGeni(GL_S, GL_TEXTURE_GEN_MODE,
-                               GL_SPHERE_MAP); // Env map
-                     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
                      glColor3f(WHITE.r, WHITE.g, WHITE.b);
                      glDisable(GL_LIGHTING);
 
                      drawSphere(radius, lats, longs);
-
-                     glDisable(GL_TEXTURE_GEN_S);
-                     glDisable(GL_TEXTURE_GEN_T);
-                     glDisable(GL_TEXTURE_2D);
+                    
                      glEnable(GL_LIGHTING);
                    }
 
@@ -230,17 +238,17 @@ void Env::drawSphere(double radius, int lats, int longs) {
     double zr1 = cos(lat1);
 
     glBegin(GL_QUAD_STRIP);
-    for (j = 0; j <= longs; j++) {
-      double lng = 2 * M_PI * (double)(j - 1) / longs;
-      double x = cos(lng);
-      double y = sin(lng);
+      for (j = 0; j <= longs; j++) {
+        double lng = 2 * M_PI * (double)(j - 1) / longs;
+        double x = cos(lng);
+        double y = sin(lng);
 
-      // Normal are needed for the EnvMap
-      glNormal3f(x * zr0, y * zr0, z0);
-      glVertex3f(radius * x * zr0, radius * y * zr0, radius * z0);
-      glNormal3f(x * zr1, y * zr1, z1);
-      glVertex3f(radius * x * zr1, radius * y * zr1, radius * z1);
-    }
+        // Normal are needed for the EnvMap
+        glNormal3f(x * zr0, y * zr0, z0);
+        glVertex3f(radius * x * zr0, radius * y * zr0, radius * z0);
+        glNormal3f(x * zr1, y * zr1, z1);
+        glVertex3f(radius * x * zr1, radius * y * zr1, radius * z1);
+      }
     glEnd();
   }
 }

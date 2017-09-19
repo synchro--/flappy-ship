@@ -60,9 +60,11 @@ Sky *get_sky(const char *texture_filename) {
   return s_sky.get();
 }
 
-/*
- *  Starring: Spaceship class.
- */
+/*                                *
+ *                                *
+ *  Starring: Spaceship class.    *
+ *                                *
+ */                               
 
 using namespace spaceship;
 
@@ -266,7 +268,7 @@ void Spaceship::render() const {
   m_env.mat_scope([&] {
     agl::Vec3 viewUP = agl::Vec3(0, 1, 0);
     agl::Vec3 front = agl::Vec3(0, 0, 1);
-    lg::i(__func__, "translating to position %f %f %f", m_px, m_py, m_pz);
+  //  lg::i(__func__, "translating to position %f %f %f", m_px, m_py, m_pz);
     
     // translate the ship according to its coordinates
     m_env.translate(m_px, m_py, m_pz);

@@ -209,6 +209,7 @@ public:
 
   // drawing functions
   void drawFloor(TexID texbind, float sz, float height, size_t num_quads);
+  void drawPlane(float sz, float height, size_t num_quads); 
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
 
