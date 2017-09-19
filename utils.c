@@ -128,3 +128,67 @@ void Env::drawTorus(float r, float R) {
     glEnd();
   }
 }
+
+//old do_step computation 
+----
+  // computiamo l'evolversi della macchina
+  float speed_xm, speed_ym, speed_zm; // velocita' in spazio macchina
+
+  // da vel frame mondo a vel frame macchina
+//  float cosf = cos(m_facing * M_PI / 180.0);
+//  float sinf = sin(m_facing * M_PI / 180.0);
+  float cosf = cos(m_angle * M_PI / 180.0);
+  float sinf = sin(m_angle * M_PI / 180.0);
+  speed_xm = +cosf * m_speedX - sinf * m_speedZ;
+  //speed_ym = m_speedY;
+  speed_zm = +sinf * m_speedX + cosf * m_speedZ;
+
+  bool left = get_state(Motion::STEER_L);
+  bool right = get_state(Motion::STEER_R);
+
+  if (left ^ right) {
+    int sign = left ? 1 : -1;
+
+    m_steering += sign * m_steer_speed;
+    m_steering *= m_steer_return;
+  }
+
+  bool throttle = get_state(Motion::THROTTLE);
+  bool brake = get_state(Motion::BRAKE);
+
+  if (throttle ^ brake) {
+     lg::i(__func__, "lolo");
+    int sign = throttle ? 1 : -1;
+
+    m_speedZ += sign * m_max_acceleration;
+
+    // Spaceships don't fly backwards
+    //m_speedZ = (m_speedZ > 0.05) ? 0 : m_speedZ;
+  }
+
+  speed_xm *= m_frictionX;
+  //speed_ym *= m_frictionY;
+  speed_zm *= m_frictionZ;
+
+  // l'orientamento della macchina segue quello dello sterzo
+  // (a seconda della velocita' sulla z)
+  // ANGLE O FACING QUI??
+  m_angle = m_angle - (speed_zm * m_grip) * m_steering;
+
+  /* // rotazione mozzo ruote (a seconda della velocita' sulla z)
+   float da; // delta angolo
+   da = (360.0 * speed_zm) / (2.0 * M_PI * raggioRuotaA);
+   mozzoA += da;
+   da = (360.0 * speed_zm) / (2.0 * M_PI * raggioRuotaP);
+   mozzoP += da; */
+
+  // ritorno a vel coord mondo
+  m_speedX = +cosf * speed_xm + sinf * speed_zm;
+  m_speedY = speed_ym;
+  m_speedZ = -sinf * speed_xm + cosf * speed_zm;
+
+  // posizione = posizione + velocita * delta t (ma delta t e' costante)
+  m_px += m_speedX;
+ // m_py += m_speedY;
+  m_pz += m_speedZ;
+}

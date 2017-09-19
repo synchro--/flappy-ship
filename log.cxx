@@ -138,4 +138,4 @@ void panic(const char *tag, const char *fmt, ...) {
 
   s_logger.vpanic(tag, fmt, ap);
 }
-}
+} // namespace lg

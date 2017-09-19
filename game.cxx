@@ -5,23 +5,23 @@ namespace game {
 Game::Game(std::string gameID)
     : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACK_CAR),
       m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0),
-      m_env(agl::get_env()), m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr)
-      {}
+      m_env(agl::get_env()), m_main_win(nullptr), m_floor(nullptr),
+      m_sky(nullptr), m_ssh(nullptr) {}
 
 /*
-* Init the game:
-* 1. Obtain main window from the environment
-* 2. Load textures and mesh
-*/
+ * Init the game:
+ * 1. Obtain main window from the environment
+ * 2. Load textures and mesh
+ */
 void Game::init() {
   // changeState(game::Splash);
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
   m_main_win->show();
 
-  m_ssh = elements::get_spaceship("envmap_flipped.jpg", "Envos.obj");
   m_floor = elements::get_floor("truman-texture.jpg");
   m_sky = elements::get_sky("truman.jpg");
+  m_ssh = elements::get_spaceship("envmap_flipped.jpg", "Envos.obj");
 
   m_ssh->scale(0.6, 0.6, 0.6);
 }
@@ -39,7 +39,8 @@ void Game::changeState(game::State state) {
   }
 
   if (m_state == State::SPLASH && state == State::END) {
-    lg::e(TAG, "Can't go from Splash screen directly to the end. You can't skip to "
+    lg::e(TAG,
+          "Can't go from Splash screen directly to the end. You can't skip to "
           "the conclusion..");
   }
 
@@ -48,7 +49,7 @@ void Game::changeState(game::State state) {
   // change state and callback functions
   if (state == State::MENU && m_state == State::GAME) {
     m_state = state;
-  //  openMenu();
+    //  openMenu();
   }
 
   if (state == State::GAME && m_state == State::MENU) {
@@ -58,7 +59,7 @@ void Game::changeState(game::State state) {
 
   if (state == State::END && m_state == State::GAME) {
     m_state = state;
-   // gameOver();
+    // gameOver();
   }
 
   // shoudln't arrive here
@@ -74,7 +75,7 @@ void Game::gameAction() {
   m_deadline_time -= time_now - m_last_time;
 
   if (m_deadline_time < 0) { // let's leave a last second hope
-   // changeState(State::END);
+                             // changeState(State::END);
   }
 
   // check se gli anelli sono stati attraversati
@@ -122,35 +123,40 @@ void Game::gameOnKey(Key key, bool pressed) {
   // Only on key down
   case Key::F1:
     if (pressed) {
-        lg::i(__func__, "Changing camera");
+      lg::i(__func__, "Changing camera");
       change_camera_type();
-  } break;
+    }
+    break;
 
   case Key::F2:
     if (pressed) {
       m_env.toggle_wireframe();
-  } break;
+    }
+    break;
 
   case Key::F3:
     if (pressed) {
       m_env.toggle_envmap();
-  } break;
+    }
+    break;
 
   case Key::F4:
     if (pressed) {
       m_env.toggle_headlight();
-  } break;
+    }
+    break;
 
   case Key::F5:
     if (pressed) {
       m_env.toggle_shadow();
-  } break;
+    }
+    break;
 
   default:
     break;
   }
 
-  //send a command to the spaceship only if triggered
+  // send a command to the spaceship only if triggered
   if (trig_motion) {
     if (!m_game_started) {
       m_last_time = m_env.getTicks();
@@ -161,7 +167,7 @@ void Game::gameOnKey(Key key, bool pressed) {
     m_ssh->sendCommand(mt, pressed);
   }
 
-  //questo funziona OK
+  // questo funziona OK
 }
 
 /* Esegue il Rendering della scena */
@@ -191,7 +197,6 @@ void Game::gameRender() {
   // tutte le primitive mandate
   // DA METTERE DENTRO WINDOW!!!!! <---------
 
-
   // disegnamo i fps (frame x sec) come una barra a sinistra.
   // (vuota = 0 fps, piena = 100 fps)
 
@@ -216,9 +221,9 @@ void Game::gameRender() {
 }
 
 /*
-* Bind all the callbacks of the environment to the corresponding
-* functions of the GAME state.
-*/
+ * Bind all the callbacks of the environment to the corresponding
+ * functions of the GAME state.
+ */
 void Game::playGame() {
   // Using placeholders to perform currying, together with std::bind()
   // Each placeholder (_1, _2, etc.) represents a future argument that will be
@@ -235,9 +240,9 @@ void Game::playGame() {
 }
 
 /*
-* Run the game.
-* 1. Init; 2. Splash screen; 3. Main event loop
-*/
+ * Run the game.
+ * 1. Init; 2. Splash screen; 3. Main event loop
+ */
 void Game::run() {
   init();
 
@@ -261,7 +266,7 @@ void Game::setupShipCamera() {
 
   // controllo la posizione della camera a seconda dell'opzione selezionata
   switch (m_camera_type) {
-  
+
   case CAMERA_BACK_CAR:
     cam_d = 2.9;
     cam_h = 1.0;
@@ -329,4 +334,4 @@ void Game::setupShipCamera() {
     break;
   }
 }
-}
+} // namespace game

@@ -5,15 +5,15 @@
 namespace elements {
 
 /*
-* Floor
-*/
+ * Floor
+ */
 Floor::Floor(const char *texture_filename)
     : m_size(100.0f), m_height(0.0f), m_env(agl::get_env()),
       // repat = true, linear interpolation
-      m_tex(m_env.loadTexture(texture_filename, true)) {}
+      m_tex(m_env.loadTexture(texture_filename, true, false)) {}
 
 void Floor::render() {
-  //lg::i(__func__, "Rendering floor...");
+  // lg::i(__func__, "Rendering floor...");
   m_env.drawFloor(m_tex, m_size, m_height, 150);
 }
 
@@ -30,15 +30,15 @@ Floor *get_floor(const char *texture_filename) {
 }
 
 /*
-* Sky
-*/
+ * Sky
+ */
 
 Sky::Sky(const char *texture_filename)
     : m_radius(100.0f), m_lats(20.0f), m_longs(20.0f), m_env(agl::get_env()),
       m_tex(m_env.loadTexture(texture_filename, false)) {}
 
 void Sky::render() {
-  //lg::i(__func__, "Rendering Sky...");
+  // lg::i(__func__, "Rendering Sky...");
   m_env.drawSky(m_tex, m_radius, m_lats, m_longs);
 }
 
@@ -61,8 +61,8 @@ Sky *get_sky(const char *texture_filename) {
 }
 
 /*
-*  Starring: Spaceship class.
-*/
+ *  Starring: Spaceship class.
+ */
 
 using namespace spaceship;
 
@@ -78,17 +78,18 @@ std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
     s_Spaceship.reset(new Spaceship(texture_filename, mesh_filename)); // Init
 } */
 
-  return std::unique_ptr<Spaceship>(new Spaceship(texture_filename, 
-                                            mesh_filename)); //init 
+  return std::unique_ptr<Spaceship>(new Spaceship(texture_filename,
+                                                  mesh_filename)); // init
 }
 
 Spaceship::Spaceship(const char *texture_filename,
                      const char *mesh_filename) // da finire
-    : m_env(agl::get_env()), m_tex(m_env.loadTexture(texture_filename)),                                 // no texture for now
-       m_mesh(agl::loadMesh(mesh_filename)) // TODO
-      {
-          init();
-      }
+    : m_env(agl::get_env()),
+      m_tex(m_env.loadTexture(texture_filename)), // no texture for now
+      m_mesh(agl::loadMesh(mesh_filename))        // TODO
+{
+  init();
+}
 
 void Spaceship::init() {
   m_scaleX = m_scaleY = m_scaleZ = 1.0;
@@ -96,8 +97,10 @@ void Spaceship::init() {
   m_px = m_pz = 0;
   m_py = 1.0; // Spaceship skills™
 
-  m_facing = m_steering = m_angle = 0.0;
+  m_facing = m_steering = 0.0;
   m_speedX = m_speedY = m_speedZ = 0.0;
+
+  /*++ Setting up constant ++*/
 
   // strong friction on X-axis, if you wanna drift, go buy Need For Speed
   m_frictionX = 0.9;
@@ -107,28 +110,28 @@ void Spaceship::init() {
   m_frictionZ = 0.991;
 
   m_steer_speed = 3.4;         // A
-  m_steer_return_speed = 0.93; // B ==> max steering = A*B / (1-B) == 2.4
+  m_steer_return = 0.93; // B ==> max steering = A*B / (1-B) == 2.4
 
   m_max_acceleration = 0.0011;
 
-  //init internal states
+  // init internal states
   m_state = {false};
 }
 
 // draw the ship as a textured mesh, using the helper functions defined
 // in the Env class.
 void Spaceship::draw() const {
-   m_env.textureDrawing(m_tex, [&]{
-          m_env.mat_scope([&] {
-            m_env.scale(m_scaleX, m_scaleY, m_scaleZ);
+  m_env.textureDrawing(m_tex, [&] {
+    m_env.mat_scope([&] {
+      m_env.scale(m_scaleX, m_scaleY, m_scaleZ);
 
-            m_mesh->renderGouraud(m_env.isWireframe());
-           });
+      m_mesh->renderGouraud(m_env.isWireframe());
+    });
   }); // generate coords automatically, true by default
 
   // if headlight is on in the Env, then draw headlights
   if (m_env.isHeadlight()) {
-    //drawHeadlight(0, 0, -1, 10);
+    // drawHeadlight(0, 0, -1, 10);
   }
 }
 
@@ -160,18 +163,16 @@ void Spaceship::drawHeadlight(float x, float y, float z, int lightN) const {
 
 // DA FARE + MODULARE
 void Spaceship::doMotion() {
+  // Here we compute the evolution of the Spaceship during time
 
-  // computiamo l'evolversi della macchina
-  float speed_xm, speed_ym, speed_zm; // velocita' in spazio macchina
+  float vel_xm, vel_ym, vel_zm; // velocita in spazio macchina
 
   // da vel frame mondo a vel frame macchina
-//  float cosf = cos(m_facing * M_PI / 180.0);
-//  float sinf = sin(m_facing * M_PI / 180.0);
-  float cosf = cos(m_angle * M_PI / 180.0);
-  float sinf = sin(m_angle * M_PI / 180.0);
-  speed_xm = +cosf * m_speedX - sinf * m_speedZ;
-  //speed_ym = m_speedY;
-  speed_zm = +sinf * m_speedX + cosf * m_speedZ;
+  float cosf = cos(m_facing * M_PI / 180.0);
+  float sinf = sin(m_facing * M_PI / 180.0);
+  vel_xm = +cosf * m_speedX - sinf * m_speedZ;
+  // vel_ym = m_speedY;
+  vel_zm = +sinf * m_speedX + cosf * m_speedZ;
 
   bool left = get_state(Motion::STEER_L);
   bool right = get_state(Motion::STEER_R);
@@ -180,58 +181,48 @@ void Spaceship::doMotion() {
     int sign = left ? 1 : -1;
 
     m_steering += sign * m_steer_speed;
-    m_steering *= m_steer_return_speed;
+    m_steering *= m_steer_return;
   }
 
   bool throttle = get_state(Motion::THROTTLE);
   bool brake = get_state(Motion::BRAKE);
 
   if (throttle ^ brake) {
-     lg::i(__func__, "lolo");
     int sign = throttle ? 1 : -1;
 
-    m_speedZ += sign * m_max_acceleration;
+    vel_zm += sign * m_max_acceleration;
 
     // Spaceships don't fly backwards
-    //m_speedZ = (m_speedZ > 0.05) ? 0 : m_speedZ;
+    // vel_zm = (vel_zm > 0.05) ? 0 : vel_zm;
   }
 
-  speed_xm *= m_frictionX;
-  //speed_ym *= m_frictionY;
-  speed_zm *= m_frictionZ;
+  vel_xm *= m_frictionX;
+  // vel_ym *= m_frictionY;
+  vel_zm *= m_frictionZ;
 
   // l'orientamento della macchina segue quello dello sterzo
   // (a seconda della velocita' sulla z)
-  // ANGLE O FACING QUI??
-  m_angle = m_angle - (speed_zm * m_grip) * m_steering;
-
-  /* // rotazione mozzo ruote (a seconda della velocita' sulla z)
-   float da; // delta angolo
-   da = (360.0 * speed_zm) / (2.0 * M_PI * raggioRuotaA);
-   mozzoA += da;
-   da = (360.0 * speed_zm) / (2.0 * M_PI * raggioRuotaP);
-   mozzoP += da; */
+  m_facing = m_facing - (vel_zm * m_grip) * m_steering;
 
   // ritorno a vel coord mondo
-  m_speedX = +cosf * speed_xm + sinf * speed_zm;
-  m_speedY = speed_ym;
-  m_speedZ = -sinf * speed_xm + cosf * speed_zm;
+  m_speedX = +cosf * vel_xm + sinf * vel_zm;
+  m_speedY = vel_ym;
+  m_speedZ = -sinf * vel_xm + cosf * vel_zm;
 
   // posizione = posizione + velocita * delta t (ma delta t e' costante)
   m_px += m_speedX;
- // m_py += m_speedY;
+  // m_py += m_speedY;
   m_pz += m_speedZ;
 }
 
 void Spaceship::execute() {
-    //later on will be added an abstraction on doMotion
-    //and doMotion will be divided into several modular method
-    processCommand();
-    doMotion();
+  // later on will be added an abstraction on doMotion
+  // and doMotion will be divided into several modular method
+  processCommand();
+  doMotion();
 }
 
 bool Spaceship::get_state(Motion mt) { return m_state[mt]; }
-
 
 const std::string motion_to_str(Motion m) {
   switch (m) {
@@ -252,7 +243,7 @@ const std::string motion_to_str(Motion m) {
     return "Motion not recognized!!";
     lg::panic(__func__, "!! Motion not recognized !!");
   }
- }
+}
 
 void Spaceship::processCommand() {
   const static auto TAG = __func__;
@@ -276,16 +267,18 @@ void Spaceship::render() const {
     agl::Vec3 viewUP = agl::Vec3(0, 1, 0);
     agl::Vec3 front = agl::Vec3(0, 0, 1);
     lg::i(__func__, "translating to position %f %f %f", m_px, m_py, m_pz);
-                 // translate the ship according to its coordinates
-                 m_env.translate(m_px, m_py, m_pz);
-    // rotate the ship according to its angle and facing
-    m_env.rotate(m_angle, viewUP);
-    // steering
+    
+    // translate the ship according to its coordinates
+    m_env.translate(m_px, m_py, m_pz);
 
-    m_env.rotate(-m_steering, front);
+    // rotate the ship according to the facing direction 
+    m_env.rotate(m_facing, viewUP);
+    
+    // rotate the ship acc. to steering val, to represent tilting
+    m_env.rotate(m_steering, front);
 
     draw();
-});
+  });
 }
 
 void Spaceship::rotateView() {
@@ -295,7 +288,6 @@ void Spaceship::rotateView() {
   m_env.rotate(m_view_beta, axisX);
   m_env.rotate(m_view_alpha, axisY);
 }
-
 
 void Spaceship::sendCommand(Motion motion, bool on_off) {
   if (motion >= Motion::N_MOTION) {
@@ -324,6 +316,4 @@ void Spaceship::shadow() const {
   m_env.enableLighting();
 }
 
-}
-
-
+} // namespace elements

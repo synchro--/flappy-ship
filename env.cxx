@@ -136,19 +136,42 @@ void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
                  [&] {
                    // draw num_quads^2 number of quads
                    glBegin(GL_QUADS);
-                   glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i quads
+                   {
+                   //glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i quads
                    glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
-                   for (int x = 0; x < num_quads; x++)
-                     for (int z = 0; z < num_quads; z++) {
-                       float x0 = -sz + 2 * (x + 0) * sz / num_quads;
-                       float x1 = -sz + 2 * (x + 1) * sz / num_quads;
-                       float z0 = -sz + 2 * (z + 0) * sz / num_quads;
-                       float z1 = -sz + 2 * (z + 1) * sz / num_quads;
-                       glVertex3d(x0, height, z0);
-                       glVertex3d(x1, height, z0);
-                       glVertex3d(x1, height, z1);
+                   auto ratio = (double) sz / num_quads; 
+
+                   for (size_t x = 0; x < num_quads; ++x) {
+                     for (size_t z = 0; z < num_quads; ++z) {
+                       float x0 = -sz + 2 * (x + 0) * ratio; 
+                       float x1 = -sz + 2 * (x + 1) * ratio; 
+                       float z0 = -sz + 2 * (z + 0) * ratio; 
+                       float z1 = -sz + 2 * (z + 1) * ratio; 
+
+                       // set coords for the texture manually 
+                       // (so, remember to specify false in textureDrawing)
+
+                       // bottom left
+                       glTexCoord2f(0.0f, 1.0f);
                        glVertex3d(x0, height, z1);
+
+                       // top left 
+                       glTexCoord2f(0.0f, 0.0f); 
+                       glVertex3d(x0, height, z0);
+                       
+                       // top right 
+                       glTexCoord2f(1.0f, 0.0f);
+                       glVertex3d(x1, height, z0);
+                       
+
+
+                       //bottom right
+                       glTexCoord2f(1.0f, 1.0f);
+                       glVertex3d(x1, height, z1);
+                      }
                      }
+
+                    }
                    glEnd();
 
                  },
@@ -222,20 +245,17 @@ void Env::drawSphere(double radius, int lats, int longs) {
   }
 }
 
-
-void Env::lineWidth(float width) {
-  glLineWidth(width);
-}
+void Env::lineWidth(float width) { glLineWidth(width); }
 
 // Load texture from image file.
 // repeat == true --> GL_REPEAT for s and t coordinates
 // nearest == true --> apply neareast neighbour interpolation
 /*
-* N.B: While linear interpolation gives a smoother result,
-* it isn't always the most ideal option. Nearest neighbour interpolation
-* is more suited in games that want to mimic 8 bit graphics,
-* because of the pixelated look.
-*/
+ * N.B: While linear interpolation gives a smoother result,
+ * it isn't always the most ideal option. Nearest neighbour interpolation
+ * is more suited in games that want to mimic 8 bit graphics,
+ * because of the pixelated look.
+ */
 
 TexID Env::loadTexture(const char *filename, bool repeat, bool nearest) {
 
@@ -300,16 +320,13 @@ void Env::rotate(float angle, const Vec3 &axis) {
 void Env::scale(float x, float y, float z) { glScalef(x, y, z); }
 
 void Env::setCamera(double eye_x, double eye_y, double eye_z, double aim_x,
-                     double aim_y, double aim_z,
-                     double upX, double upY, double upZ) {
+                    double aim_y, double aim_z, double upX, double upY,
+                    double upZ) {
   // up vector looking at the sky (0,+y,0)
-  gluLookAt(eye_x, eye_y, eye_z, aim_x, aim_y, aim_z,
-    upX, upY, upZ);
+  gluLookAt(eye_x, eye_y, eye_z, aim_x, aim_y, aim_z, upX, upY, upZ);
 }
 
-void Env::setColor(const Color &c) {
-    glColor4f(c.r, c.g, c.b, c.a);
-}
+void Env::setColor(const Color &c) { glColor4f(c.r, c.g, c.b, c.a); }
 
 // setta le matrici di trasformazione in modo
 // che le coordinate in spazio oggetto siano le coord
@@ -359,7 +376,8 @@ void Env::setupPersp() {
 // Helper function to draw textured objects
 // Accepts a lambda as a drawing function to be called afte the texture
 // is applied.
-void Env::textureDrawing(TexID texbind, std::function<void()> callback, bool gen_coordinates) {
+void Env::textureDrawing(TexID texbind, std::function<void()> callback,
+                         bool gen_coordinates) {
 
   glBindTexture(GL_TEXTURE_2D, texbind);
   glEnable(GL_TEXTURE_2D);
@@ -493,124 +511,124 @@ void Env::mainLoop() {
         break;
       }
 
-      /* DOVREBBE ESSERE INUTILE
-      else {
-        windowID = SDL_GetWindowID(win);
-        if (e.window.windowID == windowID) {
-          switch (e.window.event) {
-          case SDL_WINDOWEVENT_SIZE_CHANGED: {
+        /* DOVREBBE ESSERE INUTILE
+        else {
+          windowID = SDL_GetWindowID(win);
+          if (e.window.windowID == windowID) {
+            switch (e.window.event) {
+            case SDL_WINDOWEVENT_SIZE_CHANGED: {
 
-            m_win.
-            glViewport(0, 0, scrW, scrH);
-            rendering(win, car);
-            // redraw(); // richiedi ridisegno
-            break;
+              m_win.
+              glViewport(0, 0, scrW, scrH);
+              rendering(win, car);
+              // redraw(); // richiedi ridisegno
+              break;
+            }
+            }
           }
-          }
-        }
-      } //ELSE */
+        } //ELSE */
 
-      /*
-      TODO: handle joystick and mouse motion
+        /*
+        TODO: handle joystick and mouse motion
 
-     case SDL_MOUSEMOTION:
-       handler = m_mouse_event_handler();
-       if (e.motion.state & SDL_BUTTON(1) & m_camera_type == CAMERA_MOUSE) {
-         view_alpha += e.motion.xrel;
-         view_beta += e.motion.yrel;
-         // if (m_view_beta<-90) m_view_beta=-90;
-         if (view_beta < +5)
-           view_beta = +5; // per non andare sotto la macchina
-         if (view_beta > +90)
-           view_beta = +90;
+       case SDL_MOUSEMOTION:
+         handler = m_mouse_event_handler();
+         if (e.motion.state & SDL_BUTTON(1) & m_camera_type == CAMERA_MOUSE) {
+           view_alpha += e.motion.xrel;
+           view_beta += e.motion.yrel;
+           // if (m_view_beta<-90) m_view_beta=-90;
+           if (view_beta < +5)
+             view_beta = +5; // per non andare sotto la macchina
+           if (view_beta > +90)
+             view_beta = +90;
 
 
-       }
-       break;
-
-     case SDL_MOUSEWHEEL:
-       if (e.wheel.y < 0) {
-         // avvicino il punto di vista (zoom in)
-         m_eye_dist = m_eye_dist * 0.9;
-         m_eye_dist =
-             m_eye_dist < 1 ? 1 : m_eye_dist; // eyedist can't less than 1
-       };
-       if (e.wheel.y > 0) {
-         // allontano il punto di vista (zoom out)
-         m_eye_dist = m_eye_dist / 0.9;
-       };
-       break;
-
-     case SDL_JOYAXISMOTION: // Handle Joystick Motion
-       if (e.jaxis.axis == 0) {
-         if (e.jaxis.value < -3200) {
-           car.controller.Joy(0, true);
-           car.controller.Joy(1, false);
-           //	      printf("%d <-3200 \n",e.jaxis.value);
          }
-         if (e.jaxis.value > 3200) {
-           car.controller.Joy(0, false);
-           car.controller.Joy(1, true);
-           //	      printf("%d >3200 \n",e.jaxis.value);
-         }
-         if (e.jaxis.value >= -3200 && e.jaxis.value <= 3200) {
-           car.controller.Joy(0, false);
-           car.controller.Joy(1, false);
-           //	      printf("%d in [-3200,3200] \n",e.jaxis.value);
-         }
-         rendering(win, car);
-         // redraw();
-       }
-       break;
+         break;
 
-       //handle joystick buttons
-     case SDL_JOYBUTTONDOWN:
-       if (e.jbutton.button == 0) {
-         car.controller.Joy(2, true);
-         //	   printf("jbutton 0\n");
-       }
-       if (e.jbutton.button == 2) {
-         car.controller.Joy(3, true);
-         //	   printf("jbutton 2\n");
-       }
-       break;
-     case SDL_JOYBUTTONUP:
-       car.controller.Joy(2, false);
-       car.controller.Joy(3, false);
-       break;
-     }
-   }
+       case SDL_MOUSEWHEEL:
+         if (e.wheel.y < 0) {
+           // avvicino il punto di vista (zoom in)
+           m_eye_dist = m_eye_dist * 0.9;
+           m_eye_dist =
+               m_eye_dist < 1 ? 1 : m_eye_dist; // eyedist can't less than 1
+         };
+         if (e.wheel.y > 0) {
+           // allontano il punto di vista (zoom out)
+           m_eye_dist = m_eye_dist / 0.9;
+         };
+         break;
 
-   */
-
-      /** da eliminare **
-         else {
-           // nessun evento: siamo IDLE
-
-
-           bool doneSomething = false;
-           int guardia = 0; // sicurezza da loop infinito
-
-           // finche' il tempo simulato e' rimasto indietro rispetto
-           // al tempo reale...
-           while (nstep * PHYS_SAMPLING_STEP < timeNow) {
-             car.DoStep();
-             nstep++;
-             doneSomething = true;
-             timeNow = SDL_GetTicks();
-             if (guardia++ > 1000) {
-               quit = true;
-               break;
-             } // siamo troppo lenti!
+       case SDL_JOYAXISMOTION: // Handle Joystick Motion
+         if (e.jaxis.axis == 0) {
+           if (e.jaxis.value < -3200) {
+             car.controller.Joy(0, true);
+             car.controller.Joy(1, false);
+             //	      printf("%d <-3200 \n",e.jaxis.value);
            }
-
-           if (doneSomething)
-             rendering(win, car);
+           if (e.jaxis.value > 3200) {
+             car.controller.Joy(0, false);
+             car.controller.Joy(1, true);
+             //	      printf("%d >3200 \n",e.jaxis.value);
+           }
+           if (e.jaxis.value >= -3200 && e.jaxis.value <= 3200) {
+             car.controller.Joy(0, false);
+             car.controller.Joy(1, false);
+             //	      printf("%d in [-3200,3200] \n",e.jaxis.value);
+           }
+           rendering(win, car);
            // redraw();
+         }
+         break;
+
+         //handle joystick buttons
+       case SDL_JOYBUTTONDOWN:
+         if (e.jbutton.button == 0) {
+           car.controller.Joy(2, true);
+           //	   printf("jbutton 0\n");
+         }
+         if (e.jbutton.button == 2) {
+           car.controller.Joy(3, true);
+           //	   printf("jbutton 2\n");
+         }
+         break;
+       case SDL_JOYBUTTONUP:
+         car.controller.Joy(2, false);
+         car.controller.Joy(3, false);
+         break;
+       }
+     }
+
+     */
+
+        /** da eliminare **
            else {
-             // tempo libero!!!
-           }
-         }*/
+             // nessun evento: siamo IDLE
+
+
+             bool doneSomething = false;
+             int guardia = 0; // sicurezza da loop infinito
+
+             // finche' il tempo simulato e' rimasto indietro rispetto
+             // al tempo reale...
+             while (nstep * PHYS_SAMPLING_STEP < timeNow) {
+               car.DoStep();
+               nstep++;
+               doneSomething = true;
+               timeNow = SDL_GetTicks();
+               if (guardia++ > 1000) {
+                 quit = true;
+                 break;
+               } // siamo troppo lenti!
+             }
+
+             if (doneSomething)
+               rendering(win, car);
+             // redraw();
+             else {
+               // tempo libero!!!
+             }
+           }*/
 
       default:
         break;
@@ -621,11 +639,11 @@ void Env::mainLoop() {
 
     m_action_handler();
 
-    //Render once each cycle
+    // Render once each cycle
     render();
 
   } // while loop
-  
- } //function mainLoop
 
-} //namespace agl
+} // function mainLoop
+
+} // namespace agl

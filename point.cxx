@@ -1,10 +1,10 @@
 #include "agl.h"
 
 /*
-* The Point3 class defines all the operations regarding a 3D-Point,
-* 3D-vector and 3D-vertex.
-* Note that a 3D-vector (Vec3) is an alias for an actual Point3
-*/
+ * The Point3 class defines all the operations regarding a 3D-Point,
+ * 3D-vector and 3D-vertex.
+ * Note that a 3D-vector (Vec3) is an alias for an actual Point3
+ */
 
 namespace agl {
 
@@ -12,7 +12,7 @@ namespace agl {
 Point3::Point3(float x, float y, float z) : x(x), y(y), z(z) {}
 
 // empty constructor:
-//Point3::Point3() : x(0), y(0), z(0) {}
+// Point3::Point3() : x(0), y(0), z(0) {}
 
 // restituisce il modulo
 float Point3::modulo() const { return sqrt(x * x + y * y + z * z); }
@@ -36,7 +36,7 @@ Point3 Point3::operator+(const Point3 &other) const {
   return Point3(x + other.x, y + other.y, z + other.z);
 }
 
-Point3& Point3::operator+=(const Point3& other) {
+Point3 &Point3::operator+=(const Point3 &other) {
   x += other.x;
   y += other.y;
   z += other.z;
@@ -72,4 +72,4 @@ void Vertex::render(bool send_normal) const {
   float coords[]{point.x, point.y, point.z};
   glVertex3fv(coords);
 }
-}
+} // namespace agl

@@ -18,8 +18,8 @@ int main(int argc, char **argv) {
   }
   lg::set_level(lg::Level::INFO);
 
-  //std::string name(argv[1]);
-  std::string name("Ciao"); 
+  // std::string name(argv[1]);
+  std::string name("Ciao");
   game::Game game(name);
   game.run();
 
