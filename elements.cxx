@@ -78,7 +78,8 @@ std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
     s_Spaceship.reset(new Spaceship(texture_filename, mesh_filename)); // Init
 } */
 
-  return std::unique_ptr<Spaceship>(new Spaceship(texture_filename, mesh_filename));
+  return std::unique_ptr<Spaceship>(new Spaceship(texture_filename, 
+                                            mesh_filename)); //init 
 }
 
 Spaceship::Spaceship(const char *texture_filename,
@@ -90,7 +91,7 @@ Spaceship::Spaceship(const char *texture_filename,
       }
 
 void Spaceship::init() {
-  m_scaleX = m_scaleY = m_scaleZ = 0.6;
+  m_scaleX = m_scaleY = m_scaleZ = 1.0;
 
   m_px = m_pz = 0;
   m_py = 1.0; // Spaceship skills™
@@ -112,59 +113,6 @@ void Spaceship::init() {
 
   //init internal states
   m_state = {false};
-}
-
-bool Spaceship::get_state(Motion mt) { return m_state[mt]; }
-
-void Spaceship::execute() {
-    //later on will be added an abstraction on doMotion
-    //and doMotion will be divided into several modular method
-    processCommand();
-    doMotion();
-}
-
-void Spaceship::processCommand() {
-  const static auto TAG = __func__;
-
-  if (!m_cmds.empty()) {
-    // read and pop command
-    Command cmd = m_cmds.front();
-    m_cmds.pop();
-
-    // get command name in string in order to log
-    std::string mt = motion_to_str(cmd.first);
-    lg::i(TAG, "Spaceship is processing command %s", mt.c_str());
-
-    // set the state
-    m_state[cmd.first] = cmd.second;
-  }
-}
-
-void Spaceship::sendCommand(Motion motion, bool on_off) {
-  if (motion >= Motion::N_MOTION) {
-    lg::panic(__func__, "Command not recognized!!");
-  }
-
-  // construct and submit a new pair
-  m_cmds.emplace(motion, on_off);
-}
-
-void Spaceship::setScale(float x, float y, float z) {
-  m_scaleX = x;
-  m_scaleY = y;
-  m_scaleZ = z;
-}
-
-void Spaceship::shadow() const {
-  const auto c = agl::SHADOW;
-
-  m_env.setColor(c);
-  m_env.translate(0, 0.01, 0); // avoid z-fighting with the floor(
-  m_env.scale(1.01, 0, 1.01);  // squash on Y, 1% scaling-up on X and Z
-
-  m_env.disableLighting();
-  // renderAllParts
-  m_env.enableLighting();
 }
 
 // draw the ship as a textured mesh, using the helper functions defined
@@ -210,6 +158,119 @@ void Spaceship::drawHeadlight(float x, float y, float z, int lightN) const {
   glLightf(usedLight, GL_LINEAR_ATTENUATION, 1);
 }
 
+// DA FARE + MODULARE
+void Spaceship::doMotion() {
+
+  // computiamo l'evolversi della macchina
+  float speed_xm, speed_ym, speed_zm; // velocita' in spazio macchina
+
+  // da vel frame mondo a vel frame macchina
+//  float cosf = cos(m_facing * M_PI / 180.0);
+//  float sinf = sin(m_facing * M_PI / 180.0);
+  float cosf = cos(m_angle * M_PI / 180.0);
+  float sinf = sin(m_angle * M_PI / 180.0);
+  speed_xm = +cosf * m_speedX - sinf * m_speedZ;
+  //speed_ym = m_speedY;
+  speed_zm = +sinf * m_speedX + cosf * m_speedZ;
+
+  bool left = get_state(Motion::STEER_L);
+  bool right = get_state(Motion::STEER_R);
+
+  if (left ^ right) {
+    int sign = left ? 1 : -1;
+
+    m_steering += sign * m_steer_speed;
+    m_steering *= m_steer_return_speed;
+  }
+
+  bool throttle = get_state(Motion::THROTTLE);
+  bool brake = get_state(Motion::BRAKE);
+
+  if (throttle ^ brake) {
+     lg::i(__func__, "lolo");
+    int sign = throttle ? 1 : -1;
+
+    m_speedZ += sign * m_max_acceleration;
+
+    // Spaceships don't fly backwards
+    //m_speedZ = (m_speedZ > 0.05) ? 0 : m_speedZ;
+  }
+
+  speed_xm *= m_frictionX;
+  //speed_ym *= m_frictionY;
+  speed_zm *= m_frictionZ;
+
+  // l'orientamento della macchina segue quello dello sterzo
+  // (a seconda della velocita' sulla z)
+  // ANGLE O FACING QUI??
+  m_angle = m_angle - (speed_zm * m_grip) * m_steering;
+
+  /* // rotazione mozzo ruote (a seconda della velocita' sulla z)
+   float da; // delta angolo
+   da = (360.0 * speed_zm) / (2.0 * M_PI * raggioRuotaA);
+   mozzoA += da;
+   da = (360.0 * speed_zm) / (2.0 * M_PI * raggioRuotaP);
+   mozzoP += da; */
+
+  // ritorno a vel coord mondo
+  m_speedX = +cosf * speed_xm + sinf * speed_zm;
+  m_speedY = speed_ym;
+  m_speedZ = -sinf * speed_xm + cosf * speed_zm;
+
+  // posizione = posizione + velocita * delta t (ma delta t e' costante)
+  m_px += m_speedX;
+ // m_py += m_speedY;
+  m_pz += m_speedZ;
+}
+
+void Spaceship::execute() {
+    //later on will be added an abstraction on doMotion
+    //and doMotion will be divided into several modular method
+    processCommand();
+    doMotion();
+}
+
+bool Spaceship::get_state(Motion mt) { return m_state[mt]; }
+
+
+const std::string motion_to_str(Motion m) {
+  switch (m) {
+  case Motion::THROTTLE:
+    return "THROTTLE";
+
+  case Motion::STEER_R:
+    return "RIGHT STEERING";
+
+  case Motion::STEER_L:
+    return "LEFT STEERING";
+
+  case Motion::BRAKE:
+    return "BRAKE";
+
+  default:
+    // shouldn't arrive here
+    return "Motion not recognized!!";
+    lg::panic(__func__, "!! Motion not recognized !!");
+  }
+ }
+
+void Spaceship::processCommand() {
+  const static auto TAG = __func__;
+
+  if (!m_cmds.empty()) {
+    // read and pop command
+    Command cmd = m_cmds.front();
+    m_cmds.pop();
+
+    // get command name in string in order to log
+    std::string mt = motion_to_str(cmd.first);
+    lg::i(TAG, "Spaceship is processing command %s", mt.c_str());
+
+    // set the state
+    m_state[cmd.first] = cmd.second;
+  }
+}
+
 void Spaceship::render() const {
   m_env.mat_scope([&] {
     agl::Vec3 viewUP = agl::Vec3(0, 1, 0);
@@ -235,86 +296,34 @@ void Spaceship::rotateView() {
   m_env.rotate(m_view_alpha, axisY);
 }
 
-// DA FARE + MODULARE
-void Spaceship::doMotion() {
 
-  // computiamo l'evolversi della macchina
-  float speed_xm, speed_ym, speed_zm; // velocita' in spazio macchina
-
-  // da vel frame mondo a vel frame macchina
-  float cosf = cos(m_facing * M_PI / 180.0);
-  float sinf = sin(m_facing * M_PI / 180.0);
-  speed_xm = +cosf * m_speedX - sinf * m_speedZ;
-  speed_ym = m_speedY;
-  speed_zm = +sinf * m_speedX + cosf * m_speedZ;
-
-  bool left = get_state(Motion::STEER_L);
-  bool right = get_state(Motion::STEER_R);
-
-  if (left ^ right) {
-    int sign = left ? 1 : -1;
-
-    m_steering += sign * m_steer_speed;
-    m_steering *= m_steer_return_speed;
+void Spaceship::sendCommand(Motion motion, bool on_off) {
+  if (motion >= Motion::N_MOTION) {
+    lg::panic(__func__, "Command not recognized!!");
   }
 
-  bool throttle = get_state(Motion::THROTTLE);
-  bool brake = get_state(Motion::BRAKE);
-
-  if (throttle ^ brake) {
-     lg::i(__func__, "lolo");
-    int sign = throttle ? 1 : -1;
-
-    m_speedZ -= sign * m_max_acceleration;
-
-    // Spaceships don't fly backwards
-    m_speedZ = (m_speedZ > 0.05) ? 0 : m_speedZ;
-  }
-
-  speed_xm *= m_frictionX;
-  speed_ym *= m_frictionY;
-  speed_zm *= m_frictionZ;
-
-  // l'orientamento della macchina segue quello dello sterzo
-  // (a seconda della velocita' sulla z)
-  m_facing = m_facing - (speed_zm * m_grip) * m_steering;
-
-  /* // rotazione mozzo ruote (a seconda della velocita' sulla z)
-   float da; // delta angolo
-   da = (360.0 * speed_zm) / (2.0 * M_PI * raggioRuotaA);
-   mozzoA += da;
-   da = (360.0 * speed_zm) / (2.0 * M_PI * raggioRuotaP);
-   mozzoP += da; */
-
-  // ritorno a vel coord mondo
-  m_speedX = +cosf * speed_xm + sinf * speed_zm;
-  m_speedY = speed_ym;
-  m_speedZ = -sinf * speed_xm + cosf * speed_zm;
-
-  // posizione = posizione + velocita * delta t (ma delta t e' costante)
-  m_px += m_speedX;
-  m_py += m_speedY;
-  m_pz += m_speedZ;
+  // construct and submit a new pair
+  m_cmds.emplace(motion, on_off);
 }
 
-const std::string motion_to_str(Motion m) {
-  switch (m) {
-  case Motion::THROTTLE:
-    return "THROTTLE";
-
-  case Motion::STEER_R:
-    return "RIGHT STEERING";
-
-  case Motion::STEER_L:
-    return "LEFT STEERING";
-
-  case Motion::BRAKE:
-    return "BRAKE";
-
-  default:
-    // shouldn't arrive here
-    return "Motion not recognized!!";
-    lg::panic(__func__, "!! Motion not recognized !!");
-  }
- }
+void Spaceship::scale(float x, float y, float z) {
+  m_scaleX = x;
+  m_scaleY = y;
+  m_scaleZ = z;
 }
+
+void Spaceship::shadow() const {
+  const auto c = agl::SHADOW;
+
+  m_env.setColor(c);
+  m_env.translate(0, 0.01, 0); // avoid z-fighting with the floor(
+  m_env.scale(1.01, 0, 1.01);  // squash on Y, 1% scaling-up on X and Z
+
+  m_env.disableLighting();
+  // renderAllParts
+  m_env.enableLighting();
+}
+
+}
+
+

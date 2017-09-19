@@ -1,4 +1,4 @@
-CXXFLAGS = -std=gnu++11 
+CXXFLAGS = -std=gnu++11 -g
 LDFLAGS = -lm -lSDL2 -lSDL2_ttf -lSDL2_image -lGLU -lGL
 SRCS = $(wildcard *.cxx)
 OBJS = $(patsubst %.cxx,%.o,$(SRCS))

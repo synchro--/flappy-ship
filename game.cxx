@@ -23,7 +23,7 @@ void Game::init() {
   m_floor = elements::get_floor("truman-texture.jpg");
   m_sky = elements::get_sky("truman.jpg");
 
-  m_ssh->setScale(0.6, 0.6, 0.6);
+  m_ssh->scale(0.6, 0.6, 0.6);
 }
 
 void Game::changeState(game::State state) {
@@ -74,7 +74,7 @@ void Game::gameAction() {
   m_deadline_time -= time_now - m_last_time;
 
   if (m_deadline_time < 0) { // let's leave a last second hope
-    changeState(State::END);
+   // changeState(State::END);
   }
 
   // check se gli anelli sono stati attraversati
@@ -161,6 +161,7 @@ void Game::gameOnKey(Key key, bool pressed) {
     m_ssh->sendCommand(mt, pressed);
   }
 
+  //questo funziona OK
 }
 
 /* Esegue il Rendering della scena */
@@ -247,6 +248,7 @@ void Game::run() {
 }
 
 void Game::setupShipCamera() {
+  // angle of the SShip wrt to X-axis in the x0z plane
   double angle = m_ssh->facing();
   double cosf = cos(angle * M_PI / 180.0);
   double sinf = sin(angle * M_PI / 180.0);
@@ -259,9 +261,9 @@ void Game::setupShipCamera() {
 
   // controllo la posizione della camera a seconda dell'opzione selezionata
   switch (m_camera_type) {
-
+  
   case CAMERA_BACK_CAR:
-    cam_d = 2.5;
+    cam_d = 2.9;
     cam_h = 1.0;
     eye_x = px + cam_d * sinf;
     eye_y = py + cam_h;
@@ -312,7 +314,7 @@ void Game::setupShipCamera() {
     break;
 
   case CAMERA_MOUSE:
-    m_env.translate(0, 0, -(m_env.eyeDist()));
+    m_env.translate(0, 0, (m_env.eyeDist()));
     m_ssh->rotateView();
     /*
     lg::i("%f %f %f\n",view_alpha,view_beta,eyeDist);

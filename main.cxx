@@ -12,13 +12,14 @@
 
 int main(int argc, char **argv) {
 
-  if (argc != 2) {
+  if (argc != 1) {
     lg::e(__func__, "Usage: ./game <player_name>");
     return EXIT_FAILURE;
   }
   lg::set_level(lg::Level::INFO);
 
-  std::string name(argv[1]);
+  //std::string name(argv[1]);
+  std::string name("Ciao"); 
   game::Game game(name);
   game.run();
 

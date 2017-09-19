@@ -620,9 +620,12 @@ void Env::mainLoop() {
     } // if(SDL_PollEvent)
 
     m_action_handler();
+
+    //Render once each cycle
     render();
 
   } // while loop
+  
  } //function mainLoop
 
 } //namespace agl

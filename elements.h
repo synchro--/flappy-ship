@@ -100,14 +100,19 @@ Sky *get_sky(const char *filename);
 
 class Spaceship {
 private:
-  // position
-  float m_px, m_py, m_pz, m_facing, m_angle, m_steering, m_view_alpha,
-      m_view_beta;
-  // speed and movements
-  float m_speedX, m_speedY, m_speedZ, m_steer_speed, m_steer_return_speed,
+
+  /* Spaceship state: doMotion() will update this variables at each step*/ 
+  float m_px, m_py, m_pz, m_facing; //position
+  float m_steering; //internal state
+  float m_speedX, m_speedY, m_speedZ; //velocity 
+  
+  // Spaceship Stats: this will be constant over time 
+  static const float  m_steer_speed, m_steer_return,
       m_grip, m_frictionX, m_frictionY, m_frictionZ, m_max_acceleration;
-  // shape
-  float m_scaleX, m_scaleY, m_scaleZ;
+
+  float m_view_alpha, m_view_beta; //viewing angle
+
+  float m_scaleX, m_scaleY, m_scaleZ;   // dimension scaling
 
   // internal state of the spaceship. Each element represent a motion (on-off),
   // as described above.
@@ -141,16 +146,16 @@ public:
   friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
                                                   const char *mesh_filename);
 
-  inline float angle() const { return m_angle; }
+  //accessors 
+  inline float facing() const { return m_facing; }
   inline float x() const { return m_px; }
   inline float y() const { return m_py; }
   inline float z() const { return m_pz; }
-  inline float facing() const { return m_facing; }
 
   // APIs to interact with the spaceship
   void execute();
   void sendCommand(spaceship::Motion motion, bool on_off);
-  void setScale(float x, float y, float z);
+  void scale(float x, float y, float z);
   // render the Spaceship: TexID + Mesh
   void render() const;
   // rotate the view around the ship, to be used only on CAMERA_MOUSE mode
