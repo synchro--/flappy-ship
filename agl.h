@@ -158,7 +158,7 @@ private:
   double m_fps;     // fps value in the last interval
   double m_fps_now; // fps currently drawn
   uint m_last_time;
-  float m_eye_dist;
+  float m_eye_dist, m_view_alpha, m_view_beta; 
   int m_screenH, m_screenW;
   int m_camera_type;
   int m_step; // number of steps of Physics currently done
@@ -187,7 +187,10 @@ public:
   inline decltype(m_envmap) isEnvmap() { return m_envmap; }
   inline decltype(m_headlight) isHeadlight() { return m_headlight; }
   inline decltype(m_shadow) isShadow() { return m_shadow; }
+  
   inline decltype(m_eye_dist) eyeDist() { return m_eye_dist; }
+  inline decltype(m_view_alpha) alpha() {return m_view_alpha; }
+  inline decltype(m_view_beta) beta() {return m_view_beta; }
 
   inline void toggle_wireframe() { m_wireframe = !m_wireframe; }
   inline void toggle_envmap() { m_envmap = !m_envmap; }
@@ -237,12 +240,12 @@ public:
    * Important function: main loop, it runs forever till it encounters an
    * SDL_Quit event and dispatch everything.
    */
-  void mainLoop();
 
   void redraw();
 
   // compute the FPS and Renders!
   void render();
+  void renderLoop();
 
   void rotate(float angle, const Vec3 &axis);
   void scale(float scale_x, float scale_y, float scale_z);

@@ -28,15 +28,16 @@ private:
   elements::Floor *m_floor;
   elements::Sky *m_sky;
 
-  void changeState(game::State state);
   void setupShipCamera();
-  void gameOnKey(game::Key, bool pressed);
-  void gameRender();
+
+  void changeState(game::State state);
   void gameAction();
+  void gameOnKey(game::Key, bool pressed);
+  void gameOnMouse(MouseEvent ev, int32_t x, int32_t y);
+  void gameRender();
   void playGame();
 
   void init();
-  void setupObjectCamera();
 
   inline void change_camera_type() {
     m_camera_type = (m_camera_type + 1) % CAMERA_TYPE_MAX;
@@ -45,6 +46,6 @@ private:
 public:
   Game(std::string gameID); // constructor
   void run();
-};
+ };
 } // namespace game
 #endif // GAME_H_

@@ -192,3 +192,81 @@ void Env::drawTorus(float r, float R) {
  // m_py += m_speedY;
   m_pz += m_speedZ;
 }
+
+
+        /* DOVREBBE ESSERE INUTILE
+        else {
+          windowID = SDL_GetWindowID(win);
+          if (e.window.windowID == windowID) {
+            switch (e.window.event) {
+            case SDL_WINDOWEVENT_SIZE_CHANGED: {
+
+              m_win.
+              glViewport(0, 0, scrW, scrH);
+              rendering(win, car);
+              // redraw(); // richiedi ridisegno
+              break;
+            }
+            }
+          }
+        } //ELSE */
+
+// HANDLING MOUSE WHEEL DISTANCE 
+
+case SDL_MOUSEWHEEL:
+  if (e.wheel.y < 0) {
+    // avvicino il punto di vista (zoom in)
+    m_eye_dist = m_eye_dist * 0.9;
+    m_eye_dist =
+        m_eye_dist < 1 ? 1 : m_eye_dist; // eyedist can't less than 1
+  };
+  if (e.wheel.y > 0) {
+    // allontano il punto di vista (zoom out)
+    m_eye_dist = m_eye_dist / 0.9;
+  };
+  break;
+
+
+  //--------------- JOYSTICK HANDLING ------------------------ // 
+/*
+       case SDL_JOYAXISMOTION: // Handle Joystick Motion
+         if (e.jaxis.axis == 0) {
+           if (e.jaxis.value < -3200) {
+             car.controller.Joy(0, true);
+             car.controller.Joy(1, false);
+             //	      printf("%d <-3200 \n",e.jaxis.value);
+           }
+           if (e.jaxis.value > 3200) {
+             car.controller.Joy(0, false);
+             car.controller.Joy(1, true);
+             //	      printf("%d >3200 \n",e.jaxis.value);
+           }
+           if (e.jaxis.value >= -3200 && e.jaxis.value <= 3200) {
+             car.controller.Joy(0, false);
+             car.controller.Joy(1, false);
+             //	      printf("%d in [-3200,3200] \n",e.jaxis.value);
+           }
+           rendering(win, car);
+           // redraw();
+         }
+         break;
+
+         //handle joystick buttons
+       case SDL_JOYBUTTONDOWN:
+         if (e.jbutton.button == 0) {
+           car.controller.Joy(2, true);
+           //	   printf("jbutton 0\n");
+         }
+         if (e.jbutton.button == 2) {
+           car.controller.Joy(3, true);
+           //	   printf("jbutton 2\n");
+         }
+         break;
+       case SDL_JOYBUTTONUP:
+         car.controller.Joy(2, false);
+         car.controller.Joy(3, false);
+         break;
+       }
+     }
+
+     */

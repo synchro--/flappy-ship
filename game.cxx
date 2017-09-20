@@ -19,11 +19,11 @@ void Game::init() {
   m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
   m_main_win->show();
 
-  m_floor = elements::get_floor("truman-texture.jpg");
+  m_floor = elements::get_floor("floor1.jpg");
   m_sky = elements::get_sky("truman.jpg");
   m_ssh = elements::get_spaceship("envmap_flipped.jpg", "Envos.obj");
 
-  m_ssh->scale(0.6, 0.6, 0.6);
+  //m_ssh->scale(0.06, 0.06, 0.06);
 }
 
 void Game::changeState(game::State state) {
@@ -87,12 +87,7 @@ void Game::gameAction() {
 }
 
 void Game::gameOnKey(Key key, bool pressed) {
-  using namespace spaceship;
-  using spaceship::Motion;
-  Motion mt;
-  bool trig_motion = false;
-
-  switch (key) {
+  su
   case Key::W:
     mt = spaceship::Motion::THROTTLE;
     trig_motion = true;
@@ -166,8 +161,24 @@ void Game::gameOnKey(Key key, bool pressed) {
 
     m_ssh->sendCommand(mt, pressed);
   }
+}
 
-  // questo funziona OK
+void Game::gameOnMouse(MouseEvent ev, int32_t x, int32_t y) {
+  // Process mouse events only in State GAME
+  if(m_state == State::GAME) {
+    switch (ev)
+    {
+     case MouseEvent::MOTION: 
+        // change view Alpha and Beta
+        m_ssh->rotateView(x, y); 
+        break; 
+    case MouseEvent::WHEEL: 
+
+
+    default:
+      break;
+    }
+  }
 }
 
 /* Esegue il Rendering della scena */
@@ -190,15 +201,6 @@ void Game::gameRender() {
   m_floor->render();
   m_sky->render();
   m_ssh->render();
-
-  // m_env.setCoordToPixel(); //serve??
-
-  // attendiamo la fine della rasterizzazione di
-  // tutte le primitive mandate
-  // DA METTERE DENTRO WINDOW!!!!! <---------
-
-  // disegnamo i fps (frame x sec) come una barra a sinistra.
-  // (vuota = 0 fps, piena = 100 fps)
 
   // questa è una funzione di env
 
@@ -249,7 +251,7 @@ void Game::run() {
   // splash();
   playGame();
 
-  m_env.mainLoop();
+  m_env.renderLoop();
 }
 
 void Game::setupShipCamera() {
@@ -269,14 +271,14 @@ void Game::setupShipCamera() {
 
   case CAMERA_BACK_CAR:
     cam_d = 2.9;
-    cam_h = 1.0;
+    cam_h = 2.0;
     eye_x = px + cam_d * sinf;
     eye_y = py + cam_h;
     eye_z = pz + cam_d * cosf;
     cen_x = px - cam_d * sinf;
     cen_y = py + cam_h;
     cen_z = pz - cam_d * cosf;
-    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    m_env.setCamera(-eye_x, -eye_y, -eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
     break;
 
   case CAMERA_TOP_FIXED:
@@ -319,8 +321,13 @@ void Game::setupShipCamera() {
     break;
 
   case CAMERA_MOUSE:
+    agl::Vec3 axisX = agl::Vec3(1, 0, 0);
+    agl::Vec3 axisY = agl::Vec3(0, 1, 0);
+
     m_env.translate(0, 0, (m_env.eyeDist()));
-    m_ssh->rotateView();
+    m_env.rotate(m_env.beta(), axisX); 
+    m_env.rotate(m_env.alpha(), axisY); 
+
     /*
     lg::i("%f %f %f\n",view_alpha,view_beta,eyeDist);
                     eye_x=eyeDist*cos(view_alpha)*sin(view_beta);
@@ -332,6 +339,9 @@ void Game::setupShipCamera() {
                     gluLookAt(eye_x,eye_y,eye_z,cen_x,cen_y,cen_z,0.0,1.0,0.0);
     */
     break;
+
+    default: 
+    break; 
   }
 }
 } // namespace game

@@ -109,8 +109,6 @@ private:
   float m_steer_speed, m_steer_return, m_grip, m_frictionX,
       m_frictionY, m_frictionZ, m_max_acceleration;
 
-  float m_view_alpha, m_view_beta; // viewing angle
-
   float m_scaleX, m_scaleY, m_scaleZ; // dimension scaling
 
   // internal state of the spaceship. Each element represent a motion (on-off),
@@ -158,7 +156,7 @@ public:
   // render the Spaceship: TexID + Mesh
   void render() const;
   // rotate the view around the ship, to be used only on CAMERA_MOUSE mode
-  void rotateView();
+  void rotateView(float view_alpha, float view_beta);
 };
 
 std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,

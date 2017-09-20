@@ -43,8 +43,8 @@ const Color GREEN = {.447f, .643f, .074f};
 const Color YELLOW = {.913f, .643f, .074f};
 const Color SHADOW = {.4f, .4f, .4f};
 
-static const auto PHYS_SAMPLING_STEP = 10; // millisec of a Physics sim step
-static const auto FPS_SAMPLE = 30U;        // interval length
+static const auto PHYS_SAMPLING_STEP = 10U; // millisec of a Physics sim step
+static const auto FPS_SAMPLE = 30U;         // interval length
 } // namespace agl
 
 // GAME TYPES
@@ -72,6 +72,8 @@ enum Key {
   F5,
   N_KEYS
 };
+enum MouseEvent { MOTION, WHEEL }; 
+
 } // namespace game
 
 // LOGGING TYPES
@@ -89,6 +91,8 @@ enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE, N_MOTION };
 // Command data structure: a pair of <Enum Action, bool on/off>
 // to be submitted to the Spaceship
 using Command = std::pair<Motion, bool>;
+
+static const auto ENVOS_MESH_SCALE = 0.0099;
 
 } // namespace spaceship
 
