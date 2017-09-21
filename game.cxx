@@ -21,7 +21,7 @@ void Game::init() {
 
   m_floor = elements::get_floor("floor1.jpg");
   m_sky = elements::get_sky("truman.jpg");
-  m_ssh = elements::get_spaceship("envmap_flipped.jpg", "Envos.obj");
+  m_ssh = elements::get_spaceship("wood1.jpg", "Mesh/boat.obj");
 
   //m_ssh->scale(0.06, 0.06, 0.06);
 }
@@ -87,68 +87,72 @@ void Game::gameAction() {
 }
 
 void Game::gameOnKey(Key key, bool pressed) {
-  su
-  case Key::W:
-    mt = spaceship::Motion::THROTTLE;
-    trig_motion = true;
-    break;
+  bool trig_motion = false; 
+  spaceship::Motion mt; 
 
-  case Key::A:
-    mt = spaceship::Motion::STEER_L;
-    trig_motion = true;
-    break;
+  switch(key) {
 
-  case Key::S:
-    mt = spaceship::Motion::BRAKE;
-    trig_motion = true;
-    break;
+    case Key::W:
+      mt = spaceship::Motion::THROTTLE;
+      trig_motion = true;
+      break;
 
-  case Key::D:
-    mt = spaceship::Motion::STEER_R;
-    trig_motion = true;
-    break;
+    case Key::A:
+      mt = spaceship::Motion::STEER_L;
+      trig_motion = true;
+      break;
 
-  case Key::ESC:
-    if (pressed) {
-      changeState(State::MENU);
-    }
-    break;
+    case Key::S:
+      mt = spaceship::Motion::BRAKE;
+      trig_motion = true;
+      break;
 
-  // environment change handlers!
-  // Only on key down
-  case Key::F1:
-    if (pressed) {
-      lg::i(__func__, "Changing camera");
-      change_camera_type();
-    }
-    break;
+    case Key::D:
+      mt = spaceship::Motion::STEER_R;
+      trig_motion = true;
+      break;
 
-  case Key::F2:
-    if (pressed) {
-      m_env.toggle_wireframe();
-    }
-    break;
+    case Key::ESC:
+      if (pressed) {
+        changeState(State::MENU);
+      }
+      break;
 
-  case Key::F3:
-    if (pressed) {
-      m_env.toggle_envmap();
-    }
-    break;
+    // environment change handlers!
+    // Only on key down
+    case Key::F1:
+      if (pressed) {
+        lg::i(__func__, "Changing camera");
+        change_camera_type();
+      }
+      break;
 
-  case Key::F4:
-    if (pressed) {
-      m_env.toggle_headlight();
-    }
-    break;
+    case Key::F2:
+      if (pressed) {
+        m_env.toggle_wireframe();
+      }
+      break;
 
-  case Key::F5:
-    if (pressed) {
-      m_env.toggle_shadow();
-    }
-    break;
+    case Key::F3:
+      if (pressed) {
+        m_env.toggle_envmap();
+      }
+      break;
 
-  default:
-    break;
+    case Key::F4:
+      if (pressed) {
+        m_env.toggle_headlight();
+      }
+      break;
+
+    case Key::F5:
+      if (pressed) {
+        m_env.toggle_shadow();
+      }
+      break;
+
+    default:
+      break;
   }
 
   // send a command to the spaceship only if triggered
@@ -173,7 +177,7 @@ void Game::gameOnMouse(MouseEvent ev, int32_t x, int32_t y) {
         m_ssh->rotateView(x, y); 
         break; 
     case MouseEvent::WHEEL: 
-
+        //stuff
 
     default:
       break;
@@ -269,79 +273,84 @@ void Game::setupShipCamera() {
   // controllo la posizione della camera a seconda dell'opzione selezionata
   switch (m_camera_type) {
 
-  case CAMERA_BACK_CAR:
-    cam_d = 2.9;
-    cam_h = 2.0;
-    eye_x = px + cam_d * sinf;
-    eye_y = py + cam_h;
-    eye_z = pz + cam_d * cosf;
-    cen_x = px - cam_d * sinf;
-    cen_y = py + cam_h;
-    cen_z = pz - cam_d * cosf;
-    m_env.setCamera(-eye_x, -eye_y, -eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    case CAMERA_BACK_CAR: {
+      cam_d = 2.3;
+      cam_h = 1.0;
+      eye_x = px + cam_d * sinf;
+      eye_y = py + cam_h;
+      eye_z = pz + cam_d * cosf;
+      cen_x = px - cam_d * sinf;
+      cen_y = py + cam_h;
+      cen_z = pz - cam_d * cosf;
+      m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    }
     break;
+    
 
-  case CAMERA_TOP_FIXED:
-    cam_d = 0.5;
-    cam_h = 0.55;
-    angle = m_ssh->facing() + 40.0;
-    cosff = cos(angle * M_PI / 180.0);
-    sinff = sin(angle * M_PI / 180.0);
-    eye_x = px + cam_d * sinff;
-    eye_y = py + cam_h;
-    eye_z = pz + cam_d * cosff;
-    cen_x = px - cam_d * sinf;
-    cen_y = py + cam_h;
-    cen_z = pz - cam_d * cosf;
-    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    case CAMERA_TOP_FIXED: {
+      cam_d = 0.5;
+      cam_h = 0.55;
+      angle = m_ssh->facing() + 40.0;
+      cosff = cos(angle * M_PI / 180.0);
+      sinff = sin(angle * M_PI / 180.0);
+      eye_x = px + cam_d * sinff;
+      eye_y = py + cam_h;
+      eye_z = pz + cam_d * cosff;
+      cen_x = px - cam_d * sinf;
+      cen_y = py + cam_h;
+      cen_z = pz - cam_d * cosf;
+      m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    } 
     break;
+    
+    case CAMERA_TOP_CAR: {
+      cam_d = 2.5;
+      cam_h = 1.0;
+      eye_x = px + cam_d * sinf;
+      eye_y = py + cam_h;
+      eye_z = pz + cam_d * cosf;
+      cen_x = px - cam_d * sinf;
+      cen_y = py + cam_h;
+      cen_z = pz - cam_d * cosf;
+      m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    }
+      break;
 
-  case CAMERA_TOP_CAR:
-    cam_d = 2.5;
-    cam_h = 1.0;
-    eye_x = px + cam_d * sinf;
-    eye_y = py + cam_h;
-    eye_z = pz + cam_d * cosf;
-    cen_x = px - cam_d * sinf;
-    cen_y = py + cam_h;
-    cen_z = pz - cam_d * cosf;
-    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
-    break;
+    case CAMERA_PILOT: {
+      cam_d = 0.2;
+      cam_h = 0.55;
+      eye_x = px + cam_d * sinf;
+      eye_y = py + cam_h;
+      eye_z = pz + cam_d * cosf;
+      cen_x = px - cam_d * sinf;
+      cen_y = py + cam_h;
+      cen_z = pz - cam_d * cosf;
+      m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+    } break;
 
-  case CAMERA_PILOT:
-    cam_d = 0.2;
-    cam_h = 0.55;
-    eye_x = px + cam_d * sinf;
-    eye_y = py + cam_h;
-    eye_z = pz + cam_d * cosf;
-    cen_x = px - cam_d * sinf;
-    cen_y = py + cam_h;
-    cen_z = pz - cam_d * cosf;
-    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
-    break;
+    case CAMERA_MOUSE: {
+      agl::Vec3 axisX = agl::Vec3(1, 0, 0);
+      agl::Vec3 axisY = agl::Vec3(0, 1, 0);
 
-  case CAMERA_MOUSE:
-    agl::Vec3 axisX = agl::Vec3(1, 0, 0);
-    agl::Vec3 axisY = agl::Vec3(0, 1, 0);
+      m_env.translate(0, 0, (m_env.eyeDist()));
+      m_env.rotate(m_env.beta(), axisX); 
+      m_env.rotate(m_env.alpha(), axisY); 
 
-    m_env.translate(0, 0, (m_env.eyeDist()));
-    m_env.rotate(m_env.beta(), axisX); 
-    m_env.rotate(m_env.alpha(), axisY); 
+      /*
+      lg::i("%f %f %f\n",view_alpha,view_beta,eyeDist);
+                      eye_x=eyeDist*cos(view_alpha)*sin(view_beta);
+                      eye_y=eyeDist*sin(view_alpha)*sin(view_beta);
+                      eye_z=eyeDist*cos(view_beta);
+                      cen_x = px - cam_d*sinf;
+                      cen_y = py + cam_h;
+                      cen_z = pz - cam_d*cosf;
+                      gluLookAt(eye_x,eye_y,eye_z,cen_x,cen_y,cen_z,0.0,1.0,0.0);
+      */
+    }
+      break; 
 
-    /*
-    lg::i("%f %f %f\n",view_alpha,view_beta,eyeDist);
-                    eye_x=eyeDist*cos(view_alpha)*sin(view_beta);
-                    eye_y=eyeDist*sin(view_alpha)*sin(view_beta);
-                    eye_z=eyeDist*cos(view_beta);
-                    cen_x = px - cam_d*sinf;
-                    cen_y = py + cam_h;
-                    cen_z = pz - cam_d*cosf;
-                    gluLookAt(eye_x,eye_y,eye_z,cen_x,cen_y,cen_z,0.0,1.0,0.0);
-    */
-    break;
-
-    default: 
-    break; 
+      default: 
+      break; 
   }
 }
 } // namespace game

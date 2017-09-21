@@ -179,10 +179,11 @@ void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
 
                    if(m_wireframe) {
                      glDisable(GL_TEXTURE_2D);
-                     glColor3f(BLACK.r, BLACK.g, BLACK.b);
+                     glColor3f(SHADOW.r, SHADOW.g, SHADOW.b);
 
                      glDisable(GL_LIGHTING);
-                     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // LINES
+                     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Whole floor
                      drawPlane(sz, height, num_quads);
 
                      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

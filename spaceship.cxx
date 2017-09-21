@@ -221,16 +221,19 @@ void Spaceship::render() const {
   m_env.mat_scope([&] {
     agl::Vec3 viewUP = agl::Vec3(0, 1, 0);
     agl::Vec3 front = agl::Vec3(0, 0, 1);
+    agl::Vec3 front_boat = agl::Vec3(1, 0, 0);
 
     // translate the ship according to its coordinates
     m_env.translate(m_px, m_py, m_pz);
 
     // rotate the ship according to the facing direction 
     m_env.rotate(m_facing, viewUP);
+    //per barca
+    m_env.rotate(90, viewUP); 
     
     // rotate the ship acc. to steering val, to represent tilting
     int sign = +1; 
-    m_env.rotate(m_steering, front);
+    m_env.rotate(-m_steering, front_boat);
 
     draw();
   });

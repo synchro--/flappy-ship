@@ -37,3 +37,8 @@ sites
 *.out
 *.app
 
+#Mesh 
+./Mesh/*
+
+#Texture 
+*jpg

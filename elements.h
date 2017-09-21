@@ -156,7 +156,7 @@ public:
   // render the Spaceship: TexID + Mesh
   void render() const;
   // rotate the view around the ship, to be used only on CAMERA_MOUSE mode
-  void rotateView(float view_alpha, float view_beta);
+  void rotateView(int32_t view_alpha, int32_t view_beta);
 };
 
 std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,

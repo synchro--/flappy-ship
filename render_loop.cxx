@@ -117,10 +117,11 @@ void Env::renderLoop() {
         break;
       }
 
+        //      TODO             //
         // ---- MOUSE EVENTS --- // 
 
        case SDL_MOUSEMOTION:
-         handler = m_mouse_event_handler();
+         // handler = m_mouse_event_handler();
 
          if (e.motion.state & SDL_BUTTON(1)) {
              // handler(MouseEvent::MOTION, e.motion.xrel, e.motion.yrel);
