@@ -141,7 +141,7 @@ void Spaceship::doMotion() {
   bool brake = get_state(Motion::BRAKE);
 
   if (throttle ^ brake) {
-    int sign = throttle ? 1 : -1;
+    int sign = brake ? 1 : -1;
 
     vel_zm += sign*m_max_acceleration;
     // Spaceships don't fly backwards
@@ -168,6 +168,27 @@ void Spaceship::doMotion() {
   m_px += m_speedX;
   // m_py += m_speedY;
   m_pz += m_speedZ;
+}
+
+// ONLY TO BE USED IN FLIGHT MODE: 
+// it updates y-values to make the spaceship fly vertically
+void Spaceship::updateFly() {
+  const static auto FLY_FRICTION = 0.90; 
+  const static auto FLY_RETURN = 0.89;
+
+  bool throttle = get_state(Motion::THROTTLE);
+  bool brake = get_state(Motion::BRAKE);
+
+  if (throttle ^ brake) {
+    int sign = throttle ? 1 : -1;
+
+    m_speedY += sign*m_max_acceleration;
+  }
+
+  m_speedY*= FLY_FRICTION; 
+  m_speedY*= FLY_RETURN; 
+
+  m_py += m_speedY; 
 }
 
 void Spaceship::execute() {
@@ -228,12 +249,12 @@ void Spaceship::render() const {
 
     // rotate the ship according to the facing direction 
     m_env.rotate(m_facing, viewUP);
-    //per barca
-    m_env.rotate(90, viewUP); 
+    // per barca
+    m_env.rotate(270, viewUP); 
     
     // rotate the ship acc. to steering val, to represent tilting
     int sign = +1; 
-    m_env.rotate(-m_steering, front_boat);
+    m_env.rotate(sign * m_steering, front_boat);
 
     draw();
   });

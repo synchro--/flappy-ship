@@ -19,11 +19,11 @@ void Game::init() {
   m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
   m_main_win->show();
 
-  m_floor = elements::get_floor("floor1.jpg");
-  m_sky = elements::get_sky("truman.jpg");
-  m_ssh = elements::get_spaceship("wood1.jpg", "Mesh/boat.obj");
+  m_floor = elements::get_floor("marti.jpg");
+  m_sky = elements::get_sky("space1.jpg");
+  m_ssh = elements::get_spaceship("space-tex.jpg", "Mesh/shuttle.obj");
 
-  //m_ssh->scale(0.06, 0.06, 0.06);
+  m_ssh->scale(spaceship::SHUTTLE_SCALE, spaceship::SHUTTLE_SCALE, spaceship::SHUTTLE_SCALE);
 }
 
 void Game::changeState(game::State state) {

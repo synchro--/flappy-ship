@@ -92,8 +92,9 @@ enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE, N_MOTION };
 // to be submitted to the Spaceship
 using Command = std::pair<Motion, bool>;
 
-static const auto ENVOS_MESH_SCALE = 0.20;
-static const auto FALCON_MESH_SCALE = 0.0099; 
+static const auto ENVOS_MESH_SCALE = 0.0099;
+static const auto FALCON_MESH_SCALE = 0.0099;
+static const auto SHUTTLE_SCALE = 0.013;  
 
 } // namespace spaceship
 

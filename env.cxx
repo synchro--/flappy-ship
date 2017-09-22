@@ -30,7 +30,7 @@ Env::Env()
   static const auto TAG = __func__;
 
   // Don't let SDL set its signal() handlers - Ctrl+c and friends will work
-  SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
+  // SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
 
   lg::i(TAG, "init SDL and OpenGL");
 

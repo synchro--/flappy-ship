@@ -138,6 +138,7 @@ private:
   void init();
   void processCommand();
   void shadow() const;
+  void updateFly(); 
 
 public:
   friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
