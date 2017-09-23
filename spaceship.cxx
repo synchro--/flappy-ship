@@ -39,13 +39,16 @@ void Spaceship::init() {
   m_scaleX = m_scaleY = m_scaleZ = ENVOS_MESH_SCALE;
 
   m_px = m_pz = 0;
-  m_py = 1.0; // Spaceship skills™
+  m_py = 5.0; // Spaceship skills™
 
   m_facing = m_steering = 0.0;
   m_speedX = m_speedY = m_speedZ = 0.0;
 
   //-- CONSTANTS --//
   //---------------//
+
+  m_viewUP = agl::Vec3(0, 1, 0);
+  m_front_axis = agl::Vec3(0, 0, 1);
 
   // strong friction on X-axis, if you wanna drift, go buy Need For Speed
   m_frictionX = 0.9;
@@ -119,20 +122,6 @@ void Spaceship::doMotion() {
   vel_xm = +cosf * m_speedX - sinf * m_speedZ;
   // vel_ym = m_speedY;
   vel_zm = +sinf * m_speedX + cosf * m_speedZ;
-
-  // *** Steering Update *** // 
-  // ----------------------- //
-
-  bool left = get_state(Motion::STEER_L);
-  bool right = get_state(Motion::STEER_R);
-  
- if (left ^ right) {
-    int sign = left ? 1 : -1;
-    m_steering += sign * m_steer_speed;
-  } 
-  // steer return straight back
-  m_steering *= m_steer_return;
-
   
   // *** Velocity Update *** //
   // ----------------------- //
@@ -152,10 +141,18 @@ void Spaceship::doMotion() {
   // vel_ym *= m_frictionY;
   vel_zm *= m_frictionZ;
 
-
-
-  // *** Steering Update *** //
+  // *** Steering Update *** // 
   // ----------------------- //
+
+  bool left = get_state(Motion::STEER_L);
+  bool right = get_state(Motion::STEER_R);
+  
+ if (left ^ right) {
+    int sign = left ? 1 : -1;
+    m_steering += sign * m_steer_speed;
+  } 
+  // steer return straight back
+  m_steering *= m_steer_return;
 
   m_facing = m_facing - (vel_zm * m_grip) * m_steering;
 
@@ -173,8 +170,8 @@ void Spaceship::doMotion() {
 // ONLY TO BE USED IN FLIGHT MODE: 
 // it updates y-values to make the spaceship fly vertically
 void Spaceship::updateFly() {
-  const static auto FLY_FRICTION = 0.90; 
-  const static auto FLY_RETURN = 0.89;
+  const static auto FLY_FRICTION = 0.98; 
+  const static auto FLY_RETURN = 0.060;
 
   bool throttle = get_state(Motion::THROTTLE);
   bool brake = get_state(Motion::BRAKE);
@@ -182,13 +179,15 @@ void Spaceship::updateFly() {
   if (throttle ^ brake) {
     int sign = throttle ? 1 : -1;
 
-    m_speedY += sign*m_max_acceleration;
+    m_speedY += sign*0.1;
   }
 
   m_speedY*= FLY_FRICTION; 
-  m_speedY*= FLY_RETURN; 
+  m_speedY-= FLY_RETURN;  
 
   m_py += m_speedY; 
+  // limit on Y-motion: we can't get under the floor
+  m_py = (m_py < 1) ? 1 : m_py; 
 }
 
 void Spaceship::execute() {
@@ -196,6 +195,7 @@ void Spaceship::execute() {
   // and doMotion will be divided into several modular method
   processCommand();
   doMotion();
+  updateFly(); 
 }
 
 bool Spaceship::get_state(Motion mt) { return m_state[mt]; }
@@ -240,17 +240,17 @@ void Spaceship::processCommand() {
 
 void Spaceship::render() const {
   m_env.mat_scope([&] {
-    agl::Vec3 viewUP = agl::Vec3(0, 1, 0);
-    agl::Vec3 front = agl::Vec3(0, 0, 1);
+
     agl::Vec3 front_boat = agl::Vec3(1, 0, 0);
 
-    // translate the ship according to its coordinates
+    // translate the camera to follow the ship movements
     m_env.translate(m_px, m_py, m_pz);
 
     // rotate the ship according to the facing direction 
-    m_env.rotate(m_facing, viewUP);
-    // per barca
-    m_env.rotate(270, viewUP); 
+    m_env.rotate(m_facing, m_viewUP);
+
+    // the Mesh is loaded on the other side
+    m_env.rotate(270, m_viewUP); 
     
     // rotate the ship acc. to steering val, to represent tilting
     int sign = +1; 

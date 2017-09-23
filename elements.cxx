@@ -34,7 +34,7 @@ Floor *get_floor(const char *texture_filename) {
  */
 
 Sky::Sky(const char *texture_filename)
-    : m_radius(100.0f), m_lats(20.0f), m_longs(20.0f), m_env(agl::get_env()),
+    : m_radius(150.0f), m_lats(20.0f), m_longs(20.0f), m_env(agl::get_env()),
       m_tex(m_env.loadTexture(texture_filename, false)) {}
 
 void Sky::render() {
