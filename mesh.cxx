@@ -1,138 +1,189 @@
-// file mesh.cpp
-//
-// Implementazione dei metodi di Mesh
+#include "agl.h"
 
-#include <GL/gl.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <string>
 
-#include "point3.hxx"
+#include <cstdio>
+#include <cstring>
 
-#include "mesh.hxx"
-#include "game.hxx"
+/*
+ * Class implementing a Mesh. See agl.h
+ */
 
-void Mesh::ComputeNormalsPerFace() {
-  for (int i = 0; i < f.size(); i++) {
-    f[i].ComputeNormal();
-  }
+namespace agl {
+// Face constructor, compute the normal of the face too
+Face::Face(Vertex *v1, Vertex *v2, Vertex *v3) : verts{v1, v2, v3} {
+  computeNormal();
 }
+
+Mesh::Mesh() {}
 
 // Computo normali per vertice
 // (come media rinormalizzata delle normali delle facce adjacenti)
-void Mesh::ComputeNormalsPerVertex() {
+void Mesh::computeNormalsPerVertex() {
   // uso solo le strutture di navigazione FV (da Faccia a Vertice)!
 
   // fase uno: ciclo sui vertici, azzero tutte le normali
-  for (int i = 0; i < v.size(); i++) {
-    v[i].n = Point3(0, 0, 0);
+  for (auto &vertex : m_verts) {
+    vertex.normal = Normal3();
   }
 
   // fase due: ciclo sulle facce: accumulo le normali di F nei 3 V
   // corrispondenti
-  for (int i = 0; i < f.size(); i++) {
+  for (auto &face : m_faces) {
+    for (auto vertex : face.verts) {
+      vertex->normal += face.normal;
+    }
+    /*
     f[i].v[0]->n = f[i].v[0]->n + f[i].n;
     f[i].v[1]->n = f[i].v[1]->n + f[i].n;
     f[i].v[2]->n = f[i].v[2]->n + f[i].n;
+    */
   }
 
-  // fase tre: ciclo sui vertici; rinormalizzo
+  // fase tre: ciclo sui vertici e rinormalizzo:
   // la normale media rinormalizzata e' uguale alla somma delle normnali,
-  // rinormalizzata
-  for (int i = 0; i < v.size(); i++) {
-    v[i].n = v[i].n.Normalize();
+  // calcolata nel ciclo precedente, ma rinormalizzata
+  for (auto &vertex : m_verts) {
+    vertex.normal = vertex.normal.normalize();
   }
 }
 
 // renderizzo la mesh in wireframe
-void Mesh::RenderWire() {
+void Mesh::renderWire() {
   glLineWidth(1.0);
   // (nota: ogni edge viene disegnato due volte.
   // sarebbe meglio avere ed usare la struttura edge)
-  for (int i = 0; i < f.size(); i++) {
-    glBegin(GL_LINE_LOOP);
-    f[i].n.getAsNormal();
-    (f[i].v[0])->p.getAsVertex();
-    (f[i].v[1])->p.getAsVertex();
-    (f[i].v[2])->p.getAsVertex();
-    glEnd();
+  glBegin(GL_LINE_LOOP);
+  for (auto &face : m_faces) {
+    face.normal.render();
+    for (auto vertex : face.verts) {
+      // render as vertex, don't send the normal
+      vertex->render(false);
+    }
   }
+  glEnd();
+
+  /*  {
+      glBegin(GL_LINE_LOOP);
+      f[i].n.getAsNormal();
+      (f[i].v[0])->p.getAsVertex();
+      (f[i].v[1])->p.getAsVertex();
+      (f[i].v[2])->p.getAsVertex();
+      glEnd();
+    }*/
 }
 
 // Render usando la normale per faccia (FLAT SHADING)
-void Mesh::RenderNxF() {
-  if (useWireframe) {
-    glDisable(GL_TEXTURE_2D);
-    glColor3f(.5, .5, .5);
-    RenderWire();
-    glColor3f(1, 1, 1);
-  }
+void Mesh::renderFlat(bool wireframe_on) { render(wireframe_on, false); }
 
-  // mandiamo tutti i triangoli a schermo
-  glBegin(GL_TRIANGLES);
-  for (int i = 0; i < f.size(); i++) {
-    f[i].n.getAsNormal(); // flat shading
-
-    (f[i].v[0])->p.getAsVertex();
-
-    (f[i].v[1])->p.getAsVertex();
-
-    (f[i].v[2])->p.getAsVertex();
-  }
-  glEnd();
-}
+void Mesh::renderGouraud(bool wireframe_on) { render(wireframe_on, true); }
 
 // Render usando la normale per vertice (GOURAUD SHADING)
-void Mesh::RenderNxV() {
-  if (useWireframe) {
+void Mesh::render(bool wireframe_on, bool goraud_shading) {
+  if (wireframe_on) {
     glDisable(GL_TEXTURE_2D);
     glColor3f(.5, .5, .5);
-    RenderWire();
+    renderWire();
     glColor3f(1, 1, 1);
   }
 
-  // mandiamo tutti i triangoli a schermo
   glBegin(GL_TRIANGLES);
-  for (int i = 0; i < f.size(); i++) {
-    (f[i].v[0])->n.getAsNormal(); // gouroud shading (o phong?)
-    (f[i].v[0])->p.getAsVertex();
 
-    (f[i].v[1])->n.getAsNormal();
-    (f[i].v[1])->p.getAsVertex();
+  if (goraud_shading) {
+    // mandiamo tutti i triangoli a schermo
+    bool send_normals = goraud_shading;
 
-    (f[i].v[2])->n.getAsNormal();
-    (f[i].v[2])->p.getAsVertex();
+    for (const auto &face : m_faces) {
+      // If using flat shading
+      if (!send_normals) {
+        face.normal.render();
+      }
+
+      for (auto vert : face.verts) {
+        vert->render(send_normals);
+      }
+    }
   }
+  /*
+        for (int i = 0; i < f.size(); i++) {
+          (f[i].v[0])->n.getAsNormal();
+          (f[i].v[0])->p.getAsVertex();
+
+          (f[i].v[1])->n.getAsNormal();
+          (f[i].v[1])->p.getAsVertex();
+
+          (f[i].v[2])->n.getAsNormal();
+          (f[i].v[2])->p.getAsVertex();
+        }
+    }
+      else {
+        //flat shading
+        for (int i = 0; i < f.size(); i++) {
+          f[i].n.getAsNormal(); // flat shading
+
+          (f[i].v[0])->p.getAsVertex();
+
+          (f[i].v[1])->p.getAsVertex();
+
+          (f[i].v[2])->p.getAsVertex();
+        }
+    }
+  */
   glEnd();
 }
 
 // trova l'AXIS ALIGNED BOUNDIG BOX
-void Mesh::ComputeBoundingBox() {
+void Mesh::computeBoundingBox() {
   // basta trovare la min x, y, e z, e la max x, y, e z di tutti i vertici
   // (nota: non e' necessario usare le facce: perche?)
-  if (!v.size())
-    return;
-  bbmin = bbmax = v[0].p;
-  for (int i = 0; i < v.size(); i++) {
-    for (int k = 0; k < 3; k++) {
-      if (bbmin.coord[k] > v[i].p.coord[k])
-        bbmin.coord[k] = v[i].p.coord[k];
-      if (bbmax.coord[k] < v[i].p.coord[k])
-        bbmax.coord[k] = v[i].p.coord[k];
-    }
+  // init var to worse value
+  float min_x, min_y, min_z = INFINITY;
+  float max_x, max_y, max_z = -INFINITY;
+
+  // find maximum and minimum among vertices
+  for (const auto &vertex : m_verts) {
+    min_x = std::min(min_x, vertex.point.x);
+    min_y = std::min(min_y, vertex.point.y);
+    min_z = std::min(min_z, vertex.point.z);
+
+    max_x = std::max(max_x, vertex.point.x);
+    max_y = std::max(max_y, vertex.point.y);
+    max_z = std::max(max_z, vertex.point.z);
   }
+
+  bbmin = Point3(min_x, min_y, min_z);
+  bbmax = Point3(max_x, max_y, max_z);
 }
 
-// carica la mesh da un file in formato Obj
+// Point3 Mesh::center() { return (bbmin + bbmax) / 2.0; };
+
+// init vertex normals and bounding box
+void Mesh::init() {
+  computeNormalsPerVertex();
+  computeBoundingBox();
+}
+
+//   carica la mesh da un file in formato Obj
 //   Nota: nel file, possono essere presenti sia quads che tris
 //   ma nella rappresentazione interna (classe Mesh) abbiamo solo tris.
-//
-bool Mesh::LoadFromObj(char *filename) {
+
+// Friend class, must be used instead of the constructor
+std::unique_ptr<Mesh> loadMesh(const char *filename) {
+  static const auto TAG = __func__;
+
+  lg::i(TAG, "Loading mesh from file %s", filename);
+
+  std::unique_ptr<Mesh> ret(new Mesh());
 
   FILE *file = fopen(filename, "rt"); // apriamo il file in lettura
-  if (!file)
-    return false;
+  if (!file) {
+    // whenever I've spare time, an exception class must be added
+    lg::e(TAG, "Cannot load mesh from %s", filename);
+    exit(EXIT_FAILURE);
+  }
 
   // make a first pass through the file to get a count of the number
   // of vertices, normals, texcoords & triangles
@@ -146,17 +197,17 @@ bool Mesh::LoadFromObj(char *filename) {
   nv = 0;
   nf = 0;
   nt = 0;
-  while (fscanf(file, "%s", buf) != EOF) {
+  while (std::fscanf(file, "%s", buf) != EOF) {
     switch (buf[0]) {
     case '#': // comment
       // eat up rest of line
-      fgets(buf, sizeof(buf), file);
+      std::fgets(buf, sizeof(buf), file);
       break;
     case 'v': // v, vn, vt
       switch (buf[1]) {
       case '\0': // vertex
         // eat up rest of line
-        fgets(buf, sizeof(buf), file);
+        std::fgets(buf, sizeof(buf), file);
         nv++;
         break;
       default:
@@ -164,43 +215,43 @@ bool Mesh::LoadFromObj(char *filename) {
       }
       break;
     case 'f': // face
-      fscanf(file, "%s", buf);
+      std::fscanf(file, "%s", buf);
       // can be one of %d, %d//%d, %d/%d, %d/%d/%d %d//%d
-      if (strstr(buf, "//")) {
+      if (std::strstr(buf, "//")) {
         // v//n
-        sscanf(buf, "%d//%d", &va, &na);
-        fscanf(file, "%d//%d", &vb, &nb);
-        fscanf(file, "%d//%d", &vc, &nc);
+        std::sscanf(buf, "%d//%d", &va, &na);
+        std::fscanf(file, "%d//%d", &vb, &nb);
+        std::fscanf(file, "%d//%d", &vc, &nc);
         nf++;
         nt++;
-        while (fscanf(file, "%d//%d", &vd, &nd) > 0) {
+        while (std::fscanf(file, "%d//%d", &vd, &nd) > 0) {
           nt++;
         }
-      } else if (sscanf(buf, "%d/%d/%d", &va, &ta, &na) == 3) {
+      } else if (std::sscanf(buf, "%d/%d/%d", &va, &ta, &na) == 3) {
         // v/t/n
-        fscanf(file, "%d/%d/%d", &vb, &tb, &nb);
-        fscanf(file, "%d/%d/%d", &vc, &tc, &nc);
+        std::fscanf(file, "%d/%d/%d", &vb, &tb, &nb);
+        std::fscanf(file, "%d/%d/%d", &vc, &tc, &nc);
         nf++;
         nt++;
-        while (fscanf(file, "%d/%d/%d", &vd, &td, &nd) > 0) {
+        while (std::fscanf(file, "%d/%d/%d", &vd, &td, &nd) > 0) {
           nt++;
         }
-      } else if (sscanf(buf, "%d/%d", &va, &ta) == 2) {
+      } else if (std::sscanf(buf, "%d/%d", &va, &ta) == 2) {
         // v/t
-        fscanf(file, "%d/%d", &vb, &tb);
-        fscanf(file, "%d/%d", &vc, &tc);
+        std::fscanf(file, "%d/%d", &vb, &tb);
+        std::fscanf(file, "%d/%d", &vc, &tc);
         nf++;
         nt++;
-        while (fscanf(file, "%d/%d", &vd, &td) > 0) {
+        while (std::fscanf(file, "%d/%d", &vd, &td) > 0) {
           nt++;
         }
       } else {
         // v
-        fscanf(file, "%d", &va);
-        fscanf(file, "%d", &vb);
+        std::fscanf(file, "%d", &va);
+        std::fscanf(file, "%d", &vb);
         nf++;
         nt++;
-        while (fscanf(file, "%d", &vc) > 0) {
+        while (std::fscanf(file, "%d", &vc) > 0) {
           nt++;
         }
       }
@@ -208,7 +259,7 @@ bool Mesh::LoadFromObj(char *filename) {
 
     default:
       // eat up rest of line
-      fgets(buf, sizeof(buf), file);
+      std::fgets(buf, sizeof(buf), file);
       break;
     }
   }
@@ -216,7 +267,7 @@ bool Mesh::LoadFromObj(char *filename) {
   // printf("dopo FirstPass nv=%d nf=%d nt=%d\n",nv,nf,nt);
 
   // allochiamo spazio per nv vertici
-  v.resize(nv);
+  ret->m_verts.resize(nv);
 
   // rewind to beginning of file and read in the data this pass
   rewind(file);
@@ -226,17 +277,17 @@ bool Mesh::LoadFromObj(char *filename) {
 
   nv = 0;
   nt = 0;
-  while (fscanf(file, "%s", buf) != EOF) {
+  while (std::fscanf(file, "%s", buf) != EOF) {
     switch (buf[0]) {
     case '#': // comment
       // eat up rest of line
-      fgets(buf, sizeof(buf), file);
+      std::fgets(buf, sizeof(buf), file);
       break;
     case 'v': // v, vn, vt
       switch (buf[1]) {
       case '\0': // vertex
-        fscanf(file, "%f %f %f", &x, &y, &z);
-        v[nv].p = Point3(x, y, z);
+        std::fscanf(file, "%f %f %f", &x, &y, &z);
+        ret->m_verts[nv] = Point3(x, y, z);
         nv++;
         break;
       default:
@@ -244,95 +295,96 @@ bool Mesh::LoadFromObj(char *filename) {
       }
       break;
     case 'f': // face
-      fscanf(file, "%s", buf);
+      std::fscanf(file, "%s", buf);
       // can be one of %d, %d//%d, %d/%d, %d/%d/%d %d//%d
-      if (strstr(buf, "//")) {
+      if (std::strstr(buf, "//")) {
         // v//n
-        sscanf(buf, "%d//%d", &va, &na);
-        fscanf(file, "%d//%d", &vb, &nb);
-        fscanf(file, "%d//%d", &vc, &nc);
+        std::sscanf(buf, "%d//%d", &va, &na);
+        std::fscanf(file, "%d//%d", &vb, &nb);
+        std::fscanf(file, "%d//%d", &vc, &nc);
         va--;
         vb--;
         vc--;
-        Face newface(&(v[va]), &(v[vc]),
-                     &(v[vb])); // invoco il costruttore di faccia
-        f.push_back(
-            newface); // inserico la nuova faccia in coda al vettore facce
+
+        // create on place a new face and save it at the end of the face
+        // vector
+        ret->m_faces.emplace_back(&(ret->m_verts[va]), &(ret->m_verts[vc]),
+                                  &(ret->m_verts[vb]));
+
         nt++;
         vb = vc;
-        while (fscanf(file, "%d//%d", &vc, &nc) > 0) {
+        while (std::fscanf(file, "%d//%d", &vc, &nc) > 0) {
           vc--;
-          Face newface(&(v[va]), &(v[vc]),
-                       &(v[vb])); // invoco il costruttore di faccia
-          f.push_back(
-              newface); // inserico la nuova faccia in coda al vettore facce
+          ret->m_faces.emplace_back(&(ret->m_verts[va]), &(ret->m_verts[vc]),
+                                    &(ret->m_verts[vb]));
+
           nt++;
           vb = vc;
         }
-      } else if (sscanf(buf, "%d/%d/%d", &va, &ta, &na) == 3) {
+      } else if (std::sscanf(buf, "%d/%d/%d", &va, &ta, &na) == 3) {
         // v/t/n
-        fscanf(file, "%d/%d/%d", &vb, &tb, &nb);
-        fscanf(file, "%d/%d/%d", &vc, &tc, &nc);
+        std::fscanf(file, "%d/%d/%d", &vb, &tb, &nb);
+        std::fscanf(file, "%d/%d/%d", &vc, &tc, &nc);
         va--;
         vb--;
         vc--;
-        Face newface(&(v[va]), &(v[vc]),
-                     &(v[vb])); // invoco il costruttore di faccia
-        f.push_back(
-            newface); // inserico la nuova faccia in coda al vettore facce
+
+        ret->m_faces.emplace_back(&(ret->m_verts[va]), &(ret->m_verts[vc]),
+                                  &(ret->m_verts[vb]));
+
         nt++;
         vb = vc;
-        while (fscanf(file, "%d/%d/%d", &vc, &tc, &nc) > 0) {
+        while (std::fscanf(file, "%d/%d/%d", &vc, &tc, &nc) > 0) {
           vc--;
-          Face newface(&(v[va]), &(v[vc]),
-                       &(v[vb])); // invoco il costruttore di faccia
-          f.push_back(
-              newface); // inserico la nuova faccia in coda al vettore facce
+
+          ret->m_faces.emplace_back(&(ret->m_verts[va]), &(ret->m_verts[vc]),
+                                    &(ret->m_verts[vb]));
+
           nt++;
           vb = vc;
         }
-      } else if (sscanf(buf, "%d/%d", &va, &ta) == 2) {
+      } else if (std::sscanf(buf, "%d/%d", &va, &ta) == 2) {
         // v/t
-        fscanf(file, "%d/%d", &va, &ta);
-        fscanf(file, "%d/%d", &va, &ta);
+        std::fscanf(file, "%d/%d", &va, &ta);
+        std::fscanf(file, "%d/%d", &va, &ta);
         va--;
         vb--;
         vc--;
-        Face newface(&(v[va]), &(v[vc]),
-                     &(v[vb])); // invoco il costruttore di faccia
-        f.push_back(
-            newface); // inserico la nuova faccia in coda al vettore facce
+
+        ret->m_faces.emplace_back(&(ret->m_verts[va]), &(ret->m_verts[vc]),
+                                  &(ret->m_verts[vb]));
+
         nt++;
         vb = vc;
-        while (fscanf(file, "%d/%d", &vc, &tc) > 0) {
+        while (std::fscanf(file, "%d/%d", &vc, &tc) > 0) {
           vc--;
-          Face newface(&(v[va]), &(v[vc]),
-                       &(v[vb])); // invoco il costruttore di faccia
-          f.push_back(
-              newface); // inserico la nuova faccia in coda al vettore facce
+
+          ret->m_faces.emplace_back(&(ret->m_verts[va]), &(ret->m_verts[vc]),
+                                    &(ret->m_verts[vb]));
+
           nt++;
           vb = vc;
         }
       } else {
         // v
-        sscanf(buf, "%d", &va);
-        fscanf(file, "%d", &vb);
-        fscanf(file, "%d", &vc);
+        std::sscanf(buf, "%d", &va);
+        std::fscanf(file, "%d", &vb);
+        std::fscanf(file, "%d", &vc);
         va--;
         vb--;
         vc--;
-        Face newface(&(v[va]), &(v[vc]),
-                     &(v[vb])); // invoco il costruttore di faccia
-        f.push_back(
-            newface); // inserico la nuova faccia in coda al vettore facce
+
+        ret->m_faces.emplace_back(&(ret->m_verts[va]), &(ret->m_verts[vc]),
+                                  &(ret->m_verts[vb]));
+
         nt++;
         vb = vc;
-        while (fscanf(file, "%d", &vc) > 0) {
+        while (std::fscanf(file, "%d", &vc) > 0) {
           vc--;
-          Face newface(&(v[va]), &(v[vc]),
-                       &(v[vb])); // invoco il costruttore di faccia
-          f.push_back(
-              newface); // inserico la nuova faccia in coda al vettore facce
+
+          ret->m_faces.emplace_back(&(ret->m_verts[va]), &(ret->m_verts[vc]),
+                                    &(ret->m_verts[vb]));
+
           nt++;
           vb = vc;
         }
@@ -341,13 +393,19 @@ bool Mesh::LoadFromObj(char *filename) {
 
     default:
       // eat up rest of line
-      fgets(buf, sizeof(buf), file);
+      std::fgets(buf, sizeof(buf), file);
       break;
     }
   }
 
   // printf("dopo SecondPass nv=%d nt=%d\n",nv,nt);
 
-  fclose(file);
-  return true;
+  std::fclose(file);
+
+  // compute vertex normals and BB
+  ret->init();
+  ret->computeBoundingBox();
+
+  return ret;
 }
+} // namespace agl
