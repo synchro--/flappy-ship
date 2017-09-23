@@ -60,7 +60,7 @@ void Spaceship::init() {
   m_steer_speed = 3.4;   // A
   m_steer_return = 0.93; // B ==> max steering = A*B / (1-B) == 2.4
 
-  m_max_acceleration = 0.0028;
+  m_max_acceleration = 0.0058;
   m_grip = 0.45;
 
   // init internal states
@@ -130,11 +130,11 @@ void Spaceship::doMotion() {
   bool brake = get_state(Motion::BRAKE);
 
   if (throttle ^ brake) {
-    int sign = brake ? 1 : -1;
+    int sign = throttle ? -1 : 1;
 
     vel_zm += sign*m_max_acceleration;
     // Spaceships don't fly backwards
-    // vel_zm = (vel_zm > 0.05) ? 0 : vel_zm;
+    vel_zm = (vel_zm > 0.05) ? 0 : vel_zm;
   }
 
   vel_xm *= m_frictionX;
@@ -195,7 +195,7 @@ void Spaceship::execute() {
   // and doMotion will be divided into several modular method
   processCommand();
   doMotion();
-  updateFly(); 
+  //updateFly(); 
 }
 
 bool Spaceship::get_state(Motion mt) { return m_state[mt]; }
