@@ -5,7 +5,7 @@ namespace elements {
  *                                *
  *  Starring: Spaceship class.    *
  *                                *
- */                               
+ */
 
 using namespace spaceship;
 
@@ -35,11 +35,11 @@ Spaceship::Spaceship(const char *texture_filename,
 }
 
 void Spaceship::init() {
-  // The "Envos" spaceship mesh is huge. Here we set proper re-scaling. 
-  m_scaleX = m_scaleY = m_scaleZ = ENVOS_MESH_SCALE;
+  // The "Envos" spaceship mesh is huge. Here we set proper re-scaling.
+  m_scaleX = m_scaleY = m_scaleZ = ENVOS_SCALE;
 
   m_px = m_pz = 0;
-  m_py = 5.0; // Spaceship skills™
+  m_py = 2.0; // Spaceship skills™
 
   m_facing = m_steering = 0.0;
   m_speedX = m_speedY = m_speedZ = 0.0;
@@ -122,7 +122,7 @@ void Spaceship::doMotion() {
   vel_xm = +cosf * m_speedX - sinf * m_speedZ;
   // vel_ym = m_speedY;
   vel_zm = +sinf * m_speedX + cosf * m_speedZ;
-  
+
   // *** Velocity Update *** //
   // ----------------------- //
 
@@ -141,16 +141,16 @@ void Spaceship::doMotion() {
   // vel_ym *= m_frictionY;
   vel_zm *= m_frictionZ;
 
-  // *** Steering Update *** // 
+  // *** Steering Update *** //
   // ----------------------- //
 
   bool left = get_state(Motion::STEER_L);
   bool right = get_state(Motion::STEER_R);
-  
+
  if (left ^ right) {
     int sign = left ? 1 : -1;
     m_steering += sign * m_steer_speed;
-  } 
+  }
   // steer return straight back
   m_steering *= m_steer_return;
 
@@ -167,10 +167,10 @@ void Spaceship::doMotion() {
   m_pz += m_speedZ;
 }
 
-// ONLY TO BE USED IN FLIGHT MODE: 
+// ONLY TO BE USED IN FLIGHT MODE:
 // it updates y-values to make the spaceship fly vertically
 void Spaceship::updateFly() {
-  const static auto FLY_FRICTION = 0.98; 
+  const static auto FLY_FRICTION = 0.98;
   const static auto FLY_RETURN = 0.060;
 
   bool throttle = get_state(Motion::THROTTLE);
@@ -182,12 +182,12 @@ void Spaceship::updateFly() {
     m_speedY += sign*0.1;
   }
 
-  m_speedY*= FLY_FRICTION; 
-  m_speedY-= FLY_RETURN;  
+  m_speedY*= FLY_FRICTION;
+  m_speedY-= FLY_RETURN;
 
-  m_py += m_speedY; 
+  m_py += m_speedY;
   // limit on Y-motion: we can't get under the floor
-  m_py = (m_py < 1) ? 1 : m_py; 
+  m_py = (m_py < 1) ? 1 : m_py;
 }
 
 void Spaceship::execute() {
@@ -195,7 +195,7 @@ void Spaceship::execute() {
   // and doMotion will be divided into several modular method
   processCommand();
   doMotion();
-  //updateFly(); 
+  //updateFly();
 }
 
 bool Spaceship::get_state(Motion mt) { return m_state[mt]; }
@@ -246,15 +246,15 @@ void Spaceship::render() const {
     // translate the camera to follow the ship movements
     m_env.translate(m_px, m_py, m_pz);
 
-    // rotate the ship according to the facing direction 
+    // rotate the ship according to the facing direction
     m_env.rotate(m_facing, m_viewUP);
 
     // the Mesh is loaded on the other side
-    m_env.rotate(270, m_viewUP); 
-    
+    m_env.rotate(180, m_viewUP);
+
     // rotate the ship acc. to steering val, to represent tilting
-    int sign = +1; 
-    m_env.rotate(sign * m_steering, front_boat);
+    int sign = -1;
+    m_env.rotate(sign * m_steering, m_front_axis);
 
     draw();
   });
@@ -263,10 +263,10 @@ void Spaceship::render() const {
 void Spaceship::rotateView(int32_t view_alpha, int32_t view_beta) {
   agl::Vec3 axisX = agl::Vec3(1, 0, 0);
   agl::Vec3 axisY = agl::Vec3(0, 1, 0);
-  
+
   // avoid ending up under the ship
-  view_beta = (view_beta < 5) ? 5 : view_beta; 
-  view_beta = (view_beta > 90) ? 90 : view_beta; 
+  view_beta = (view_beta < 5) ? 5 : view_beta;
+  view_beta = (view_beta > 90) ? 90 : view_beta;
 
   m_env.rotate(view_beta, axisX);
   m_env.rotate(view_alpha, axisY);

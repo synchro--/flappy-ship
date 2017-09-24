@@ -72,7 +72,7 @@ enum Key {
   F5,
   N_KEYS
 };
-enum MouseEvent { MOTION, WHEEL }; 
+enum MouseEvent { MOTION, WHEEL };
 
 } // namespace game
 
@@ -92,9 +92,17 @@ enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE, N_MOTION };
 // to be submitted to the Spaceship
 using Command = std::pair<Motion, bool>;
 
-static const auto ENVOS_MESH_SCALE = 0.0099;
-static const auto FALCON_MESH_SCALE = 0.0099;
-static const auto SHUTTLE_SCALE = 0.013;  
+// Mesh dimension resizing constants
+static const auto ENVOS_SCALE = 0.0059;
+static const auto FALCON_SCALE = 0.0099;
+static const auto SHUTTLE_SCALE = 0.013;
+
+// Some mesh are built along a particular axis:
+// Therefore a rotation is needed
+
+static const auto ENVOS_ANGLE = 180;
+static const auto SHUTTLE_ANGLE = 270;
+static const auto BOAT_ANGLE = 270;
 
 } // namespace spaceship
 

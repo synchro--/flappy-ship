@@ -19,11 +19,11 @@ void Game::init() {
   m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
   m_main_win->show();
 
-  m_floor = elements::get_floor("marti.jpg");
+  m_floor = elements::get_floor("floor1.jpg");
   m_sky = elements::get_sky("space1.jpg");
-  m_ssh = elements::get_spaceship("space-tex.jpg", "Mesh/shuttle.obj");
+  m_ssh = elements::get_spaceship("envmap_flipped.jpg", "Mesh/Envos.obj");
 
-  m_ssh->scale(spaceship::SHUTTLE_SCALE, spaceship::SHUTTLE_SCALE, spaceship::SHUTTLE_SCALE);
+  m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE);
 }
 
 void Game::changeState(game::State state) {
@@ -87,8 +87,8 @@ void Game::gameAction() {
 }
 
 void Game::gameOnKey(Key key, bool pressed) {
-  bool trig_motion = false; 
-  spaceship::Motion mt; 
+  bool trig_motion = false;
+  spaceship::Motion mt;
 
   switch(key) {
 
@@ -172,11 +172,11 @@ void Game::gameOnMouse(MouseEvent ev, int32_t x, int32_t y) {
   if(m_state == State::GAME) {
     switch (ev)
     {
-     case MouseEvent::MOTION: 
+     case MouseEvent::MOTION:
         // change view Alpha and Beta
-        m_ssh->rotateView(x, y); 
-        break; 
-    case MouseEvent::WHEEL: 
+        m_ssh->rotateView(x, y);
+        break;
+    case MouseEvent::WHEEL:
         //stuff
 
     default:
@@ -285,7 +285,7 @@ void Game::setupShipCamera() {
       m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
     }
     break;
-    
+
 
     case CAMERA_TOP_FIXED: {
       cam_d = 0.5;
@@ -300,9 +300,9 @@ void Game::setupShipCamera() {
       cen_y = py + cam_h;
       cen_z = pz - cam_d * cosf;
       m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
-    } 
+    }
     break;
-    
+
     case CAMERA_TOP_CAR: {
       cam_d = 2.5;
       cam_h = 1.0;
@@ -333,8 +333,8 @@ void Game::setupShipCamera() {
       agl::Vec3 axisY = agl::Vec3(0, 1, 0);
 
       m_env.translate(0, 0, (m_env.eyeDist()));
-      m_env.rotate(m_env.beta(), axisX); 
-      m_env.rotate(m_env.alpha(), axisY); 
+      m_env.rotate(m_env.beta(), axisX);
+      m_env.rotate(m_env.alpha(), axisY);
 
       /*
       lg::i("%f %f %f\n",view_alpha,view_beta,eyeDist);
@@ -347,10 +347,10 @@ void Game::setupShipCamera() {
                       gluLookAt(eye_x,eye_y,eye_z,cen_x,cen_y,cen_z,0.0,1.0,0.0);
       */
     }
-      break; 
+      break;
 
-      default: 
-      break; 
+      default:
+      break;
   }
 }
 } // namespace game
