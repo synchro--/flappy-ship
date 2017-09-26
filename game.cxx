@@ -307,8 +307,8 @@ void Game::setupShipCamera() {
     break;
 
     case CAMERA_TOP_CAR: {
-      cam_d = 2.5;
-      cam_h = 1.0;
+      cam_d = 6.5;
+      cam_h = 3.0;
       eye_x = px + cam_d * sinf;
       eye_y = py + cam_h;
       eye_z = pz + cam_d * cosf;
@@ -320,8 +320,8 @@ void Game::setupShipCamera() {
       break;
 
     case CAMERA_PILOT: {
-      cam_d = 0.2;
-      cam_h = 0.55;
+      cam_d = 1.0;
+      cam_h = 1.05;
       eye_x = px + cam_d * sinf;
       eye_y = py + cam_h;
       eye_z = pz + cam_d * cosf;

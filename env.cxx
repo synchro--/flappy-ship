@@ -309,19 +309,15 @@ void Env::redraw() {
 // 1. Compute FPS
 // 2. Calls rendering callback
 void Env::render() {
-
-  for(;;) {
-    auto time_now = getTicks(); 
+          auto time_now = getTicks(); 
 
     if (m_last_time + FPS_SAMPLE < time_now ) {
       m_fps = 1000.0 * ((double) m_fps_now) / (time_now - m_last_time);
       m_fps_now = 1.0;
       m_last_time = time_now;
-      break; 
     } else {
       m_fps_now++;
     }
-  }
 
   // finally, the rendering we were all waiting for!
   m_render_handler();
