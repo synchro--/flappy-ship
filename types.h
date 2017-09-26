@@ -44,7 +44,7 @@ const Color YELLOW = {.913f, .643f, .074f};
 const Color SHADOW = {.4f, .4f, .4f};
 
 static const auto PHYS_SAMPLING_STEP = 10U; // millisec of a Physics sim step
-static const auto FPS_SAMPLE = 30U;         // interval length
+static const auto FPS_SAMPLE = 15U;         // interval length
 } // namespace agl
 
 // GAME TYPES

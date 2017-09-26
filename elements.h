@@ -129,17 +129,22 @@ private:
   // instance is obtained through get_spaceship()
   Spaceship(const char *texture_filename, const char *mesh_filename);
 
-  // internal logic and physics of the spaceship
-
+  //drawing methods
   void draw() const;
   void drawHeadlight(float x, float y, float z, int lightN) const;
-  void doMotion();
+
+  // inner logic and physics of the spaceship
   bool get_state(spaceship::Motion mt);
 
   void init();
   void processCommand();
-  void shadow() const;
   void updateFly(); 
+  void updatePosition(); 
+  bool updateSteering();
+  bool updateVelocity(); 
+
+  bool computePhysics(); 
+  void doMotion();
 
 public:
   friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
@@ -147,6 +152,8 @@ public:
 
   // accessors
   inline float facing() const { return m_facing; }
+  inline bool is_steering() const {return m_steering; }
+  inline bool has_velocity() const {return m_speedZ; }
   inline float x() const { return m_px; }
   inline float y() const { return m_py; }
   inline float z() const { return m_pz; }
@@ -155,8 +162,10 @@ public:
   void execute();
   void sendCommand(spaceship::Motion motion, bool on_off);
   void scale(float x, float y, float z);
+
   // render the Spaceship: TexID + Mesh
-  void render() const;
+  void render();
+  void shadow();
   // rotate the view around the ship, to be used only on CAMERA_MOUSE mode
   void rotateView(int32_t view_alpha, int32_t view_beta);
 };

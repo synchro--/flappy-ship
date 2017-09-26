@@ -24,7 +24,7 @@ Env::Env()
       // all environment variables
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0),
       m_screenH(750), m_screenW(750), m_wireframe(false),
-      m_envmap(true), m_headlight(false), m_shadow(true), m_step(0) {
+      m_envmap(true), m_headlight(false), m_shadow(false), m_step(0) {
 
   // "__func__" == function name
   static const auto TAG = __func__;
@@ -309,14 +309,18 @@ void Env::redraw() {
 // 1. Compute FPS
 // 2. Calls rendering callback
 void Env::render() {
-  auto time_now = getTicks();
 
-  if (m_last_time + FPS_SAMPLE < time_now) {
-    m_fps = 1000.0 * ((double)m_fps_now) / (time_now - m_last_time);
-    m_fps_now = 0;
-    m_last_time = time_now;
-  } else {
-    m_fps_now+= PHYS_SAMPLING_STEP;
+  for(;;) {
+    auto time_now = getTicks(); 
+
+    if (m_last_time + FPS_SAMPLE < time_now ) {
+      m_fps = 1000.0 * ((double) m_fps_now) / (time_now - m_last_time);
+      m_fps_now = 1.0;
+      m_last_time = time_now;
+      break; 
+    } else {
+      m_fps_now++;
+    }
   }
 
   // finally, the rendering we were all waiting for!

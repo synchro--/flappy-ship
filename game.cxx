@@ -18,10 +18,9 @@ void Game::init() {
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
   m_main_win->show();
-
-  m_floor = elements::get_floor("floor1.jpg");
-  m_sky = elements::get_sky("space1.jpg");
-  m_ssh = elements::get_spaceship("envmap_flipped.jpg", "Mesh/Envos.obj");
+  m_floor = elements::get_floor("Texture/wood1.jpg");
+  m_sky = elements::get_sky("Texture/space1.jpg");
+  m_ssh = elements::get_spaceship("Texture/tex2.jpg", "Mesh/Envos.obj");
 
   m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE);
 }
@@ -205,6 +204,10 @@ void Game::gameRender() {
   m_floor->render();
   m_sky->render();
   m_ssh->render();
+
+  /*if(m_env.isShadow()) {
+    m_ssh->shadow();
+  }*/
 
   // questa è una funzione di env
 
