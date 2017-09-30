@@ -215,7 +215,8 @@ public:
   void drawPlane(float sz, float height, size_t num_quads); 
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
-
+  void drawTorus(double r, double R); 
+  
   inline void disableLighting() { glDisable(GL_LIGHTING); }
   inline void enableLighting() { glEnable(GL_LIGHTING); }
 

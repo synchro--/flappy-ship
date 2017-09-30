@@ -255,61 +255,114 @@ void Env::drawSphere(double radius, int lats, int longs) {
   }
 }
 
-void Env::lineWidth(float width) { glLineWidth(width); }
+// Draws a torus of inner radius r and outer radius R.
+void Env::drawTorus(float r, float R)
+{
+  const static int NUM_C = 50;
+  // number of vertex that approximates the circular ring shape
+  const static int NUM_VERTEX_APPROX = 15;
+  // length of the perimeter of the ring
+  const static double RING_PERIMETER = 2.0 * M_PI;
+  double s, t, x, y, z;
+  double cos_phi, sin_phi, cos_teta, sin_teta;
 
-// Load texture from image file.
-// repeat == true --> GL_REPEAT for s and t coordinates
-// nearest == true --> apply neareast neighbour interpolation
-/*
+  for (size_t i = 0; i < NUM_C; ++i)
+  {
+    glBegin(GL_QUAD_STRIP);
+
+    for (size_t j = 0; j <= NUM_VERTEX_APPROX; ++j)
+    {
+      for (int k = 1; k >= 0; --k)
+      {
+        s = (i + k) % NUM_C + 0.5;
+        t = j % NUM_VERTEX_APPROX;
+
+        cos_phi = cos(s * RING_PERIMETER / NUM_C);
+        sin_phi = sin(s * RING_PERIMETER / NUM_C);
+
+        cos_teta = cos(t * RING_PERIMETER / NUM_VERTEX_APPROX);
+        sin_teta = sin(t * RING_PERIMETER / NUM_VERTEX_APPROX);
+
+        x = (R + r * cos_phi) * cos_teta;
+        y = (R + r * cos_phi) * sin_teta;
+        z = r * sin_teta;
+
+        /*
+        double
+          n_x = cos_psi * cos_phi,
+          n_y = sin_psi * cos_phi,
+          n_z = sin_phi;
+
+        glNormal3d(n_x, n_y, n_z);*/
+
+        glNormal3d(x, y, z);
+        glVertex3d(2 * x, 2 * y, 2 * z);
+      }
+    }
+
+    glEnd();
+  }
+
+  void Env::lineWidth(float width) { glLineWidth(width); }
+
+  // Load texture from image file.
+  // repeat == true --> GL_REPEAT for s and t coordinates
+  // nearest == true --> apply neareast neighbour interpolation
+  /*
  * N.B: While linear interpolation gives a smoother result,
  * it isn't always the most ideal option. Nearest neighbour interpolation
  * is more suited in games that want to mimic 8 bit graphics,
  * because of the pixelated look.
  */
 
-TexID Env::loadTexture(const char *filename, bool repeat, bool nearest) {
+  TexID Env::loadTexture(const char *filename, bool repeat, bool nearest)
+  {
 
-  lg::i(__func__, "Loading texture from file %s", filename);
+    lg::i(__func__, "Loading texture from file %s", filename);
 
-  SDL_Surface *s = IMG_Load(filename);
-  if (!s) {
-    lg::e(__func__, "Error while loading texture from file %s", filename);
-    return EXIT_FAILURE;
+    SDL_Surface *s = IMG_Load(filename);
+    if (!s)
+    {
+      lg::e(__func__, "Error while loading texture from file %s", filename);
+      return EXIT_FAILURE;
+    }
+
+    TexID texbind;
+    // generate a name for the texture (i.e. an unsigned int)
+    glGenTextures(1, &texbind);
+    glBindTexture(GL_TEXTURE_2D, texbind);
+    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, s->w, s->h, GL_RGB, GL_UNSIGNED_BYTE,
+                      s->pixels);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                    nearest ? GL_NEAREST : GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
+
+    if (repeat)
+    {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
+
+    return texbind;
   }
 
-  TexID texbind;
-  // generate a name for the texture (i.e. an unsigned int)
-  glGenTextures(1, &texbind);
-  glBindTexture(GL_TEXTURE_2D, texbind);
-  gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, s->w, s->h, GL_RGB, GL_UNSIGNED_BYTE,
-                    s->pixels);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                  nearest ? GL_NEAREST : GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-
-  if (repeat) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  // probabilmente da eliminare e gestire diversamente in seguito
+  void Env::redraw()
+  {
+    // ci automandiamo un messaggio che (s.o. permettendo)
+    // ci fara' ridisegnare la finestra
+    SDL_Event e;
+    e.type = SDL_WINDOWEVENT;
+    e.window.event = SDL_WINDOWEVENT_EXPOSED;
+    SDL_PushEvent(&e);
   }
 
-  return texbind;
-}
-
-// probabilmente da eliminare e gestire diversamente in seguito
-void Env::redraw() {
-  // ci automandiamo un messaggio che (s.o. permettendo)
-  // ci fara' ridisegnare la finestra
-  SDL_Event e;
-  e.type = SDL_WINDOWEVENT;
-  e.window.event = SDL_WINDOWEVENT_EXPOSED;
-  SDL_PushEvent(&e);
-}
-
-// 1. Compute FPS
-// 2. Calls rendering callback
-void Env::render() {
-          auto time_now = getTicks(); 
+  // 1. Compute FPS
+  // 2. Calls rendering callback
+  void Env::render()
+  {
+    auto time_now = getTicks(); 
 
     if (m_last_time + FPS_SAMPLE < time_now ) {
       m_fps = 1000.0 * ((double) m_fps_now) / (time_now - m_last_time);

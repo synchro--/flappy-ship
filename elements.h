@@ -72,14 +72,47 @@ public:
 Sky *get_sky(const char *filename);
 
 /*
- TODO class RING coming soon
- oppure trovare un'altra idea
- tipo paletti in cui si passa di fianco dalla direzione corretta
- e si fa quindi una sorta di slalom --> SpaceSlalom
-
- - come stabilire la direzione corretta e rilevera se si passa l'ostacolo dalla
- - parte giusta ? discutere con cillo
+* RING class. 
+* Rings are torus polygons that must be crossed to win the game. 
+* Whenever a ring is crossed the player gets bonus time for the next one. 
+* Whenever a ring is crossed a next one will be spawned somewhere (random coords)
+*
+* When the player crossed all the required rings, a special Final Gate will be triggered. 
+* See class Gate. 
 */
+
+class Ring {
+private:
+  float m_px, m_py, m_pz; // coords 
+  float m_ship_old_z; // the previous ship position wrt ring ref frame
+  float m_angle; //wrt Y-axis 
+  agl::Vec3 m_Yaxis; 
+  bool m_3D_FLIGHT; // when true rings can have positive y-coord, thus be in the "sky"
+  bool m_triggered; 
+  bool m_first_time_crossed; 
+  agl::Env &m_env; //env reference 
+
+public: 
+  // colors for when the ring is triggered or not
+  const static agl::Color TRIGGERED; 
+  const static agl::Color NOT_TRIGGERED; 
+
+  Ring(float x, float y, float z, float angle = 30, m_3D_FLIGHT = false); 
+
+  void render(); 
+
+  // check if the new ship position has crossed the ring 
+  void checkCrossing(float x, float z); 
+  // same but for flight mode 
+  void checkCrossing(float x, float y, float z);
+
+  // accessors
+  inline float x() { return m_px; }
+  inline float y() { return m_py; }
+  inline float z() { return m_pz; }
+  inline isTriggered() { return m_triggered; }
+
+};
 
 /*
  * The Spaceship class.

@@ -1,5 +1,6 @@
 
 #include "elements.h"
+#include <cmath>
 
 // Implementation of the objects in elements.h
 namespace elements {
@@ -59,4 +60,20 @@ Sky *get_sky(const char *texture_filename) {
 
   return s_sky.get();
  }
+
+ /*  
+  * Ring. See elements::Ring 
+  * 
+  */
+
+  Ring::Ring(float x, float y, float z, float angle, bool flight_mode
+  : m_ship_old_z(INFINITY
+    {
+    m_px = x;
+    m_py = y; 
+    m_pz = z; 
+    m_angle = angle;
+    m_3D_FLIGHT = flight_mode; 
+    }
+ 
 } // namespace elements

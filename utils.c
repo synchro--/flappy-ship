@@ -49,32 +49,34 @@ void drawCubeFill() {
 
 // disegna un cubo in wireframe
 void drawCubeWire() {
+  static const auto sz = 1.0; 
+
   glBegin(GL_LINE_LOOP); // faccia z=+1
-  glVertex3f(+1, +1, +1);
-  glVertex3f(-1, +1, +1);
-  glVertex3f(-1, -1, +1);
-  glVertex3f(+1, -1, +1);
+  glVertex3f(+sz, +sz, +sz);
+  glVertex3f(-sz, +sz, +sz);
+  glVertex3f(-sz, -sz, +sz);
+  glVertex3f(+sz, -sz, +sz);
   glEnd();
 
-  glBegin(GL_LINE_LOOP); // faccia z=-1
-  glVertex3f(+1, -1, -1);
-  glVertex3f(-1, -1, -1);
-  glVertex3f(-1, +1, -1);
-  glVertex3f(+1, +1, -1);
+  glBegin(GL_LINE_LOOP); // faccia z=-sz
+  glVertex3f(+sz, -sz, -sz);
+  glVertex3f(-sz, -sz, -sz);
+  glVertex3f(-sz, +sz, -sz);
+  glVertex3f(+sz, +sz, -sz);
   glEnd();
 
   glBegin(GL_LINES); // 4 segmenti da -z a +z
-  glVertex3f(-1, -1, -1);
-  glVertex3f(-1, -1, +1);
+  glVertex3f(-sz, -sz, -sz);
+  glVertex3f(-sz, -sz, +sz);
 
-  glVertex3f(+1, -1, -1);
-  glVertex3f(+1, -1, +1);
+  glVertex3f(+sz, -sz, -sz);
+  glVertex3f(+sz, -sz, +sz);
 
-  glVertex3f(+1, +1, -1);
-  glVertex3f(+1, +1, +1);
+  glVertex3f(+sz, +sz, -sz);
+  glVertex3f(+sz, +sz, +sz);
 
-  glVertex3f(-1, +1, -1);
-  glVertex3f(-1, +1, +1);
+  glVertex3f(-sz, +sz, -sz);
+  glVertex3f(-sz, +sz, +sz);
   glEnd();
 }
 
