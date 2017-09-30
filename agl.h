@@ -162,7 +162,7 @@ private:
   int m_screenH, m_screenW;
   int m_camera_type;
   int m_step; // number of steps of Physics currently done
-  bool m_wireframe, m_envmap, m_headlight, m_shadow;
+  bool m_wireframe, m_envmap, m_headlight, m_shadow, m_blending;
 
   /* Callbacks variables:
    *  they will be the handler for keys, windows events and rendering.
@@ -187,7 +187,8 @@ public:
   inline decltype(m_envmap) isEnvmap() { return m_envmap; }
   inline decltype(m_headlight) isHeadlight() { return m_headlight; }
   inline decltype(m_shadow) isShadow() { return m_shadow; }
-  
+  inline decltype(m_blending) isBlending() { return m_blending; }
+
   inline decltype(m_eye_dist) eyeDist() { return m_eye_dist; }
   inline decltype(m_view_alpha) alpha() {return m_view_alpha; }
   inline decltype(m_view_beta) beta() {return m_view_beta; }
@@ -196,6 +197,7 @@ public:
   inline void toggle_envmap() { m_envmap = !m_envmap; }
   inline void toggle_headlight() { m_headlight = !m_headlight; }
   inline void toggle_shadow() { m_shadow = !m_shadow; }
+  inline void toggle_blending() {m_blending = !m_blending; }
 
   // Setters for all the callbacks
   // Default: empty
@@ -216,7 +218,7 @@ public:
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
   void drawTorus(double r, double R); 
-  
+
   inline void disableLighting() { glDisable(GL_LIGHTING); }
   inline void enableLighting() { glEnable(GL_LIGHTING); }
 

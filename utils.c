@@ -122,6 +122,7 @@ void Env::drawTorus(float r, float R) {
           n_z = sin_phi;
 
         glNormal3d(n_x, n_y, n_z);*/
+        
         glNormal3d(x, y, z);
         glVertex3d(2 * x, 2 * y, 2 * z);
       }

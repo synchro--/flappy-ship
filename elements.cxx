@@ -67,13 +67,111 @@ Sky *get_sky(const char *texture_filename) {
   */
 
   Ring::Ring(float x, float y, float z, float angle, bool flight_mode
-  : m_ship_old_z(INFINITY
+  : m_ship_old_z(INFINITY), m_triggered(false), m_env(agl::get_env())
     {
-    m_px = x;
-    m_py = y; 
-    m_pz = z; 
-    m_angle = angle;
-    m_3D_FLIGHT = flight_mode; 
+      m_px = x;
+      m_py = y; 
+      m_pz = z; 
+      m_angle = angle;
+      m_3D_FLIGHT = flight_mode; 
     }
- 
+
+  // constants for the rings 
+  // colors for when the ring is triggered or not
+  static const agl::Color TRIGGERED = {1.0f, .86f, .35f, .7f};
+  static const agl::Color NOT_TRIGGERED = {.2f, .80f, .2f, .7f};
+  //view UP vector 
+  const static agl::Vec3 viewUP = agl::Vec3(0.0, 1.0, 0.0);
+  //radius values 
+  const static float r = 0.3; // inner radius
+  const static float R = 2.5; // outer radius
+
+    Ring::render() {
+      m_env.mat_scope([&] {
+        m_env.translate(m_px, m_py, m_pz); 
+        m_env.rotate(m_angl, viewUP); 
+        // set the proper color if triggered 
+        m_env.setColor(m_triggered ? TRIGGERED : NOT_TRIGGERED);
+
+        if(m_env.isBlending()) {
+          // maybe move this to Env helper function 
+          glEnable(GL_BLEND);
+          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+          m_env.drawTorus(r, R); 
+
+          glDisable(GL_BLEND);
+        } 
+        else {
+          m_env.drawTorus(r, R); 
+        }
+
+      });
+    }
+
+    
+    Ring::checkCrossing(float x, float z) {
+      //if the ring has already been crossed, nothing to do 
+      if(!m_triggered) {
+        bool first_call = m_ship_old_z == INFINITY; 
+
+        // get distance wrt to ring center 
+        x-= m_px; 
+        z-= m_pz; 
+
+        float cos_phi = cosf(m_angle * M_PI / 180.0f); 
+        float sin_phi = sinf(m_angle * M_PI / 180.0f); 
+
+        // project coords of the ship to ring reference frame 
+        float x_ring = x*cos_phi - z*sin_phi;
+        float z_ring = x*sin_phi + z*cos_phi; 
+
+        // X: is it inside the circle diameter? 
+        bool check_X = (x_ring < 2*R) && (x_ring > -2*R); 
+        // Z: sign changed? Then crossing happened 
+        bool check_Z = (z_ring >= 0 && m_ship_old_z < 0) || (z_ring <= 0 && m_ship_old_z > 0); 
+
+        if(!first_call && check_Z && check_X) {
+          m_triggered = true; 
+        }
+        
+        m_ship_old_z = z_ring; 
+      }
+    }
+
+  // as above but checking on all 3Dimesionson for flappy flight mode    
+  Ring::checkCrossing(float x, float y, float z) {
+      //if the ring has already been crossed, nothing to do
+      if (!m_triggered)
+      {
+        bool first_call = m_ship_old_z == INFINITY;
+
+        // get distance wrt to ring center
+        x -= m_px;
+        y -= m_py; 
+        z -= m_pz;
+
+        float cos_phi = cosf(m_angle * M_PI / 180.0f);
+        float sin_phi = sinf(m_angle * M_PI / 180.0f);
+
+        // project coords of the ship to ring reference frame
+        float x_ring = x * cos_phi - z * sin_phi;
+        float y_ring = y; 
+        float z_ring = x * sin_phi + z * cos_phi;
+
+        // X: is it inside the circle diameter?
+        bool check_X = (x_ring < 2 * R) && (x_ring > -2 * R);
+        bool check_Y = (y_ring < 2 * R) && (y_ring > -2 * R); 
+        // Z: sign changed? Then crossing happened
+        bool check_Z = (z_ring >= 0 && m_ship_old_z < 0) || (z_ring <= 0 && m_ship_old_z > 0);
+
+        if (!first_call && check_Z && check_Y && check_X)
+        {
+          m_triggered = true;
+        }
+
+        m_ship_old_z = z_ring;
+       }
+    }
+
 } // namespace elements

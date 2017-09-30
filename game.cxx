@@ -2,11 +2,11 @@
 
 namespace game {
 
-Game::Game(std::string gameID)
+Game::Game(std::string gameID, size_t num_rings)
     : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACK_CAR),
       m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0),
-      m_env(agl::get_env()), m_main_win(nullptr), m_floor(nullptr),
-      m_sky(nullptr), m_ssh(nullptr) {}
+      m_num_rings(num_rings), m_env(agl::get_env()), m_main_win(nullptr), 
+      m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
 
 /*
  * Init the game:
@@ -23,6 +23,8 @@ void Game::init() {
   m_ssh = elements::get_spaceship("Texture/tex2.jpg", "Mesh/Envos.obj");
 
   m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE);
+
+  init_rings(); 
 }
 
 void Game::changeState(game::State state) {
@@ -74,15 +76,23 @@ void Game::gameAction() {
   m_deadline_time -= time_now - m_last_time;
 
   if (m_deadline_time < 0) { // let's leave a last second hope
-                             // changeState(State::END);
+      // changeState(State::END);
   }
 
+  auto &current_ring = m_rings[m_cur_ring];
   // check se gli anelli sono stati attraversati
   // spawn nuovo anello + bonus time || crea porta finale (time diventa rosso)
+  ring_crossed = current_ring.checkCrossing()
   bool ring_crossed = true;
   if (ring_crossed) {
     m_deadline_time += game::BONUS_TIME;
   }
+}
+
+void Game::init_rings() {
+  m_rings.clear(); 
+
+
 }
 
 void Game::gameOnKey(Key key, bool pressed) {

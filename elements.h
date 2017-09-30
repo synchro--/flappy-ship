@@ -86,16 +86,19 @@ private:
   float m_px, m_py, m_pz; // coords 
   float m_ship_old_z; // the previous ship position wrt ring ref frame
   float m_angle; //wrt Y-axis 
-  agl::Vec3 m_Yaxis; 
   bool m_3D_FLIGHT; // when true rings can have positive y-coord, thus be in the "sky"
   bool m_triggered; 
-  bool m_first_time_crossed; 
   agl::Env &m_env; //env reference 
 
 public: 
   // colors for when the ring is triggered or not
-  const static agl::Color TRIGGERED; 
-  const static agl::Color NOT_TRIGGERED; 
+  static const agl::Color TRIGGERED = {1.0f, .86f, .35f, .7f};
+  static const agl::Color NOT_TRIGGERED = {.2f, .80f, .2f, .7f};
+  //view UP vector 
+  const static agl::Vec3 viewUP = agl::Vec3(0.0, 1.0, 0.0);
+  //radius values 
+  const static float r = 0.3; // inner radius
+  const static float R = 2.5; // outer radius
 
   Ring(float x, float y, float z, float angle = 30, m_3D_FLIGHT = false); 
 
