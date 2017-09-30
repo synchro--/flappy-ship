@@ -27,6 +27,9 @@ private:
   std::unique_ptr<elements::Spaceship> m_ssh;
   elements::Floor *m_floor;
   elements::Sky *m_sky;
+  std::vector<elements::Ring> m_rings;
+  size_t m_num_rings;
+  size_t m_cur_ring_index;
 
   void setupShipCamera();
 
@@ -37,6 +40,7 @@ private:
   void gameRender();
   void playGame();
 
+  void init_rings();
   void init();
 
   inline void change_camera_type() {
@@ -44,7 +48,7 @@ private:
   }
 
 public:
-  Game(std::string gameID); // constructor
+  Game(std::string gameID, size_t num_rings); // constructor
   void run();
  };
 } // namespace game

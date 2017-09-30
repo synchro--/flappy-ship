@@ -24,7 +24,8 @@ Env::Env()
       // all environment variables
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0),
       m_screenH(750), m_screenW(750), m_wireframe(false),
-      m_envmap(true), m_headlight(false), m_shadow(false), m_step(0) {
+      m_envmap(true), m_headlight(false), m_shadow(false),
+      m_blending(false), m_step(0) {
 
   // "__func__" == function name
   static const auto TAG = __func__;
@@ -133,32 +134,32 @@ std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x,
 
 void Env::drawPlane(float sz, float height, size_t num_quads) {
   glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
-  auto ratio = (double) sz / num_quads; 
+  auto ratio = (double) sz / num_quads;
   glBegin(GL_QUADS); {
     for (size_t x = 0; x < num_quads; ++x) {
       for (size_t z = 0; z < num_quads; ++z) {
-        float x0 = -sz + 2 * (x + 0) * ratio; 
-        float x1 = -sz + 2 * (x + 1) * ratio; 
-        float z0 = -sz + 2 * (z + 0) * ratio; 
-        float z1 = -sz + 2 * (z + 1) * ratio; 
+        float x0 = -sz + 2 * (x + 0) * ratio;
+        float x1 = -sz + 2 * (x + 1) * ratio;
+        float z0 = -sz + 2 * (z + 0) * ratio;
+        float z1 = -sz + 2 * (z + 1) * ratio;
 
         if(!m_wireframe) {
         // bottom left
         glTexCoord2f(0.0f, 1.0f);
         glVertex3d(x0, height, z1);
 
-        // top left 
-        glTexCoord2f(0.0f, 0.0f); 
+        // top left
+        glTexCoord2f(0.0f, 0.0f);
         glVertex3d(x0, height, z0);
-        
-        // top right 
+
+        // top right
         glTexCoord2f(1.0f, 0.0f);
         glVertex3d(x1, height, z0);
 
         //bottom right
         glTexCoord2f(1.0f, 1.0f);
         glVertex3d(x1, height, z1);
-       } 
+       }
         else {
         glVertex3d(x0, height, z1);
         glVertex3d(x0, height, z0);
@@ -220,7 +221,7 @@ void Env::drawSky(TexID texbind, double radius, int lats, int longs) {
                      glDisable(GL_LIGHTING);
 
                      drawSphere(radius, lats, longs);
-                    
+
                      glEnable(GL_LIGHTING);
                    }
 
@@ -256,7 +257,7 @@ void Env::drawSphere(double radius, int lats, int longs) {
 }
 
 // Draws a torus of inner radius r and outer radius R.
-void Env::drawTorus(float r, float R)
+void Env::drawTorus(double r, double R)
 {
   const static int NUM_C = 50;
   // number of vertex that approximates the circular ring shape
@@ -285,7 +286,7 @@ void Env::drawTorus(float r, float R)
 
         x = (R + r * cos_phi) * cos_teta;
         y = (R + r * cos_phi) * sin_teta;
-        z = r * sin_teta;
+        z = r * sin_phi;
 
         /*
         double
@@ -299,6 +300,7 @@ void Env::drawTorus(float r, float R)
         glVertex3d(2 * x, 2 * y, 2 * z);
       }
     }
+   }
 
     glEnd();
   }
@@ -362,7 +364,7 @@ void Env::drawTorus(float r, float R)
   // 2. Calls rendering callback
   void Env::render()
   {
-    auto time_now = getTicks(); 
+    auto time_now = getTicks();
 
     if (m_last_time + FPS_SAMPLE < time_now ) {
       m_fps = 1000.0 * ((double) m_fps_now) / (time_now - m_last_time);
@@ -469,7 +471,5 @@ void Env::textureDrawing(TexID texbind, std::function<void()> callback,
 }
 
 void Env::translate(float x, float y, float z) { glTranslatef(x, y, z); }
-
-
 
 } // namespace agl
