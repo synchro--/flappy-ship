@@ -18,7 +18,7 @@ void Game::init() {
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
   m_main_win->show();
-  m_floor = elements::get_floor("Texture/wood1.jpg");
+  m_floor = elements::get_floor("Texture/sea.jpg");
   m_sky = elements::get_sky("Texture/space1.jpg");
   m_ssh = elements::get_spaceship("Texture/tex2.jpg", "Mesh/Envos.obj");
 
@@ -79,11 +79,12 @@ void Game::gameAction() {
       // changeState(State::END);
   }
 
-  auto &current_ring = m_rings[m_cur_ring_index];
+  // auto &current_ring = m_rings[m_cur_ring_index];
   // check se gli anelli sono stati attraversati
   // spawn nuovo anello + bonus time || crea porta finale (time diventa rosso)
-  current_ring.checkCrossing(m_ssh->x(), m_ssh->z());
-  bool ring_crossed = current_ring.isTriggered();
+  // current_ring.checkCrossing(m_ssh->x(), m_ssh->z());
+  bool ring_crossed;
+  //ring_crossed = current_ring.isTriggered();
   ring_crossed = true;
   if (ring_crossed) {
     m_deadline_time += game::BONUS_TIME;
@@ -92,8 +93,6 @@ void Game::gameAction() {
 
 void Game::init_rings() {
   m_rings.clear();
-
-
 }
 
 void Game::gameOnKey(Key key, bool pressed) {
