@@ -143,7 +143,9 @@ public:
 
 std::unique_ptr<Mesh> loadMesh(const char *mesh_filename);
 
-using game::Key;   // type for game keys
+using game::Key;       // custom type for game keys
+using game::MouseEvent // custom type for mouse events 
+
 class SmartWindow; // pre-declared to be used in Env
 
 /* The Env class represents the Environment of the game.
@@ -158,22 +160,22 @@ private:
   double m_fps;     // fps value in the last interval
   double m_fps_now; // fps currently drawn
   uint m_last_time;
-  float m_eye_dist, m_view_alpha, m_view_beta; 
   int m_screenH, m_screenW;
   int m_camera_type;
   int m_step; // number of steps of Physics currently done
   bool m_wireframe, m_envmap, m_headlight, m_shadow, m_blending;
 
   /* Callbacks variables:
-   *  they will be the handler for keys, windows events and rendering.
+   *  they will be the handler for keys, mouse & windows events and rendering.
    *  The actual callback function will vary according to the current
    *  state of the game.
-   *  For example, if we are on Menù, the rendering callback will be different
+   *  For example, if we are on Menu, the rendering callback will be different
    *  wrt when we are actually playing.
    */
   std::function<void()> m_action_handler, m_render_handler,
       m_window_event_handler;
   std::function<void(game::Key)> m_key_up_handler, m_key_down_handler;
+  std::function<void(game::MouseEvent, int32_t, int32_t)> m_mouse_event_handler; 
 
 public:
   // Friends can touch your private parts.
@@ -189,9 +191,10 @@ public:
   inline decltype(m_shadow) isShadow() { return m_shadow; }
   inline decltype(m_blending) isBlending() { return m_blending; }
 
+/*
   inline decltype(m_eye_dist) eyeDist() { return m_eye_dist; }
   inline decltype(m_view_alpha) alpha() {return m_view_alpha; }
-  inline decltype(m_view_beta) beta() {return m_view_beta; }
+  inline decltype(m_view_beta) beta() {return m_view_beta; } */
 
   inline void toggle_wireframe() { m_wireframe = !m_wireframe; }
   inline void toggle_envmap() { m_envmap = !m_envmap; }
@@ -204,6 +207,7 @@ public:
   void set_action(decltype(m_action_handler) actions = [] {});
   void set_keydown_handler(decltype(m_key_down_handler) onkeydown = [](Key) {});
   void set_keyup_handler(decltype(m_key_up_handler) onkeyup = [](Key) {});
+  void set_mouse_handler(decltype(m_mouse_event_handler) onmousev = [](MouseEvent, int32_t, int32_t) {});
   void set_render(decltype(m_render_handler) render = [] {});
   void set_winevent_handler(decltype(m_window_event_handler) onwinev = [] {});
 

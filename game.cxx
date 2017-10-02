@@ -4,6 +4,7 @@ namespace game {
 
 Game::Game(std::string gameID, size_t num_rings)
     : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACK_CAR),
+      m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0),
       m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0),
       m_num_rings(num_rings), m_env(agl::get_env()), m_main_win(nullptr),
       m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
@@ -180,17 +181,40 @@ void Game::gameOnKey(Key key, bool pressed) {
   }
 }
 
+
+// Handler for mouse events, like zooming and perspective change 
+// Values changed with this method will only take effect when setting up 
+// the camera in setupShipCamera()
+// Used only when camera is set to CAMERA_MOUSE
 void Game::gameOnMouse(MouseEvent ev, int32_t x, int32_t y) {
   // Process mouse events only in State GAME
   if(m_state == State::GAME) {
     switch (ev)
     {
-     case MouseEvent::MOTION:
-        // change view Alpha and Beta
-        m_ssh->rotateView(x, y);
+     case MouseEvent::MOTION: {
+        m_view_alpha = y; 
+        m_view_beta = x; 
+       
+        // avoid ending up under the ship
+        view_beta = (view_beta < 5) ? 5 : view_beta;
+        view_beta = (view_beta > 90) ? 90 : view_beta;
+     }
         break;
-    case MouseEvent::WHEEL:
-        //stuff
+        
+    case MouseEvent::WHEEL: {
+        // if mouse event is a wheel roll, only the first value is significant 
+        if (x < 0) {
+           // zoom in
+           m_eye_dist = m_eye_dist * 0.9;
+           // can't be < 1
+           m_eye_dist = m_eye_dist < 1 ? 1 : m_eye_dist;
+         }
+
+         else if (x > 0) {
+           // Zoom out
+           m_eye_dist = m_eye_dist / 0.9;
+         }
+    } break; 
 
     default:
       break;
@@ -250,14 +274,14 @@ void Game::gameRender() {
 void Game::playGame() {
   // Using placeholders to perform currying, together with std::bind()
   // Each placeholder (_1, _2, etc.) represents a future argument that will be
-  // passed
-  // to the callback handler.
+  // passed to the callback handler.
   using namespace std::placeholders;
 
   m_env.set_winevent_handler(std::bind(&Game::gameRender, this));
   m_env.set_render(std::bind(&Game::gameRender, this));
   m_env.set_action(std::bind(&Game::gameAction, this));
-
+  
+  m_env.set_mouse_handler(std::bind(&Game::gameOnMouse, this, _1, _2, _3)); 
   m_env.set_keydown_handler(std::bind(&Game::gameOnKey, this, _1, true));
   m_env.set_keyup_handler(std::bind(&Game::gameOnKey, this, _1, false));
 }
@@ -346,13 +370,13 @@ void Game::setupShipCamera() {
     } break;
 
     case CAMERA_MOUSE: {
-      agl::Vec3 axisX = agl::Vec3(1, 0, 0);
-      agl::Vec3 axisY = agl::Vec3(0, 1, 0);
-
-      m_env.translate(0, 0, (m_env.eyeDist()));
-      m_env.rotate(m_env.beta(), axisX);
-      m_env.rotate(m_env.alpha(), axisY);
-
+      const auto axisX = agl::Vec3(1, 0, 0);
+      const auto axisY = agl::Vec3(0, 1, 0);
+      
+      m_env.translate(0, 0, m_eye_dist); 
+      m_env.rotate(m_view_beta, axisX);
+      m_env.rotate(m_view_alpha, axisY);
+      
       /*
       lg::i("%f %f %f\n",view_alpha,view_beta,eyeDist);
                       eye_x=eyeDist*cos(view_alpha)*sin(view_beta);

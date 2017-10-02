@@ -19,6 +19,7 @@ private:
   bool m_game_started;
   bool m_restart_game;
   int m_camera_type;
+  float m_eye_dist, m_view_alpha, m_view_beta;
   double m_deadline_time; // fps currently drawn
   uint32_t m_last_time;
 
@@ -35,7 +36,7 @@ private:
   void changeState(game::State state);
   void gameAction();
   void gameOnKey(game::Key, bool pressed);
-  void gameOnMouse(MouseEvent ev, int32_t x, int32_t y);
+  void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
   void gameRender();
   void playGame();
 

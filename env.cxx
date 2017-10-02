@@ -22,7 +22,6 @@ Env::Env()
       m_key_up_handler([](Key) {}),
 
       // all environment variables
-      m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0),
       m_screenH(750), m_screenW(750), m_wireframe(false),
       m_envmap(true), m_headlight(false), m_shadow(false),
       m_blending(false), m_step(0) {
