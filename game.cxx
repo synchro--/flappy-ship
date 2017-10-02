@@ -79,6 +79,7 @@ void Game::gameAction() {
       // changeState(State::END);
   }
 
+
   // auto &current_ring = m_rings[m_cur_ring_index];
   // check se gli anelli sono stati attraversati
   // spawn nuovo anello + bonus time || crea porta finale (time diventa rosso)
@@ -92,7 +93,10 @@ void Game::gameAction() {
 }
 
 void Game::init_rings() {
+
   m_rings.clear();
+
+
 }
 
 void Game::gameOnKey(Key key, bool pressed) {

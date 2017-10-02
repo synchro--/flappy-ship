@@ -30,7 +30,6 @@ private:
   std::vector<elements::Ring> m_rings;
   size_t m_num_rings;
   size_t m_cur_ring_index;
-
   void setupShipCamera();
 
   void changeState(game::State state);

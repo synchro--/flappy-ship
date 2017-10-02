@@ -104,7 +104,7 @@ Sky *get_sky(const char *texture_filename) {
         }
         else {
           m_env.drawTorus(s_r, s_R);
-        }
+       }
 
       });
     }
@@ -141,7 +141,7 @@ Sky *get_sky(const char *texture_filename) {
 
   // as above but checking on all 3Dimesionson for flappy flight mode
   void Ring::checkCrossing(float x, float y, float z) {
-      //if the ring has already been crossed, nothing to do
+     //if the ring has already been crossed, nothing to do
       if (!m_triggered)
       {
         bool first_call = m_ship_old_z == INFINITY;
@@ -162,7 +162,7 @@ Sky *get_sky(const char *texture_filename) {
         // X: is it inside the circle diameter?
         bool check_X = (x_ring < 2 * s_R) && (x_ring > -2 * s_R);
         bool check_Y = (y_ring < 2 * s_R) && (y_ring > -2 * s_R);
-        // Z: sign changed? Then crossing happened
+       // Z: sign changed? Then crossing happened
         bool check_Z = (z_ring >= 0 && m_ship_old_z < 0) || (z_ring <= 0 && m_ship_old_z > 0);
 
         if (!first_call && check_Z && check_Y && check_X)
