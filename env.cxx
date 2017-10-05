@@ -76,6 +76,11 @@ void Env::set_keyup_handler(decltype(m_key_up_handler) onkeyup) {
   m_key_up_handler = onkeyup;
 }
 
+// Sets the callback for mouse events. 
+void Env::set_mouse_handler(decltype(m_mouse_event_handler) onmousev) {
+  m_mouse_event_handler = onmousev; 
+}
+
 // Sets the onwindowevent callback, which is called when the window is exposed
 // again after being covered - usually it is set to the same as
 // m_render_handler.

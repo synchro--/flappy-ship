@@ -119,18 +119,20 @@ void Env::renderLoop() {
 
         // ---- MOUSE EVENTS --- // 
 
-       case SDL_MOUSEMOTION:
-         handler = m_mouse_event_handler();
+       case SDL_MOUSEMOTION: {
+        auto handler = m_mouse_event_handler;
 
          if (e.motion.state & SDL_BUTTON(1)) {
              handler(MouseEvent::MOTION, e.motion.xrel, e.motion.yrel);
          }
+        }
          break;
 
-       case SDL_MOUSEWHEEL:
-          
-         handler(MouseEvent::WHEEL, e.wheel.y)
-         break;
+       case SDL_MOUSEWHEEL: {
+         auto handler = m_mouse_event_handler;    
+         handler(MouseEvent::WHEEL, e.wheel.y, -1.0); 
+       }
+       break;
 
       default:
         break;

@@ -38,6 +38,7 @@ private:
   void gameOnKey(game::Key, bool pressed);
   void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
   void gameRender();
+  // set the callbacks to the game functions
   void playGame();
 
   void init_rings();

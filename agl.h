@@ -143,8 +143,8 @@ public:
 
 std::unique_ptr<Mesh> loadMesh(const char *mesh_filename);
 
-using game::Key;       // custom type for game keys
-using game::MouseEvent // custom type for mouse events 
+using game::Key;        // custom type for game keys
+using game::MouseEvent; // custom type for mouse events 
 
 class SmartWindow; // pre-declared to be used in Env
 
@@ -172,10 +172,10 @@ private:
    *  For example, if we are on Menu, the rendering callback will be different
    *  wrt when we are actually playing.
    */
-  std::function<void()> m_action_handler, m_render_handler,
+  std::function<void ()> m_action_handler, m_render_handler,
       m_window_event_handler;
-  std::function<void(game::Key)> m_key_up_handler, m_key_down_handler;
-  std::function<void(game::MouseEvent, int32_t, int32_t)> m_mouse_event_handler; 
+  std::function<void (game::Key)> m_key_up_handler, m_key_down_handler;
+  std::function<void (game::MouseEvent, int32_t, int32_t)> m_mouse_event_handler; 
 
 public:
   // Friends can touch your private parts.

@@ -36,7 +36,7 @@ Spaceship::Spaceship(const char *texture_filename,
 
 void Spaceship::init() {
   // The "Envos" spaceship mesh is huge. Here we set proper re-scaling.
-  m_scaleX = m_scaleY = m_scaleZ = ENVOS_SCALE;
+  m_scaleX = m_scaleY = m_scaleZ = SHUTTLE_SCALE;
 
   m_px = m_pz = 0;
   m_py = 2.0; // Spaceship skills™
@@ -351,27 +351,16 @@ void Spaceship::render()  {
     m_env.rotate(m_facing, m_viewUP);
 
     // the Mesh is loaded on the other side
-    m_env.rotate(ENVOS_ANGLE, m_viewUP);
+    m_env.rotate(SHUTTLE_ANGLE, m_viewUP);
 
     // rotate the ship acc. to steering val, to represent tilting
-    int sign = -1;
-    m_env.rotate(sign * m_steering, m_front_axis);
+    int sign = +1;
+//    m_env.rotate(sign * m_steering, m_front_axis);
+    m_env.rotate(sign * m_steering, front_boat);
 
     draw();   
     
     });
-}
-
-void Spaceship::rotateView(int32_t view_alpha, int32_t view_beta) {
-  agl::Vec3 axisX = agl::Vec3(1, 0, 0);
-  agl::Vec3 axisY = agl::Vec3(0, 1, 0);
-
-  // avoid ending up under the ship
-  view_beta = (view_beta < 5) ? 5 : view_beta;
-  view_beta = (view_beta > 90) ? 90 : view_beta;
-
-  m_env.rotate(view_beta, axisX);
-  m_env.rotate(view_alpha, axisY);
 }
 
 void Spaceship::sendCommand(Motion motion, bool on_off) {

@@ -19,9 +19,9 @@ void Game::init() {
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
   m_main_win->show();
-  m_floor = elements::get_floor("Texture/sea.jpg");
+  m_floor = elements::get_floor("Texture/space-tex.jpg");
   m_sky = elements::get_sky("Texture/space1.jpg");
-  m_ssh = elements::get_spaceship("Texture/tex2.jpg", "Mesh/Envos.obj");
+  m_ssh = elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/shuttle.obj");
 
   m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE);
 
@@ -196,8 +196,8 @@ void Game::gameOnMouse(MouseEvent ev, int32_t x, int32_t y) {
         m_view_beta = x; 
        
         // avoid ending up under the ship
-        view_beta = (view_beta < 5) ? 5 : view_beta;
-        view_beta = (view_beta > 90) ? 90 : view_beta;
+        m_view_beta = (m_view_beta < 5) ? 5 : m_view_beta;
+        m_view_beta = (m_view_beta > 90) ? 90 : m_view_beta;
      }
         break;
         
@@ -281,9 +281,9 @@ void Game::playGame() {
   m_env.set_render(std::bind(&Game::gameRender, this));
   m_env.set_action(std::bind(&Game::gameAction, this));
   
-  m_env.set_mouse_handler(std::bind(&Game::gameOnMouse, this, _1, _2, _3)); 
   m_env.set_keydown_handler(std::bind(&Game::gameOnKey, this, _1, true));
   m_env.set_keyup_handler(std::bind(&Game::gameOnKey, this, _1, false));
+  m_env.set_mouse_handler(std::bind(&Game::gameOnMouse, this, _1, _2, _3));
 }
 
 /*
@@ -370,6 +370,16 @@ void Game::setupShipCamera() {
     } break;
 
     case CAMERA_MOUSE: {
+      cam_d = 2.3;
+      cam_h = 1.0;
+      eye_x = px + cam_d * sinf;
+      eye_y = py + cam_h;
+      eye_z = pz + cam_d * cosf;
+      cen_x = px - cam_d * sinf;
+      cen_y = py + cam_h;
+      cen_z = pz - cam_d * cosf;
+      m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+
       const auto axisX = agl::Vec3(1, 0, 0);
       const auto axisY = agl::Vec3(0, 1, 0);
       
