@@ -89,6 +89,22 @@ void Spaceship::draw() const {
   }
 }
 
+void Spaceship::drawFlicker() const {
+  m_env.textureDrawing(m_tex, [&] {
+    m_env.mat_scope([&] {
+      m_env.scale(m_scaleX, m_scaleY, m_scaleZ);
+
+      m_mesh->renderGouraud(true);
+    });
+  }); // generate coords automatically, true by default
+
+  // if headlight is on in the Env, then draw headlights
+  if (m_env.isHeadlight()) {
+    lg::i(__func__, "Headlights toggled!");
+    drawHeadlight(0, 0, -1, 8);
+  }
+}
+
 // attiva una luce di openGL per simulare un faro
 void Spaceship::drawHeadlight(float x, float y, float z, int lightN) const {
 
@@ -337,7 +353,7 @@ void Spaceship::processCommand() {
   }
 }
 
-void Spaceship::render() {
+void Spaceship::render(bool flicker) {
   m_env.mat_scope([&] {
 
     agl::Vec3 front_boat = agl::Vec3(1, 0, 0);
@@ -356,7 +372,11 @@ void Spaceship::render() {
     m_env.rotate(sign * m_steering, m_front_axis);
     //   m_env.rotate(sign * m_steering, front_boat);
 
-    draw();
+    if(flicker) {
+      drawFlicker(); 
+    } else {
+      draw(); 
+    }
 
   });
 }
@@ -381,12 +401,22 @@ void Spaceship::shadow() {
     const auto c = agl::SHADOW;
 
     m_env.setColor(c);
-    m_env.translate(0, 0.01, 0); // avoid z-fighting with the floor(
-    scale(1.01, 0.0, 1.01);      // squash on Y, 1% scaling-up on X and Z
-
     m_env.disableLighting();
+
+
+    m_env.translate(m_px+2.0, 0.01, m_pz+2.0); // avoid z-fighting with the floor
+    // rotate the ship according to the facing direction
+    m_env.rotate(m_facing, m_viewUP);
+    // the Mesh is loaded on the other side
+    m_env.rotate(ENVOS_ANGLE, m_viewUP);
+        // rotate the ship acc. to steering val, to represent tilting
+    int sign = -1;
+    m_env.rotate(sign * m_steering, m_front_axis);
+
+    m_env.scale(ENVOS_SCALE*1.01, ENVOS_SCALE*0.0, ENVOS_SCALE*1.01);      // squash on Y, 1% scaling-up on X and Z
+    
     // render the ship without lighting and squashed!
-    m_mesh->renderGouraud(m_env.isWireframe());
+    m_mesh->renderGouraud(m_env.isWireframe()); 
     m_env.enableLighting();
   });
 }

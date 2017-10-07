@@ -218,6 +218,7 @@ public:
   void setColor(const Color &color);
 
   // drawing functions
+  void drawCubeWire(); 
   void drawFloor(TexID texbind, float sz, float height, size_t num_quads);
   void drawPlane(float sz, float height, size_t num_quads);
   void drawSky(TexID texbind, double radius, int lats, int longs);

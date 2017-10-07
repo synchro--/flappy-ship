@@ -22,6 +22,7 @@ private:
   int m_camera_type;
   float m_eye_dist, m_view_alpha, m_view_beta;
   double m_deadline_time; // fps currently drawn
+  int32_t m_penalty_time; 
   uint32_t m_last_time;
 
   agl::Env &m_env;

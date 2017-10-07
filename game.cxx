@@ -6,8 +6,7 @@ namespace game {
 Game::Game(std::string gameID, size_t num_rings)
     : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACK_CAR),
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0),
-      m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0),
-      m_num_rings(num_rings), m_cur_ring_index(0), m_env(agl::get_env()),
+      m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0), m_penalty_time(0.0), m_num_rings(num_rings), m_cur_ring_index(0), m_env(agl::get_env()),
       m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
 
 /*
@@ -84,10 +83,13 @@ void Game::gameAction() {
   // only if game has started, i.e. a key has been pressed
   if (m_game_started) {
     auto time_now = m_env.getTicks();
-    m_deadline_time -= (time_now - m_last_time);
+    auto diff = time_now - m_last_time; 
+    m_deadline_time -= diff;
+    // if a penalty has been triggered, compute its remaining time
+    m_penalty_time = m_penalty_time > 0.0 ? (m_penalty_time - 100) : 0.0; 
 
     lg::i(__func__, "Time left: %f %f", (m_deadline_time / 1000.0),
-          (time_now - m_last_time));
+          m_penalty_time/1000.0);
     m_last_time = time_now;
 
     if (m_deadline_time < 0) { // let's leave a last second hope
@@ -103,8 +105,10 @@ void Game::gameAction() {
   ring_crossed = current_ring.isTriggered();
   // ring_crossed = true;
   if (ring_crossed) {
-    m_deadline_time += game::BONUS_TIME;
+    m_deadline_time += game::RING_TIME;
     ++m_cur_ring_index;
+   // m_ssh->shadow(); 
+   m_penalty_time = 6000U; 
   }
 }
 
@@ -260,7 +264,12 @@ void Game::gameRender() {
 
   m_floor->render();
   m_sky->render();
-  m_ssh->render();
+  if(m_penalty_time && ((m_penalty_time / 200) % 2 == 0)) {
+    m_ssh->render(true); 
+  } 
+  else {
+      m_ssh->render();
+  }
 
   // ring rendering: render till the first non-triggered ring
   for (size_t i = 0; i < m_num_rings; ++i) {
@@ -272,9 +281,9 @@ void Game::gameRender() {
     }
   }
 
-  /*if(m_env.isShadow()) {
+  if(m_env.isShadow()) {
     m_ssh->shadow();
-  }*/
+  }
 
   // questa è una funzione di env
 

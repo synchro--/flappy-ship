@@ -119,6 +119,52 @@ public:
   inline bool isTriggered() { return m_triggered; }
 };
 
+
+/*
+ * Introducing: the BAD cube. 
+ * It's a simple wireframe cube, but if the spaceship touches it the player gets a penalty time.
+ * Besides, the spaceship starts flickering to indicate that something bad happened.
+ */
+
+ /*
+class BadCube {
+private:
+  float m_px, m_py, m_pz; // coords
+  float m_ship_old_z;     // the previous ship position wrt ring ref frame
+  float m_angle;          // wrt Y-axis
+  bool m_3D_FLIGHT; // when true rings can have positive y-coord, thus be in the
+                    // "sky"
+  bool m_triggered;
+  agl::Env &m_env; // env reference
+
+public:
+  // static members
+  // colors for when the ring is triggered or not
+  static const agl::Color TRIGGERED;
+  static const agl::Color NOT_TRIGGERED;
+  // view UP vector
+  static const agl::Vec3 s_viewUP;
+  // radius values
+  static const float s_r;
+  static const float s_R;
+
+  Ring(float x, float y, float z, float angle = 30.0, bool m_3D_FLIGHT = false);
+
+  void render();
+
+  // check if the new ship position has crossed the ring
+  void checkCrossing(float x, float z);
+  // same but for flight mode
+  void checkCrossing(float x, float y, float z);
+
+  // accessors
+  inline float x() { return m_px; }
+  inline float y() { return m_py; }
+  inline float z() { return m_pz; }
+  inline bool isTriggered() { return m_triggered; }
+};
+*/ 
+
 /*
  * The Spaceship class.
  *
@@ -170,6 +216,7 @@ private:
 
   // drawing methods
   void draw() const;
+  void drawFlicker() const;
   void drawHeadlight(float x, float y, float z, int lightN) const;
 
   // inner logic and physics of the spaceship
@@ -203,7 +250,7 @@ public:
   void scale(float x, float y, float z);
 
   // render the Spaceship: TexID + Mesh
-  void render();
+  void render(bool flicker = false);
   void shadow();
 };
 

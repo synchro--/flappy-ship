@@ -41,7 +41,7 @@ const Color BLACK = {.0f, .0f, .0f, 1.0f};
 const Color RED = {.768f, .109f, .109f};
 const Color GREEN = {.447f, .643f, .074f};
 const Color YELLOW = {.913f, .643f, .074f};
-const Color SHADOW = {.4f, .4f, .4f};
+const Color SHADOW = {.3f, .3f, .3f};
 
 static const auto PHYS_SAMPLING_STEP = 10U; // millisec of a Physics sim step
 static const auto FPS_SAMPLE = 10U;         // interval length

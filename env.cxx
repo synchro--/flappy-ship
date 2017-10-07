@@ -135,6 +135,39 @@ std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x,
   return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h));
 }
 
+// draw a wireframe cube
+void Env::drawCubeWire() {
+  static const auto sz = 1.0; 
+
+  glBegin(GL_LINE_LOOP); // faccia z=+1
+  glVertex3f(+sz, +sz, +sz);
+  glVertex3f(-sz, +sz, +sz);
+  glVertex3f(-sz, -sz, +sz);
+  glVertex3f(+sz, -sz, +sz);
+  glEnd();
+
+  glBegin(GL_LINE_LOOP); // faccia z=-sz
+  glVertex3f(+sz, -sz, -sz);
+  glVertex3f(-sz, -sz, -sz);
+  glVertex3f(-sz, +sz, -sz);
+  glVertex3f(+sz, +sz, -sz);
+  glEnd();
+
+  glBegin(GL_LINES); // 4 segmenti da -z a +z
+  glVertex3f(-sz, -sz, -sz);
+  glVertex3f(-sz, -sz, +sz);
+
+  glVertex3f(+sz, -sz, -sz);
+  glVertex3f(+sz, -sz, +sz);
+
+  glVertex3f(+sz, +sz, -sz);
+  glVertex3f(+sz, +sz, +sz);
+
+  glVertex3f(-sz, +sz, -sz);
+  glVertex3f(-sz, +sz, +sz);
+  glEnd();
+}
+
 // size 'sz' should be ~100.0f
 void Env::drawPlane(float sz, float height, size_t num_quads) {
   glNormal3f(0, 1, 0); // normale verticale uguale x tutti
