@@ -1,7 +1,7 @@
 #include "elements.h"
 
 namespace elements {
-    /*                                *
+/*                                *
  *                                *
  *  Starring: Spaceship class.    *
  *                                *
@@ -38,7 +38,8 @@ void Spaceship::init() {
   // The "Envos" spaceship mesh is huge. Here we set proper re-scaling.
   m_scaleX = m_scaleY = m_scaleZ = SHUTTLE_SCALE;
 
-  m_px = m_pz = 0;
+  m_px = 0;
+  m_pz = 0;
   m_py = 2.0; // Spaceship skills™
 
   m_facing = m_steering = 0.0;
@@ -65,9 +66,9 @@ void Spaceship::init() {
 
   // init internal states
   m_state = {false};
-  
+
   // init queue size
-  decltype(m_cmds)().swap(m_cmds); 
+  decltype(m_cmds)().swap(m_cmds);
 }
 
 // draw the ship as a textured mesh, using the helper functions defined
@@ -83,8 +84,8 @@ void Spaceship::draw() const {
 
   // if headlight is on in the Env, then draw headlights
   if (m_env.isHeadlight()) {
-     lg::i(__func__, "Headlights toggled!"); 
-     drawHeadlight(0, 0, -1, 8);
+    lg::i(__func__, "Headlights toggled!");
+    drawHeadlight(0, 0, -1, 8);
   }
 }
 
@@ -118,74 +119,73 @@ void Spaceship::drawHeadlight(float x, float y, float z, int lightN) const {
 void Spaceship::doMotion() {
   // Here we compute the evolution of the Spaceship during time
 
-  bool done_something = computePhysics(); 
-  
-  // if something happened, we need to update the position of the ship 
-  if(done_something) {
-    updatePosition(); 
+  bool done_something = computePhysics();
+
+  // if something happened, we need to update the position of the ship
+  if (done_something) {
+    updatePosition();
   }
 
-/*
-  float vel_xm, vel_ym, vel_zm; // velocita in spazio macchina
+  /*
+    float vel_xm, vel_ym, vel_zm; // velocita in spazio macchina
 
-  // da vel frame mondo a vel frame macchina
-  float cosf = cos(m_facing * M_PI / 180.0);
-  float sinf = sin(m_facing * M_PI / 180.0);
-  vel_xm = +cosf * m_speedX - sinf * m_speedZ;
-  // vel_ym = m_speedY;
-  vel_zm = +sinf * m_speedX + cosf * m_speedZ;
+    // da vel frame mondo a vel frame macchina
+    float cosf = cos(m_facing * M_PI / 180.0);
+    float sinf = sin(m_facing * M_PI / 180.0);
+    vel_xm = +cosf * m_speedX - sinf * m_speedZ;
+    // vel_ym = m_speedY;
+    vel_zm = +sinf * m_speedX + cosf * m_speedZ;
 
-  // *** Velocity Update *** //
-  // ----------------------- //
+    // *** Velocity Update *** //
+    // ----------------------- //
 
-  bool throttle = get_state(Motion::THROTTLE);
-  bool brake = get_state(Motion::BRAKE);
+    bool throttle = get_state(Motion::THROTTLE);
+    bool brake = get_state(Motion::BRAKE);
 
-  if (throttle ^ brake) {
-    int sign = throttle ? -1 : 1;
+    if (throttle ^ brake) {
+      int sign = throttle ? -1 : 1;
 
-    vel_zm += sign*m_max_acceleration;
-    // Spaceships don't fly backwards
-    vel_zm = (vel_zm > 0.05) ? 0 : vel_zm;
-  }
+      vel_zm += sign*m_max_acceleration;
+      // Spaceships don't fly backwards
+      vel_zm = (vel_zm > 0.05) ? 0 : vel_zm;
+    }
 
-  vel_xm *= m_frictionX;
-  // vel_ym *= m_frictionY;
-  vel_zm *= m_frictionZ;
+    vel_xm *= m_frictionX;
+    // vel_ym *= m_frictionY;
+    vel_zm *= m_frictionZ;
 
-  // *** Steering Update *** //
-  // ----------------------- //
+    // *** Steering Update *** //
+    // ----------------------- //
 
-  bool left = get_state(Motion::STEER_L);
-  bool right = get_state(Motion::STEER_R);
+    bool left = get_state(Motion::STEER_L);
+    bool right = get_state(Motion::STEER_R);
 
- if (left ^ right) {
-    int sign = left ? 1 : -1;
-    m_steering += sign * m_steer_speed;
-  }
-  // steer return straight back
-  m_steering *= m_steer_return;
+   if (left ^ right) {
+      int sign = left ? 1 : -1;
+      m_steering += sign * m_steer_speed;
+    }
+    // steer return straight back
+    m_steering *= m_steer_return;
 
-  m_facing = m_facing - (vel_zm * m_grip) * m_steering;
+    m_facing = m_facing - (vel_zm * m_grip) * m_steering;
 
-  // ritorno a vel coord mondo
-  m_speedX = +cosf * vel_xm + sinf * vel_zm;
-  //m_speedY = vel_ym;
-  m_speedZ = -sinf * vel_xm + cosf * vel_zm;
+    // ritorno a vel coord mondo
+    m_speedX = +cosf * vel_xm + sinf * vel_zm;
+    //m_speedY = vel_ym;
+    m_speedZ = -sinf * vel_xm + cosf * vel_zm;
 
-  // posizione = posizione + velocita * delta t (ma delta t e' costante)
-  m_px += m_speedX;
-  // m_py += m_speedY;
-  m_pz += m_speedZ;
-*/
-
+    // posizione = posizione + velocita * delta t (ma delta t e' costante)
+    m_px += m_speedX;
+    // m_py += m_speedY;
+    m_pz += m_speedZ;
+  */
 }
 
 bool Spaceship::computePhysics() {
-  bool steering = updateSteering(); 
-  bool velocity = updateVelocity(); 
+  bool steering = updateSteering();
+  bool velocity = updateVelocity();
 
-  return steering || velocity; 
+  return steering || velocity;
 }
 
 // process the next command in the queue and execute the motion
@@ -196,52 +196,50 @@ void Spaceship::execute() {
   // updateFly();
 }
 
-
 void Spaceship::updatePosition() {
   float vel_xm, vel_ym, vel_zm;
 
-  //--- traslation update ---// 
+  //--- traslation update ---//
 
   float cosf = cos(m_facing * M_PI / 180.0);
   float sinf = sin(m_facing * M_PI / 180.0);
-  
+
   // project the speed from the ship reference frame -> world ref frame
-  vel_xm = m_speedZ * sinf; 
-  vel_zm = m_speedZ * cosf; 
-  
+  vel_xm = m_speedZ * sinf;
+  vel_zm = m_speedZ * cosf;
+
   // position = position + velocity * delta_t (but the latter is == 1)
   m_px += vel_xm;
   // m_py += m_speedY;
   m_pz += vel_zm;
 
+  //--- angular update ---//
 
-  //--- angular update ---// 
-  
   // update the facing angle of the ship according to the computed steering
-  // and apply grip 
+  // and apply grip
   m_facing -= (m_speedZ * m_grip) * m_steering;
 }
 
 // Compute the velocity update during time
 // return false if no update is needed
 bool Spaceship::updateVelocity() {
-  
+
   bool throttle = get_state(Motion::THROTTLE);
   bool brake = get_state(Motion::BRAKE);
 
   // if the spaceship is still and no key is pressed, then return
-  if(!has_velocity() && !brake && !throttle) {
-    return false; 
+  if (!has_velocity() && !brake && !throttle) {
+    return false;
   }
-  
-  // if both THROTTLE and BRAKE (aka W-S) have been pressed, 
-  // they cancel out each other 
-  // so we compute the update only if the XOR returns true 
+
+  // if both THROTTLE and BRAKE (aka W-S) have been pressed,
+  // they cancel out each other
+  // so we compute the update only if the XOR returns true
 
   if (throttle ^ brake) {
     int sign = throttle ? -1 : 1;
 
-    m_speedZ += sign*m_max_acceleration;
+    m_speedZ += sign * m_max_acceleration;
     // Spaceships don't fly backwards
     m_speedZ = (m_speedZ > 0.05) ? 0 : m_speedZ;
   }
@@ -249,7 +247,7 @@ bool Spaceship::updateVelocity() {
   // apply friction
   m_speedX *= m_frictionX;
   m_speedZ *= m_frictionZ;
-  return true; 
+  return true;
 }
 
 // Compute the steering update
@@ -259,19 +257,19 @@ bool Spaceship::updateSteering() {
   bool left = get_state(Motion::STEER_L);
   bool right = get_state(Motion::STEER_R);
 
- // if the spaceship is not in the middle of a steering and no key is pressed
- if(!is_steering() && !left && !right) {
-   return false; 
- }
+  // if the spaceship is not in the middle of a steering and no key is pressed
+  if (!is_steering() && !left && !right) {
+    return false;
+  }
 
- if (left ^ right) {
+  if (left ^ right) {
     int sign = left ? 1 : -1;
     m_steering += sign * m_steer_speed;
-  } 
+  }
 
   // steer return straight back
   m_steering *= m_steer_return;
-  return true; 
+  return true;
 }
 
 // ONLY TO BE USED IN FLIGHT MODE:
@@ -288,11 +286,11 @@ void Spaceship::updateFly() {
   if (throttle ^ brake) {
     int sign = throttle ? 1 : -1;
 
-    m_speedY += sign*0.1;
+    m_speedY += sign * 0.1;
   }
 
-  m_speedY*= FLY_FRICTION;
-  m_speedY-= FLY_RETURN;
+  m_speedY *= FLY_FRICTION;
+  m_speedY -= FLY_RETURN;
 
   m_py += m_speedY;
   // limit on Y-motion: we can't get under the floor
@@ -330,16 +328,16 @@ void Spaceship::processCommand() {
     Command cmd = m_cmds.front();
     m_cmds.pop();
 
-  // get command name in string in order to log
-  // std::string mt = motion_to_str(cmd.first);
-  // lg::i(TAG, "Spaceship is processing command %s", mt.c_str());
+    // get command name in string in order to log
+    // std::string mt = motion_to_str(cmd.first);
+    // lg::i(TAG, "Spaceship is processing command %s", mt.c_str());
 
     // set the state
     m_state[cmd.first] = cmd.second;
   }
 }
 
-void Spaceship::render()  {
+void Spaceship::render() {
   m_env.mat_scope([&] {
 
     agl::Vec3 front_boat = agl::Vec3(1, 0, 0);
@@ -351,16 +349,16 @@ void Spaceship::render()  {
     m_env.rotate(m_facing, m_viewUP);
 
     // the Mesh is loaded on the other side
-    m_env.rotate(SHUTTLE_ANGLE, m_viewUP);
+    m_env.rotate(ENVOS_ANGLE, m_viewUP);
 
     // rotate the ship acc. to steering val, to represent tilting
-    int sign = +1;
-//    m_env.rotate(sign * m_steering, m_front_axis);
-    m_env.rotate(sign * m_steering, front_boat);
+    int sign = -1;
+    m_env.rotate(sign * m_steering, m_front_axis);
+   //   m_env.rotate(sign * m_steering, front_boat);
 
-    draw();   
-    
-    });
+    draw();
+
+  });
 }
 
 void Spaceship::sendCommand(Motion motion, bool on_off) {
@@ -380,17 +378,17 @@ void Spaceship::scale(float x, float y, float z) {
 
 void Spaceship::shadow() {
   m_env.mat_scope([&] {
-  const auto c = agl::SHADOW;
+    const auto c = agl::SHADOW;
 
-  m_env.setColor(c);
-  m_env.translate(0, 0.01, 0); // avoid z-fighting with the floor(
-  scale(1.01, 0.0, 1.01);  // squash on Y, 1% scaling-up on X and Z
+    m_env.setColor(c);
+    m_env.translate(0, 0.01, 0); // avoid z-fighting with the floor(
+    scale(1.01, 0.0, 1.01);      // squash on Y, 1% scaling-up on X and Z
 
-  m_env.disableLighting();
-  // render the ship without lighting and squashed! 
-  m_mesh->renderGouraud(m_env.isWireframe());
-  m_env.enableLighting();
-  });  
+    m_env.disableLighting();
+    // render the ship without lighting and squashed!
+    m_mesh->renderGouraud(m_env.isWireframe());
+    m_env.enableLighting();
+  });
 }
 
-}
+} // namespace elements

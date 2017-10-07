@@ -1,4 +1,5 @@
 #include "game.h"
+#include "random"
 
 namespace game {
 
@@ -6,8 +7,8 @@ Game::Game(std::string gameID, size_t num_rings)
     : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACK_CAR),
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0),
       m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0),
-      m_num_rings(num_rings), m_env(agl::get_env()), m_main_win(nullptr),
-      m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
+      m_num_rings(num_rings), m_cur_ring_index(0), m_env(agl::get_env()),
+      m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
 
 /*
  * Init the game:
@@ -19,11 +20,13 @@ void Game::init() {
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
   m_main_win->show();
-  m_floor = elements::get_floor("Texture/space-tex.jpg");
+  m_floor = elements::get_floor("Texture/tex2.jpg");
   m_sky = elements::get_sky("Texture/space1.jpg");
-  m_ssh = elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/shuttle.obj");
+  m_ssh =
+      elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
 
-  m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE);
+  m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
+               spaceship::ENVOS_SCALE);
 
   init_rings();
 }
@@ -69,104 +72,129 @@ void Game::changeState(game::State state) {
 }
 
 void Game::gameAction() {
-  // Azioni del gioco:
-  // passano i secondi --> i frame sono da far mostrare ad Env
+  // Game actions:
+  // - Ship execute a step of physics
+  // - time pass by
+  // - if time is < 0 game over
+  // - if crosses ring: get bonus time
+  // - if ring is last one: final gate
+  // - if crosses final gate: WIN!
+
   m_ssh->execute();
 
-  auto time_now = m_env.getTicks();
-  m_deadline_time -= time_now - m_last_time;
+  // only if game has started, i.e. a key has been pressed
+  if (m_game_started) {
+    auto time_now = m_env.getTicks();
+    m_deadline_time -= time_now - m_last_time;
+    lg::i(__func__, "Time left: %f", m_deadline_time);
 
-  if (m_deadline_time < 0) { // let's leave a last second hope
+    if (m_deadline_time < 0) { // let's leave a last second hope
       // changeState(State::END);
+    }
   }
 
-
-  // auto &current_ring = m_rings[m_cur_ring_index];
+  auto &current_ring = m_rings[m_cur_ring_index];
   // check se gli anelli sono stati attraversati
   // spawn nuovo anello + bonus time || crea porta finale (time diventa rosso)
-  // current_ring.checkCrossing(m_ssh->x(), m_ssh->z());
+  current_ring.checkCrossing(m_ssh->x(), m_ssh->z());
   bool ring_crossed;
-  //ring_crossed = current_ring.isTriggered();
-  ring_crossed = true;
+  ring_crossed = current_ring.isTriggered();
+  // ring_crossed = true;
   if (ring_crossed) {
     m_deadline_time += game::BONUS_TIME;
+    ++m_cur_ring_index;
   }
 }
 
 void Game::init_rings() {
+  static const float FLOOR_MAX_DIST = 60.0;
 
   m_rings.clear();
 
+  float x, z; // ring coords
 
+  // C++11 new random functions
+
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_real_distribution<double> dist(0.0, FLOOR_MAX_DIST);
+
+  x = dist(mt);
+  z = dist(mt);
+  lg::i(__func__, "Position: %f %f", x, z);
+
+  for (size_t i = 0; i < m_num_rings; ++i) {
+    m_rings.emplace_back(x + (i * 3), 0,  z + (i * 4));
+  }
 }
 
 void Game::gameOnKey(Key key, bool pressed) {
   bool trig_motion = false;
   spaceship::Motion mt;
 
-  switch(key) {
+  switch (key) {
 
-    case Key::W:
-      mt = spaceship::Motion::THROTTLE;
-      trig_motion = true;
-      break;
+  case Key::W:
+    mt = spaceship::Motion::THROTTLE;
+    trig_motion = true;
+    break;
 
-    case Key::A:
-      mt = spaceship::Motion::STEER_L;
-      trig_motion = true;
-      break;
+  case Key::A:
+    mt = spaceship::Motion::STEER_L;
+    trig_motion = true;
+    break;
 
-    case Key::S:
-      mt = spaceship::Motion::BRAKE;
-      trig_motion = true;
-      break;
+  case Key::S:
+    mt = spaceship::Motion::BRAKE;
+    trig_motion = true;
+    break;
 
-    case Key::D:
-      mt = spaceship::Motion::STEER_R;
-      trig_motion = true;
-      break;
+  case Key::D:
+    mt = spaceship::Motion::STEER_R;
+    trig_motion = true;
+    break;
 
-    case Key::ESC:
-      if (pressed) {
-        changeState(State::MENU);
-      }
-      break;
+  case Key::ESC:
+    if (pressed) {
+      changeState(State::MENU);
+    }
+    break;
 
-    // environment change handlers!
-    // Only on key down
-    case Key::F1:
-      if (pressed) {
-        lg::i(__func__, "Changing camera");
-        change_camera_type();
-      }
-      break;
+  // environment change handlers!
+  // Only on key down
+  case Key::F1:
+    if (pressed) {
+      lg::i(__func__, "Changing camera");
+      change_camera_type();
+    }
+    break;
 
-    case Key::F2:
-      if (pressed) {
-        m_env.toggle_wireframe();
-      }
-      break;
+  case Key::F2:
+    if (pressed) {
+      m_env.toggle_wireframe();
+    }
+    break;
 
-    case Key::F3:
-      if (pressed) {
-        m_env.toggle_envmap();
-      }
-      break;
+  case Key::F3:
+    if (pressed) {
+      m_env.toggle_envmap();
+    }
+    break;
 
-    case Key::F4:
-      if (pressed) {
-        m_env.toggle_headlight();
-      }
-      break;
+  case Key::F4:
+    if (pressed) {
+      m_env.toggle_headlight();
+    }
+    break;
 
-    case Key::F5:
-      if (pressed) {
-        m_env.toggle_shadow();
-      }
-      break;
+  case Key::F5:
+    if (pressed) {
+      m_env.toggle_shadow();
+    }
+    break;
 
-    default:
-      break;
+  default:
+    break;
   }
 
   // send a command to the spaceship only if triggered
@@ -181,40 +209,37 @@ void Game::gameOnKey(Key key, bool pressed) {
   }
 }
 
-
-// Handler for mouse events, like zooming and perspective change 
-// Values changed with this method will only take effect when setting up 
+// Handler for mouse events, like zooming and perspective change
+// Values changed with this method will only take effect when setting up
 // the camera in setupShipCamera()
 // Used only when camera is set to CAMERA_MOUSE
 void Game::gameOnMouse(MouseEvent ev, int32_t x, int32_t y) {
   // Process mouse events only in State GAME
-  if(m_state == State::GAME) {
-    switch (ev)
-    {
-     case MouseEvent::MOTION: {
-        m_view_alpha = y; 
-        m_view_beta = x; 
-       
-        // avoid ending up under the ship
-        m_view_beta = (m_view_beta < 5) ? 5 : m_view_beta;
-        m_view_beta = (m_view_beta > 90) ? 90 : m_view_beta;
-     }
-        break;
-        
-    case MouseEvent::WHEEL: {
-        // if mouse event is a wheel roll, only the first value is significant 
-        if (x < 0) {
-           // zoom in
-           m_eye_dist = m_eye_dist * 0.9;
-           // can't be < 1
-           m_eye_dist = m_eye_dist < 1 ? 1 : m_eye_dist;
-         }
+  if (m_state == State::GAME) {
+    switch (ev) {
+    case MouseEvent::MOTION: {
+      m_view_alpha = y;
+      m_view_beta = x;
 
-         else if (x > 0) {
-           // Zoom out
-           m_eye_dist = m_eye_dist / 0.9;
-         }
-    } break; 
+      // avoid ending up under the ship
+      m_view_beta = (m_view_beta < 5) ? 5 : m_view_beta;
+      m_view_beta = (m_view_beta > 90) ? 90 : m_view_beta;
+    } break;
+
+    case MouseEvent::WHEEL: {
+      // if mouse event is a wheel roll, only the first value is significant
+      if (x < 0) {
+        // zoom in
+        m_eye_dist = m_eye_dist * 0.9;
+        // can't be < 1
+        m_eye_dist = m_eye_dist < 1 ? 1 : m_eye_dist;
+      }
+
+      else if (x > 0) {
+        // Zoom out
+        m_eye_dist = m_eye_dist / 0.9;
+      }
+    } break;
 
     default:
       break;
@@ -243,6 +268,16 @@ void Game::gameRender() {
   m_sky->render();
   m_ssh->render();
 
+  // ring rendering: render till the first non-triggered ring
+  for (size_t i = 0; i < m_num_rings; ++i) {
+    auto &ring = m_rings[i];
+
+    ring.render();
+    if (!ring.isTriggered()) {
+      break;
+    }
+  }
+
   /*if(m_env.isShadow()) {
     m_ssh->shadow();
   }*/
@@ -264,6 +299,7 @@ void Game::gameRender() {
 
   m_env.enableLighting();
 
+  // refresh the view
   m_main_win->refresh();
 }
 
@@ -280,7 +316,7 @@ void Game::playGame() {
   m_env.set_winevent_handler(std::bind(&Game::gameRender, this));
   m_env.set_render(std::bind(&Game::gameRender, this));
   m_env.set_action(std::bind(&Game::gameAction, this));
-  
+
   m_env.set_keydown_handler(std::bind(&Game::gameOnKey, this, _1, true));
   m_env.set_keyup_handler(std::bind(&Game::gameOnKey, this, _1, false));
   m_env.set_mouse_handler(std::bind(&Game::gameOnMouse, this, _1, _2, _3));
@@ -314,94 +350,89 @@ void Game::setupShipCamera() {
   // controllo la posizione della camera a seconda dell'opzione selezionata
   switch (m_camera_type) {
 
-    case CAMERA_BACK_CAR: {
-      cam_d = 2.3;
-      cam_h = 1.0;
-      eye_x = px + cam_d * sinf;
-      eye_y = py + cam_h;
-      eye_z = pz + cam_d * cosf;
-      cen_x = px - cam_d * sinf;
-      cen_y = py + cam_h;
-      cen_z = pz - cam_d * cosf;
-      m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
-    }
+  case CAMERA_BACK_CAR: {
+    cam_d = 2.3;
+    cam_h = 1.0;
+    eye_x = px + cam_d * sinf;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosf;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+  } break;
+
+  case CAMERA_TOP_FIXED: {
+    cam_d = 0.5;
+    cam_h = 0.55;
+    angle = m_ssh->facing() + 40.0;
+    cosff = cos(angle * M_PI / 180.0);
+    sinff = sin(angle * M_PI / 180.0);
+    eye_x = px + cam_d * sinff;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosff;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+  } break;
+
+  case CAMERA_TOP_CAR: {
+    cam_d = 6.5;
+    cam_h = 3.0;
+    eye_x = px + cam_d * sinf;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosf;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+  } break;
+
+  case CAMERA_PILOT: {
+    cam_d = 1.0;
+    cam_h = 1.05;
+    eye_x = px + cam_d * sinf;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosf;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+  } break;
+
+  case CAMERA_MOUSE: {
+    cam_d = 2.3;
+    cam_h = 1.0;
+    eye_x = px + cam_d * sinf;
+    eye_y = py + cam_h;
+    eye_z = pz + cam_d * cosf;
+    cen_x = px - cam_d * sinf;
+    cen_y = py + cam_h;
+    cen_z = pz - cam_d * cosf;
+    m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
+
+    const auto axisX = agl::Vec3(1, 0, 0);
+    const auto axisY = agl::Vec3(0, 1, 0);
+
+    m_env.translate(0, 0, m_eye_dist);
+    m_env.rotate(m_view_beta, axisX);
+    m_env.rotate(m_view_alpha, axisY);
+
+    /*
+    lg::i("%f %f %f\n",view_alpha,view_beta,eyeDist);
+                    eye_x=eyeDist*cos(view_alpha)*sin(view_beta);
+                    eye_y=eyeDist*sin(view_alpha)*sin(view_beta);
+                    eye_z=eyeDist*cos(view_beta);
+                    cen_x = px - cam_d*sinf;
+                    cen_y = py + cam_h;
+                    cen_z = pz - cam_d*cosf;
+                    gluLookAt(eye_x,eye_y,eye_z,cen_x,cen_y,cen_z,0.0,1.0,0.0);
+    */
+  } break;
+
+  default:
     break;
-
-
-    case CAMERA_TOP_FIXED: {
-      cam_d = 0.5;
-      cam_h = 0.55;
-      angle = m_ssh->facing() + 40.0;
-      cosff = cos(angle * M_PI / 180.0);
-      sinff = sin(angle * M_PI / 180.0);
-      eye_x = px + cam_d * sinff;
-      eye_y = py + cam_h;
-      eye_z = pz + cam_d * cosff;
-      cen_x = px - cam_d * sinf;
-      cen_y = py + cam_h;
-      cen_z = pz - cam_d * cosf;
-      m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
-    }
-    break;
-
-    case CAMERA_TOP_CAR: {
-      cam_d = 6.5;
-      cam_h = 3.0;
-      eye_x = px + cam_d * sinf;
-      eye_y = py + cam_h;
-      eye_z = pz + cam_d * cosf;
-      cen_x = px - cam_d * sinf;
-      cen_y = py + cam_h;
-      cen_z = pz - cam_d * cosf;
-      m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
-    }
-      break;
-
-    case CAMERA_PILOT: {
-      cam_d = 1.0;
-      cam_h = 1.05;
-      eye_x = px + cam_d * sinf;
-      eye_y = py + cam_h;
-      eye_z = pz + cam_d * cosf;
-      cen_x = px - cam_d * sinf;
-      cen_y = py + cam_h;
-      cen_z = pz - cam_d * cosf;
-      m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
-    } break;
-
-    case CAMERA_MOUSE: {
-      cam_d = 2.3;
-      cam_h = 1.0;
-      eye_x = px + cam_d * sinf;
-      eye_y = py + cam_h;
-      eye_z = pz + cam_d * cosf;
-      cen_x = px - cam_d * sinf;
-      cen_y = py + cam_h;
-      cen_z = pz - cam_d * cosf;
-      m_env.setCamera(eye_x, eye_y, eye_z, cen_x, cen_y, cen_z, 0.0, 1.0, 0.0);
-
-      const auto axisX = agl::Vec3(1, 0, 0);
-      const auto axisY = agl::Vec3(0, 1, 0);
-      
-      m_env.translate(0, 0, m_eye_dist); 
-      m_env.rotate(m_view_beta, axisX);
-      m_env.rotate(m_view_alpha, axisY);
-      
-      /*
-      lg::i("%f %f %f\n",view_alpha,view_beta,eyeDist);
-                      eye_x=eyeDist*cos(view_alpha)*sin(view_beta);
-                      eye_y=eyeDist*sin(view_alpha)*sin(view_beta);
-                      eye_z=eyeDist*cos(view_beta);
-                      cen_x = px - cam_d*sinf;
-                      cen_y = py + cam_h;
-                      cen_z = pz - cam_d*cosf;
-                      gluLookAt(eye_x,eye_y,eye_z,cen_x,cen_y,cen_z,0.0,1.0,0.0);
-      */
-    }
-      break;
-
-      default:
-      break;
   }
 }
 } // namespace game

@@ -31,8 +31,8 @@ private:
   std::vector<elements::Ring> m_rings;
   size_t m_num_rings;
   size_t m_cur_ring_index;
-  void setupShipCamera();
 
+  void setupShipCamera();
   void changeState(game::State state);
   void gameAction();
   void gameOnKey(game::Key, bool pressed);
@@ -51,6 +51,6 @@ private:
 public:
   Game(std::string gameID, size_t num_rings); // constructor
   void run();
- };
+};
 } // namespace game
 #endif // GAME_H_

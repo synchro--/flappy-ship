@@ -72,32 +72,34 @@ public:
 Sky *get_sky(const char *filename);
 
 /*
-* RING class.
-* Rings are torus polygons that must be crossed to win the game.
-* Whenever a ring is crossed the player gets bonus time for the next one.
-* Whenever a ring is crossed a next one will be spawned somewhere (random coords)
-*
-* When the player crossed all the required rings, a special Final Gate will be triggered.
-* See class Gate.
-*/
+ * RING class.
+ * Rings are torus polygons that must be crossed to win the game.
+ * Whenever a ring is crossed the player gets bonus time for the next one.
+ * Whenever a ring is crossed a next one will be spawned somewhere (random
+ * coords)
+ *
+ * When the player crossed all the required rings, a special Final Gate will be
+ * triggered. See class Gate.
+ */
 
 class Ring {
 private:
   float m_px, m_py, m_pz; // coords
-  float m_ship_old_z; // the previous ship position wrt ring ref frame
-  float m_angle; //wrt Y-axis
-  bool m_3D_FLIGHT; // when true rings can have positive y-coord, thus be in the "sky"
+  float m_ship_old_z;     // the previous ship position wrt ring ref frame
+  float m_angle;          // wrt Y-axis
+  bool m_3D_FLIGHT; // when true rings can have positive y-coord, thus be in the
+                    // "sky"
   bool m_triggered;
-  agl::Env &m_env; //env reference
+  agl::Env &m_env; // env reference
 
 public:
   // static members
   // colors for when the ring is triggered or not
   static const agl::Color TRIGGERED;
   static const agl::Color NOT_TRIGGERED;
-  //view UP vector
+  // view UP vector
   static const agl::Vec3 s_viewUP;
-  //radius values
+  // radius values
   static const float s_r;
   static const float s_R;
 
@@ -114,8 +116,7 @@ public:
   inline float x() { return m_px; }
   inline float y() { return m_py; }
   inline float z() { return m_pz; }
-  inline bool  isTriggered() { return m_triggered; }
-
+  inline bool isTriggered() { return m_triggered; }
 };
 
 /*
@@ -143,11 +144,12 @@ private:
   float m_speedX, m_speedY, m_speedZ; // velocity
 
   // Spaceship Stats: this will be constant over time
-  float m_steer_speed, m_steer_return, m_grip, m_frictionX,
-      m_frictionY, m_frictionZ, m_max_acceleration;
+  float m_steer_speed, m_steer_return, m_grip, m_frictionX, m_frictionY,
+      m_frictionZ, m_max_acceleration;
 
   float m_scaleX, m_scaleY, m_scaleZ; // dimension scaling
-  agl::Vec3 m_viewUP, m_front_axis; // axis representing viewUP vector and front-facing vec
+  agl::Vec3 m_viewUP,
+      m_front_axis; // axis representing viewUP vector and front-facing vec
 
   // internal state of the spaceship. Each element represent a motion (on-off),
   // as described above.
@@ -166,7 +168,7 @@ private:
   // instance is obtained through get_spaceship()
   Spaceship(const char *texture_filename, const char *mesh_filename);
 
-  //drawing methods
+  // drawing methods
   void draw() const;
   void drawHeadlight(float x, float y, float z, int lightN) const;
 
@@ -189,8 +191,8 @@ public:
 
   // accessors
   inline float facing() const { return m_facing; }
-  inline bool is_steering() const {return m_steering; }
-  inline bool has_velocity() const {return m_speedZ; }
+  inline bool is_steering() const { return m_steering; }
+  inline bool has_velocity() const { return m_speedZ; }
   inline float x() const { return m_px; }
   inline float y() const { return m_py; }
   inline float z() const { return m_pz; }

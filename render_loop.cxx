@@ -4,14 +4,14 @@
 namespace agl {
 
 /*
-* Main Render Loop: 
-* ----------------
-* Renders the splash screen and then goes into an infinite loop processing
-* events as they arise. 
-* - it dispatch the keys to the proper handler callbacks
-* - calls the action handler to update the game status
-* - finally, calls the rendering handler lambda: m_render_handler()
-*/
+ * Main Render Loop:
+ * ----------------
+ * Renders the splash screen and then goes into an infinite loop processing
+ * events as they arise.
+ * - it dispatch the keys to the proper handler callbacks
+ * - calls the action handler to update the game status
+ * - finally, calls the rendering handler lambda: m_render_handler()
+ */
 
 void Env::renderLoop() {
   // main event loop
@@ -117,22 +117,20 @@ void Env::renderLoop() {
         break;
       }
 
-        // ---- MOUSE EVENTS --- // 
+        // ---- MOUSE EVENTS --- //
 
-       case SDL_MOUSEMOTION: {
+      case SDL_MOUSEMOTION: {
         auto handler = m_mouse_event_handler;
 
-         if (e.motion.state & SDL_BUTTON(1)) {
-             handler(MouseEvent::MOTION, e.motion.xrel, e.motion.yrel);
-         }
+        if (e.motion.state & SDL_BUTTON(1)) {
+          handler(MouseEvent::MOTION, e.motion.xrel, e.motion.yrel);
         }
-         break;
+      } break;
 
-       case SDL_MOUSEWHEEL: {
-         auto handler = m_mouse_event_handler;    
-         handler(MouseEvent::WHEEL, e.wheel.y, -1.0); 
-       }
-       break;
+      case SDL_MOUSEWHEEL: {
+        auto handler = m_mouse_event_handler;
+        handler(MouseEvent::WHEEL, e.wheel.y, -1.0);
+      } break;
 
       default:
         break;
@@ -146,8 +144,8 @@ void Env::renderLoop() {
     // Render once each cycle
     render();
 
-   } // while loop
+  } // while loop
 
- } // function mainLoop
+} // function mainLoop
 
-}
+} // namespace agl
