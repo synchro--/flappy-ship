@@ -41,6 +41,7 @@ const Color BLACK = {.0f, .0f, .0f, 1.0f};
 const Color RED = {.768f, .109f, .109f};
 const Color GREEN = {.447f, .643f, .074f};
 const Color YELLOW = {.913f, .643f, .074f};
+const Color LIGHT_YELLOW = {245.0f, 246.0f, 206.0f};
 const Color SHADOW = {.3f, .3f, .3f};
 
 static const auto PHYS_SAMPLING_STEP = 10U; // millisec of a Physics sim step
@@ -111,8 +112,8 @@ static const auto BOAT_ANGLE = 270;
 
 // ELEMENTS CONSTANTS
 namespace elements {
-static const auto FLOOR_SIZE = 150.0;
-static const auto SKY_RADIUS = 150.0;
+static const auto FLOOR_SIZE = 120.0;
+static const auto SKY_RADIUS = 120.0;
 } // namespace elements
 
 #endif //_TYPES_H_

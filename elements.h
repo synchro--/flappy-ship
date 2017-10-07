@@ -126,44 +126,41 @@ public:
  * Besides, the spaceship starts flickering to indicate that something bad happened.
  */
 
- /*
+ 
 class BadCube {
 private:
   float m_px, m_py, m_pz; // coords
   float m_ship_old_z;     // the previous ship position wrt ring ref frame
   float m_angle;          // wrt Y-axis
-  bool m_3D_FLIGHT; // when true rings can have positive y-coord, thus be in the
+  bool m_3D_FLIGHT; // when true, cubes can have positive y-coord, thus be in the
                     // "sky"
-  bool m_triggered;
+ // bool m_triggered;
+
   agl::Env &m_env; // env reference
 
 public:
   // static members
-  // colors for when the ring is triggered or not
-  static const agl::Color TRIGGERED;
-  static const agl::Color NOT_TRIGGERED;
   // view UP vector
   static const agl::Vec3 s_viewUP;
   // radius values
-  static const float s_r;
-  static const float s_R;
+  static const float side; 
 
-  Ring(float x, float y, float z, float angle = 30.0, bool m_3D_FLIGHT = false);
+  BadCube(float x, float y, float z, float angle = 30.0, bool m_3D_FLIGHT = false);
 
   void render();
 
   // check if the new ship position has crossed the ring
-  void checkCrossing(float x, float z);
+  bool checkCrossing(float x, float z);
   // same but for flight mode
-  void checkCrossing(float x, float y, float z);
+  bool checkCrossing(float x, float y, float z);
 
   // accessors
   inline float x() { return m_px; }
   inline float y() { return m_py; }
   inline float z() { return m_pz; }
-  inline bool isTriggered() { return m_triggered; }
+  // inline bool isTriggered() { return m_triggered; }
+
 };
-*/ 
 
 /*
  * The Spaceship class.

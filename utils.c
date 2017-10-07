@@ -1,10 +1,8 @@
 // BUFFER FILE CONTENENTE VECCHIO CODICE CHE MAGARI PUÒ SERVIRE
 // IN FUTURO PER QUALSIVOGLIA MOTIVO
 
-// vecchio codice ora commentato
-// disegna un cubo rasterizzando quads
-void drawCubeFill() {
-  const float S = 100;
+// draw a cube rasterizing quads
+void Env::drawCubeFill(const float S) {
 
   glBegin(GL_QUADS);
 
@@ -80,11 +78,11 @@ void drawCubeWire() {
   glEnd();
 }
 
-void drawCube() {
-  glColor3f(.9, .9, .9);
-  drawCubeFill();
-  glColor3f(0, 0, 0);
-  drawCubeWire();
+void drawCube(const float side) {
+  setColor(YELLOW); 
+  drawCubeFill(side);
+  glColor3f(BLACK);
+  drawCubeWire(side);
 }
 
 // Draws a torus of inner radius r and outer radius R.

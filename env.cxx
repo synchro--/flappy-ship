@@ -135,9 +135,54 @@ std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x,
   return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h));
 }
 
+// draw a cube rasterizing quads
+void Env::drawCubeFill(const float S) {
+
+  glBegin(GL_QUADS);
+
+  glNormal3f(0, 0, +1);
+  glVertex3f(+S, +S, +S);
+  glVertex3f(-S, +S, +S);
+  glVertex3f(-S, -S, +S);
+  glVertex3f(+S, -S, +S);
+
+  glNormal3f(0, 0, -1);
+  glVertex3f(+S, -S, -S);
+  glVertex3f(-S, -S, -S);
+  glVertex3f(-S, +S, -S);
+  glVertex3f(+S, +S, -S);
+
+  glNormal3f(0, +1, 0);
+  glVertex3f(+S, +S, +S);
+  glVertex3f(-S, +S, +S);
+  glVertex3f(-S, +S, -S);
+  glVertex3f(+S, +S, -S);
+
+  glNormal3f(0, -1, 0);
+  glVertex3f(+S, -S, -S);
+  glVertex3f(-S, -S, -S);
+  glVertex3f(-S, -S, +S);
+  glVertex3f(+S, -S, +S);
+
+  glNormal3f(+1, 0, 0);
+  glVertex3f(+S, +S, +S);
+  glVertex3f(+S, -S, +S);
+  glVertex3f(+S, -S, -S);
+  glVertex3f(+S, +S, -S);
+
+  glNormal3f(-1, 0, 0);
+  glVertex3f(-S, +S, -S);
+  glVertex3f(-S, -S, -S);
+  glVertex3f(-S, -S, +S);
+  glVertex3f(-S, +S, +S);
+
+  glEnd();
+}
+
+
 // draw a wireframe cube
-void Env::drawCubeWire() {
-  static const auto sz = 1.0; 
+void Env::drawCubeWire(const float sz) {
+  lineWidth(12.0); 
 
   glBegin(GL_LINE_LOOP); // faccia z=+1
   glVertex3f(+sz, +sz, +sz);
@@ -166,6 +211,13 @@ void Env::drawCubeWire() {
   glVertex3f(-sz, +sz, -sz);
   glVertex3f(-sz, +sz, +sz);
   glEnd();
+}
+
+void Env::drawCube(const float side) {
+  setColor(LIGHT_YELLOW); 
+  drawCubeFill(side);
+  setColor(BLACK);
+  drawCubeWire(side);
 }
 
 // size 'sz' should be ~100.0f

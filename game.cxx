@@ -6,7 +6,7 @@ namespace game {
 Game::Game(std::string gameID, size_t num_rings)
     : m_gameID(gameID), m_state(State::GAME), m_camera_type(CAMERA_BACK_CAR),
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0),
-      m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0), m_penalty_time(0.0), m_num_rings(num_rings), m_cur_ring_index(0), m_env(agl::get_env()),
+      m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0), m_penalty_time(0.0), m_num_rings(num_rings), m_cur_ring_index(0), m_env(agl::get_env()), m_num_cubes(10),
       m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
 
 /*
@@ -17,16 +17,17 @@ Game::Game(std::string gameID, size_t num_rings)
 void Game::init() {
   // changeState(game::Splash);
   std::string win_name = "Main Window";
-  m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
+  m_main_win = m_env.createWindow(win_name, 0, 0, 900, 700);
   m_main_win->show();
   m_floor = elements::get_floor("Texture/tex1.jpg");
-  m_sky = elements::get_sky("Texture/floor1.jpg");
+  m_sky = elements::get_sky("Texture/space1.jpg");
   m_ssh = elements::get_spaceship("Texture/tex2.jpg", "Mesh/Envos.obj");
 
   m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
                spaceship::ENVOS_SCALE);
 
   init_rings();
+  init_cubes(); 
 }
 
 void Game::changeState(game::State state) {
@@ -103,18 +104,23 @@ void Game::gameAction() {
   current_ring.checkCrossing(m_ssh->x(), m_ssh->z());
   bool ring_crossed;
   ring_crossed = current_ring.isTriggered();
-  // ring_crossed = true;
+
   if (ring_crossed) {
     m_deadline_time += game::RING_TIME;
     ++m_cur_ring_index;
    // m_ssh->shadow(); 
-   m_penalty_time = 6000U; 
+  }
+
+  for(auto &cube : m_cubes) {
+    if(cube.checkCrossing(m_ssh->x(), m_ssh->z())) {
+      lg::i(__func__, "Penalty!"); 
+      m_penalty_time = 6000U; 
+      break;
+    }
   }
 }
 
-void Game::init_rings() {
-  static const float FLOOR_MAX_DIST = 150.0;
-
+void Game::init_rings() { 
   m_rings.clear();
 
   // generate coordinate to place the rings using the coordinate generator
@@ -123,6 +129,16 @@ void Game::init_rings() {
     auto coords = coordinateGenerator::randomCoord2D();
     float y = 1.5; // height of the ring
     m_rings.emplace_back(coords.first, y, coords.second);
+  }
+}
+
+void Game::init_cubes() {
+  // cubes 
+  m_cubes.clear(); 
+  for (size_t i = 0; i < m_num_cubes; ++i) {
+    auto coords = coordinateGenerator::randomCoord2D();
+    float y = 2.5; // height of the ring
+    m_cubes.emplace_back(coords.first, y, coords.second);
   }
 }
 
@@ -264,7 +280,7 @@ void Game::gameRender() {
 
   m_floor->render();
   m_sky->render();
-  if(m_penalty_time && ((m_penalty_time / 200) % 2 == 0)) {
+  if(m_penalty_time && ((m_penalty_time / 200) % 2 == 1)) {
     m_ssh->render(true); 
   } 
   else {
@@ -279,6 +295,11 @@ void Game::gameRender() {
     if (!ring.isTriggered()) {
       break;
     }
+  }
+
+  // render all BadCubes. They'll be an obstacle from the beginning
+  for(auto &cube : m_cubes) {
+    cube.render(); 
   }
 
   if(m_env.isShadow()) {
