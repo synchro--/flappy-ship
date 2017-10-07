@@ -61,7 +61,7 @@ void Spaceship::init() {
   m_steer_speed = 3.4;   // A
   m_steer_return = 0.93; // B ==> max steering = A*B / (1-B) == 2.4
 
-  m_max_acceleration = 0.0035;
+  m_max_acceleration = FAST_ACC;
   m_grip = 0.45;
 
   // init internal states
@@ -354,7 +354,7 @@ void Spaceship::render() {
     // rotate the ship acc. to steering val, to represent tilting
     int sign = -1;
     m_env.rotate(sign * m_steering, m_front_axis);
-   //   m_env.rotate(sign * m_steering, front_boat);
+    //   m_env.rotate(sign * m_steering, front_boat);
 
     draw();
 

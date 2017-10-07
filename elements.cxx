@@ -9,7 +9,7 @@ namespace elements {
  * Floor
  */
 Floor::Floor(const char *texture_filename)
-    : m_size(100.0f), m_height(0.0f), m_env(agl::get_env()),
+    : m_size(FLOOR_SIZE), m_height(0.0f), m_env(agl::get_env()),
       // repat = true, linear interpolation
       m_tex(m_env.loadTexture(texture_filename, true, false)) {}
 
@@ -35,8 +35,9 @@ Floor *get_floor(const char *texture_filename) {
  */
 
 Sky::Sky(const char *texture_filename)
-    : m_radius(150.0f), m_lats(20.0f), m_longs(20.0f), m_env(agl::get_env()),
-      m_tex(m_env.loadTexture(texture_filename, false)) {}
+    : m_radius(SKY_RADIUS), m_lats(20.0f), m_longs(20.0f),
+      m_env(agl::get_env()), m_tex(m_env.loadTexture(texture_filename, false)) {
+}
 
 void Sky::render() {
   // lg::i(__func__, "Rendering Sky...");
@@ -77,7 +78,7 @@ Ring::Ring(float x, float y, float z, float angle, bool flight_mode)
 
 // initaliazing static members of Ring class
 // colors for when the ring is triggered or not
-const agl::Color Ring::TRIGGERED = {1.0f, .86f, .35f, .7f};
+const agl::Color Ring::TRIGGERED = agl::RED; //{1.0f, .86f, .35f, .7f};
 const agl::Color Ring::NOT_TRIGGERED = {.2f, .80f, .2f, .7f};
 // view UP vector
 const agl::Vec3 Ring::s_viewUP = agl::Vec3(0.0, 1.0, 0.0);

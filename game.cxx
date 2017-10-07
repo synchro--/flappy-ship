@@ -20,10 +20,9 @@ void Game::init() {
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 0, 0, 800, 600);
   m_main_win->show();
-  m_floor = elements::get_floor("Texture/tex2.jpg");
-  m_sky = elements::get_sky("Texture/space1.jpg");
-  m_ssh =
-      elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
+  m_floor = elements::get_floor("Texture/tex1.jpg");
+  m_sky = elements::get_sky("Texture/floor1.jpg");
+  m_ssh = elements::get_spaceship("Texture/tex2.jpg", "Mesh/Envos.obj");
 
   m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
                spaceship::ENVOS_SCALE);
@@ -85,8 +84,11 @@ void Game::gameAction() {
   // only if game has started, i.e. a key has been pressed
   if (m_game_started) {
     auto time_now = m_env.getTicks();
-    m_deadline_time -= time_now - m_last_time;
-    lg::i(__func__, "Time left: %f", m_deadline_time);
+    m_deadline_time -= (time_now - m_last_time);
+
+    lg::i(__func__, "Time left: %f %f", (m_deadline_time / 1000.0),
+          (time_now - m_last_time));
+    m_last_time = time_now;
 
     if (m_deadline_time < 0) { // let's leave a last second hope
       // changeState(State::END);
@@ -107,24 +109,16 @@ void Game::gameAction() {
 }
 
 void Game::init_rings() {
-  static const float FLOOR_MAX_DIST = 60.0;
+  static const float FLOOR_MAX_DIST = 150.0;
 
   m_rings.clear();
 
-  float x, z; // ring coords
-
-  // C++11 new random functions
-
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_real_distribution<double> dist(0.0, FLOOR_MAX_DIST);
-
-  x = dist(mt);
-  z = dist(mt);
-  lg::i(__func__, "Position: %f %f", x, z);
-
+  // generate coordinate to place the rings using the coordinate generator
+  // see coord_system.h
   for (size_t i = 0; i < m_num_rings; ++i) {
-    m_rings.emplace_back(x + (i * 3), 0,  z + (i * 4));
+    auto coords = coordinateGenerator::randomCoord2D();
+    float y = 1.5; // height of the ring
+    m_rings.emplace_back(coords.first, y, coords.second);
   }
 }
 
@@ -200,9 +194,9 @@ void Game::gameOnKey(Key key, bool pressed) {
   // send a command to the spaceship only if triggered
   if (trig_motion) {
     if (!m_game_started) {
-      m_last_time = m_env.getTicks();
       m_game_started = true;
-      //     m_deadline_time = game::RING_TIME;
+      m_last_time = m_env.getTicks();
+      m_deadline_time = game::RING_TIME;
     }
 
     m_ssh->sendCommand(mt, pressed);

@@ -135,6 +135,7 @@ std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x,
   return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h));
 }
 
+// size 'sz' should be ~100.0f
 void Env::drawPlane(float sz, float height, size_t num_quads) {
   glNormal3f(0, 1, 0); // normale verticale uguale x tutti
   auto ratio = (double)sz / num_quads;
@@ -453,6 +454,8 @@ void Env::textureDrawing(TexID texbind, std::function<void()> callback,
             m_envmap ? GL_SPHERE_MAP : GL_OBJECT_LINEAR); // EnvMap
   glTexGeni(GL_T, GL_TEXTURE_GEN_MODE,
             m_envmap ? GL_SPHERE_MAP : GL_OBJECT_LINEAR);
+
+  setColor(WHITE); // avoid other colors to mess up the texture original color
 
   //--- call the callback drawing function --- //
   callback();

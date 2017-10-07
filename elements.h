@@ -103,7 +103,7 @@ public:
   static const float s_r;
   static const float s_R;
 
-  Ring(float x, float y, float z, float angle = 30, bool m_3D_FLIGHT = false);
+  Ring(float x, float y, float z, float angle = 30.0, bool m_3D_FLIGHT = false);
 
   void render();
 

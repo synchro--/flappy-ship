@@ -50,8 +50,8 @@ static const auto FPS_SAMPLE = 10U;         // interval length
 // GAME TYPES
 namespace game {
 
-static const double RING_TIME = 5.0;
-static const double BONUS_TIME = 4.0;
+static const auto RING_TIME = 7000U;
+static const auto BONUS_TIME = 4000U;
 
 enum State { SPLASH, MENU, GAME, SETTINGS, END };
 enum Key {
@@ -92,6 +92,9 @@ enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE, N_MOTION };
 // to be submitted to the Spaceship
 using Command = std::pair<Motion, bool>;
 
+static const auto FAST_ACC = 0.0045;
+static const auto NORMAL_ACC = 0.0035;
+
 // Mesh dimension resizing constants
 static const auto ENVOS_SCALE = 0.0059;
 static const auto FALCON_SCALE = 0.0099;
@@ -105,5 +108,11 @@ static const auto SHUTTLE_ANGLE = 270;
 static const auto BOAT_ANGLE = 270;
 
 } // namespace spaceship
+
+// ELEMENTS CONSTANTS
+namespace elements {
+static const auto FLOOR_SIZE = 150.0;
+static const auto SKY_RADIUS = 150.0;
+} // namespace elements
 
 #endif //_TYPES_H_

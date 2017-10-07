@@ -4,6 +4,7 @@
 #include "types.h"
 
 #include "agl.h"
+#include "coord_system.h"
 #include "elements.h"
 
 /*The logic of the game, putting all together*/
