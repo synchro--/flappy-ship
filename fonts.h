@@ -43,10 +43,10 @@
     inline decltype(m_width) get_width() { return m_width; }
     inline decltype(m_height) get_heght() { return m_height; }
     inline decltype(m_advance) get_advance() { return m_advance; }
-    inline decltype(m_bearingX) get_bearingX() { return m_bearingX; }
-    inline decltype(m_bearingY) get_bearingY() { return m_bearingY; }
-    inline decltype(m_textureX) get_textureX() { return m_textureX; }
-    inline decltype(m_textureY) get_textureY() { return m_textureY; }
+    inline decltype(m_minx) get_minx() { return m_minx; }
+    inline decltype(m_miny) get_miny() { return m_miny; }
+    inline decltype(m_maxx) get_maxx() { return m_maxx; }
+    inline decltype(m_maxy) get_maxy() { return m_maxy; }
     
     Glyph(char m_letter, TexID textureID, byte m_width, byte m_height, byte m_advance,
           char m_bearingX, char m_bearingY, byte m_textureX, byte m_textureY); 
@@ -57,14 +57,11 @@
   char m_letter; // freetype glyph index
   TexID m_texID; 
 
-  byte m_width;  // width of the glyph in pixels
-  byte m_height; // height of the glyph in pixels
+  byte m_minx;  
+  byte m_miny;  
   byte m_advance; // number of pixels to advance on x axis
-  char m_bearingX; // x offset of top-left corner from x axis
-
-  char m_bearingY; // y offset of top-left corner from y axis
-  byte m_textureX; // x pixel coord of the bitmap's bottom-left corner
-  ushort m_textureY;// y pixel coord of the bitmap's bottom-left corner
+  byte m_maxx; 
+  byte m_maxy; 
 };
  
 
