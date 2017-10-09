@@ -179,7 +179,7 @@ private:
 
 public:
   // Friends can touch your private parts.
-  friend Env &get_env();
+  friend Env& get_env();
 
   // destructor takes care of closing the SDL libraries
   virtual ~Env();

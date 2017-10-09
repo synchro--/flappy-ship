@@ -5,7 +5,6 @@ namespace agl {
 // Returns the singleton instance of agl::Env, initializing it if necessary
 Env &get_env() {
   // having a unique ptr ensures the Env will be called only during the main
-  // static std::unique_ptr<Env> s_env(nullptr);
   static std::unique_ptr<Env> s_env(nullptr);
   if (!s_env) {
     s_env.reset(new Env()); // initialize the environment
