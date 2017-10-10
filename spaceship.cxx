@@ -372,10 +372,10 @@ void Spaceship::render(bool flicker) {
     m_env.rotate(sign * m_steering, m_front_axis);
     //   m_env.rotate(sign * m_steering, front_boat);
 
-    if(flicker) {
-      drawFlicker(); 
+    if (flicker) {
+      drawFlicker();
     } else {
-      draw(); 
+      draw();
     }
 
   });
@@ -403,20 +403,21 @@ void Spaceship::shadow() {
     m_env.setColor(c);
     m_env.disableLighting();
 
-
-    m_env.translate(m_px+2.0, 0.01, m_pz+2.0); // avoid z-fighting with the floor
+    m_env.translate(m_px + 2.0, 0.01,
+                    m_pz + 2.0); // avoid z-fighting with the floor
     // rotate the ship according to the facing direction
     m_env.rotate(m_facing, m_viewUP);
     // the Mesh is loaded on the other side
     m_env.rotate(ENVOS_ANGLE, m_viewUP);
-        // rotate the ship acc. to steering val, to represent tilting
+    // rotate the ship acc. to steering val, to represent tilting
     int sign = -1;
     m_env.rotate(sign * m_steering, m_front_axis);
 
-    m_env.scale(ENVOS_SCALE*1.01, ENVOS_SCALE*0.0, ENVOS_SCALE*1.01);      // squash on Y, 1% scaling-up on X and Z
-    
+    m_env.scale(ENVOS_SCALE * 1.01, ENVOS_SCALE * 0.0,
+                ENVOS_SCALE * 1.01); // squash on Y, 1% scaling-up on X and Z
+
     // render the ship without lighting and squashed!
-    m_mesh->renderGouraud(m_env.isWireframe()); 
+    m_mesh->renderGouraud(m_env.isWireframe());
     m_env.enableLighting();
   });
 }

@@ -117,7 +117,7 @@ void Env::renderLoop() {
         break;
       }
 
-        // ---- MOUSE EVENTS --- //
+      // ---- MOUSE EVENTS --- //
 
       case SDL_MOUSEMOTION: {
         auto handler = m_mouse_event_handler;

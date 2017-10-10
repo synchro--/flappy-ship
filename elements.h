@@ -119,22 +119,23 @@ public:
   inline bool isTriggered() { return m_triggered; }
 };
 
-
 /*
- * Introducing: the BAD cube. 
- * It's a simple wireframe cube, but if the spaceship touches it the player gets a penalty time.
- * Besides, the spaceship starts flickering to indicate that something bad happened.
+ * Introducing: the BAD cube.
+ * It's a simple wireframe cube, but if the spaceship touches it the player gets
+ * a penalty time.
+ * Besides, the spaceship starts flickering to indicate that something bad
+ * happened.
  */
 
- 
 class BadCube {
 private:
   float m_px, m_py, m_pz; // coords
   float m_ship_old_z;     // the previous ship position wrt ring ref frame
   float m_angle;          // wrt Y-axis
-  bool m_3D_FLIGHT; // when true, cubes can have positive y-coord, thus be in the
-                    // "sky"
- // bool m_triggered;
+  bool
+      m_3D_FLIGHT; // when true, cubes can have positive y-coord, thus be in the
+                   // "sky"
+                   // bool m_triggered;
 
   agl::Env &m_env; // env reference
 
@@ -143,9 +144,10 @@ public:
   // view UP vector
   static const agl::Vec3 s_viewUP;
   // radius values
-  static const float side; 
+  static const float side;
 
-  BadCube(float x, float y, float z, float angle = 30.0, bool m_3D_FLIGHT = false);
+  BadCube(float x, float y, float z, float angle = 30.0,
+          bool m_3D_FLIGHT = false);
 
   void render();
 
@@ -159,7 +161,6 @@ public:
   inline float y() { return m_py; }
   inline float z() { return m_pz; }
   // inline bool isTriggered() { return m_triggered; }
-
 };
 
 /*

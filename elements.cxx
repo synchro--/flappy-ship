@@ -172,8 +172,6 @@ void Ring::checkCrossing(float x, float y, float z) {
   }
 }
 
-
-
 /*
  * BadCube. See elements::BadCube
  *
@@ -192,12 +190,12 @@ BadCube::BadCube(float x, float y, float z, float angle, bool flight_mode)
 
 // view UP vector
 const agl::Vec3 BadCube::s_viewUP = agl::Vec3(0.0, 1.0, 0.0);
-const float BadCube::side = 2.5; // side of the cube 
+const float BadCube::side = 2.5; // side of the cube
 
 void BadCube::render() {
   m_env.mat_scope([&] {
     m_env.translate(m_px, m_py, m_pz);
-    m_env.rotate(m_angle, s_viewUP); 
+    m_env.rotate(m_angle, s_viewUP);
 
     if (m_env.isBlending()) {
       // maybe move this to Env helper function
@@ -208,64 +206,63 @@ void BadCube::render() {
 
       glDisable(GL_BLEND);
     } else {
-       m_env.setColor(agl::YELLOW);
-       m_env.drawCubeWire(side);
-      // m_env.drawCube(side); 
+      m_env.setColor(agl::YELLOW);
+      m_env.drawCubeWire(side);
+      // m_env.drawCube(side);
     }
 
   });
 }
 
 bool BadCube::checkCrossing(float x, float z) {
-    // get distance wrt to the cube center
-    x -= m_px;
-    z -= m_pz;
+  // get distance wrt to the cube center
+  x -= m_px;
+  z -= m_pz;
 
-    float cos_phi = cosf(m_angle * M_PI / 180.0f);
-    float sin_phi = sinf(m_angle * M_PI / 180.0f);
+  float cos_phi = cosf(m_angle * M_PI / 180.0f);
+  float sin_phi = sinf(m_angle * M_PI / 180.0f);
 
-    // project coords of the ship to the cube reference frame
-    float x_ring = x * cos_phi - z * sin_phi;
-    float z_ring = x * sin_phi + z * cos_phi;
+  // project coords of the ship to the cube reference frame
+  float x_ring = x * cos_phi - z * sin_phi;
+  float z_ring = x * sin_phi + z * cos_phi;
 
+  // X: is it inside the square perimeter ?
+  bool check_X = (x_ring < 2 * side) && (x_ring > -2 * side);
+  // Z: sign changed? Then crossing happened
+  bool check_Z =
+      (z_ring >= 0 && m_ship_old_z < 0) || (z_ring <= 0 && m_ship_old_z > 0);
 
-    // X: is it inside the square perimeter ?
-    bool check_X = (x_ring < 2 * side) && (x_ring > -2 * side);
-    // Z: sign changed? Then crossing happened
-    bool check_Z =
-        (z_ring >= 0 && m_ship_old_z < 0) || (z_ring <= 0 && m_ship_old_z > 0);
+  // update last z
+  m_ship_old_z = z_ring;
 
-    // update last z
-    m_ship_old_z = z_ring;
-
-    return check_X && check_Z; 
+  return check_X && check_Z;
 }
 
 // as above but checking on all 3Dimesionson for flappy flight mode
 bool BadCube::checkCrossing(float x, float y, float z) {
-    // get distance wrt to the cube center
-    x -= m_px;
-    y -= m_py;
-    z -= m_pz;
+  // get distance wrt to the cube center
+  x -= m_px;
+  y -= m_py;
+  z -= m_pz;
 
-    float cos_phi = cosf(m_angle * M_PI / 180.0f);
-    float sin_phi = sinf(m_angle * M_PI / 180.0f);
+  float cos_phi = cosf(m_angle * M_PI / 180.0f);
+  float sin_phi = sinf(m_angle * M_PI / 180.0f);
 
-    // project coords of the ship to cube reference frame
-    float x_ring = x * cos_phi - z * sin_phi;
-    float y_ring = y;
-    float z_ring = x * sin_phi + z * cos_phi;
+  // project coords of the ship to cube reference frame
+  float x_ring = x * cos_phi - z * sin_phi;
+  float y_ring = y;
+  float z_ring = x * sin_phi + z * cos_phi;
 
-    // X: is it inside the square perimeter?
-    bool check_X = (x_ring < 2 * side) && (x_ring > -2 * side);
-    bool check_Y = (y_ring < 2 * side) && (y_ring > -2 * side);
-    // Z: sign changed? Then crossing happened
-    bool check_Z =
-        (z_ring >= 0 && m_ship_old_z < 0) || (z_ring <= 0 && m_ship_old_z > 0);
+  // X: is it inside the square perimeter?
+  bool check_X = (x_ring < 2 * side) && (x_ring > -2 * side);
+  bool check_Y = (y_ring < 2 * side) && (y_ring > -2 * side);
+  // Z: sign changed? Then crossing happened
+  bool check_Z =
+      (z_ring >= 0 && m_ship_old_z < 0) || (z_ring <= 0 && m_ship_old_z > 0);
 
-    //update last Z position 
-    m_ship_old_z = z_ring;
-    return (check_Z && check_Y && check_X);  
+  // update last Z position
+  m_ship_old_z = z_ring;
+  return (check_Z && check_Y && check_X);
 }
 
 } // namespace elements

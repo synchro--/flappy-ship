@@ -179,7 +179,7 @@ private:
 
 public:
   // Friends can touch your private parts.
-  friend Env& get_env();
+  friend Env &get_env();
 
   // destructor takes care of closing the SDL libraries
   virtual ~Env();
@@ -218,9 +218,9 @@ public:
   void setColor(const Color &color);
 
   // drawing functions
-  void drawCubeFill(const float side); 
+  void drawCubeFill(const float side);
   void drawCubeWire(const float side);
-  void drawCube(const float side);  
+  void drawCube(const float side);
   void drawFloor(TexID texbind, float sz, float height, size_t num_quads);
   void drawPlane(float sz, float height, size_t num_quads);
   void drawSky(TexID texbind, double radius, int lats, int longs);

@@ -178,10 +178,9 @@ void Env::drawCubeFill(const float S) {
   glEnd();
 }
 
-
 // draw a wireframe cube
 void Env::drawCubeWire(const float sz) {
-  lineWidth(12.0); 
+  lineWidth(12.0);
 
   glBegin(GL_LINE_LOOP); // faccia z=+1
   glVertex3f(+sz, +sz, +sz);
@@ -213,7 +212,7 @@ void Env::drawCubeWire(const float sz) {
 }
 
 void Env::drawCube(const float side) {
-  setColor(LIGHT_YELLOW); 
+  setColor(LIGHT_YELLOW);
   drawCubeFill(side);
   setColor(BLACK);
   drawCubeWire(side);

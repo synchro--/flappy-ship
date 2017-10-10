@@ -22,7 +22,7 @@ private:
   int m_camera_type;
   float m_eye_dist, m_view_alpha, m_view_beta;
   double m_deadline_time; // fps currently drawn
-  uint32_t m_penalty_time; 
+  uint32_t m_penalty_time;
   uint32_t m_last_time;
 
   agl::Env &m_env;
@@ -35,9 +35,9 @@ private:
   size_t m_num_rings;
   size_t m_cur_ring_index;
 
-  // Cube stuff 
-  std::vector<elements::BadCube> m_cubes; 
-  size_t m_num_cubes; 
+  // Cube stuff
+  std::vector<elements::BadCube> m_cubes;
+  size_t m_num_cubes;
 
   void setupShipCamera();
   void changeState(game::State state);
@@ -49,7 +49,7 @@ private:
   void playGame();
 
   void init_rings();
-  void init_cubes(); 
+  void init_cubes();
   void init();
 
   inline void change_camera_type() {
