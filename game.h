@@ -6,6 +6,7 @@
 #include "agl.h"
 #include "coord_system.h"
 #include "elements.h"
+#include "fonts.h"
 
 /*The logic of the game, putting all together*/
 
@@ -28,7 +29,7 @@ private:
   // environment 
   agl::Env &m_env;
   std::unique_ptr<agl::SmartWindow> m_main_win;
-  std::unique_prt<fonts::AGLTextRenderer> m_text_renderer;
+  fonts::AGLTextRenderer *m_text_renderer;
 
   // various elements
   std::unique_ptr<elements::Spaceship> m_ssh;

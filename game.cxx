@@ -8,7 +8,7 @@ Game::Game(std::string gameID, size_t num_rings)
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0),
       m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0),
       m_penalty_time(0.0), m_num_rings(num_rings), m_cur_ring_index(0),
-      m_num_cubes(10), m_main_win(nullptr),
+      m_env(agl::get_env()), m_num_cubes(10), m_main_win(nullptr),
       m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
 
 /*
@@ -18,8 +18,7 @@ Game::Game(std::string gameID, size_t num_rings)
  */
 void Game::init() {
   // changeState(game::Splash);
-  m_env = agl::get_env(); 
-  m_text_renderer = fonts::getTextRenderer("Fonts/neuropol.ttf" ,24); 
+  m_text_renderer = fonts::getTextRenderer("Fonts/neuropol.ttf", 24);
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 0, 0, m_env.get_win_width(), m_env.get_win_height());
   m_main_win->show();
@@ -78,7 +77,7 @@ void Game::drawHUD() {
   auto fps = m_env.get_fps(); 
   const static auto X_O = 100; 
   const static auto Y_O = 100; 
-  m_text_renderer.renderText("FPS ", X_O, Y_O);
+  m_text_renderer->renderText("FPS ", X_O, Y_O);
 }
 
 void Game::gameAction() {
