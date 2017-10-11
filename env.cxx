@@ -21,7 +21,7 @@ Env::Env()
       m_key_up_handler([](Key) {}),
 
       // all environment variables
-      m_screenH(750), m_screenW(750), m_wireframe(false), m_envmap(true),
+      m_screenH(750), m_screenW(900), m_wireframe(false), m_envmap(true),
       m_headlight(false), m_shadow(false), m_blending(false), m_step(0) {
 
   // "__func__" == function name
@@ -178,37 +178,40 @@ void Env::drawCubeFill(const float S) {
   glEnd();
 }
 
+
 // draw a wireframe cube
-void Env::drawCubeWire(const float sz) {
+void Env::drawCubeWire(const float side) {
   lineWidth(12.0);
 
-  glBegin(GL_LINE_LOOP); // faccia z=+1
-  glVertex3f(+sz, +sz, +sz);
-  glVertex3f(-sz, +sz, +sz);
-  glVertex3f(-sz, -sz, +sz);
-  glVertex3f(+sz, -sz, +sz);
+  glBegin(GL_LINE_LOOP); // faccia z=+side
+  glVertex3f(+side, +side, +side);
+  glVertex3f(-side, +side, +side);
+  glVertex3f(-side, -side, +side);
+  glVertex3f(+side, -side, +side);
   glEnd();
 
-  glBegin(GL_LINE_LOOP); // faccia z=-sz
-  glVertex3f(+sz, -sz, -sz);
-  glVertex3f(-sz, -sz, -sz);
-  glVertex3f(-sz, +sz, -sz);
-  glVertex3f(+sz, +sz, -sz);
+  glBegin(GL_LINE_LOOP); // faccia z=-side
+  glVertex3f(+side, -side, -side);
+  glVertex3f(-side, -side, -side);
+  glVertex3f(-side, +side, -side);
+  glVertex3f(+side, +side, -side);
   glEnd();
+
 
   glBegin(GL_LINES); // 4 segmenti da -z a +z
-  glVertex3f(-sz, -sz, -sz);
-  glVertex3f(-sz, -sz, +sz);
+  glVertex3f(-side, -side, -side);
+  glVertex3f(-side, -side, +side);
 
-  glVertex3f(+sz, -sz, -sz);
-  glVertex3f(+sz, -sz, +sz);
+  glVertex3f(+side, -side, -side);
+  glVertex3f(+side, -side, +side);
 
-  glVertex3f(+sz, +sz, -sz);
-  glVertex3f(+sz, +sz, +sz);
+  glVertex3f(+side, +side, -side);
+  glVertex3f(+side, +side, +side);
 
-  glVertex3f(-sz, +sz, -sz);
-  glVertex3f(-sz, +sz, +sz);
+  glVertex3f(-side, +side, -side);
+  glVertex3f(-side, +side, +side);
   glEnd();
+  
 }
 
 void Env::drawCube(const float side) {
@@ -343,6 +346,18 @@ void Env::drawSphere(double radius, int lats, int longs) {
     }
     glEnd();
   }
+}
+
+void Env::drawSquare(const float side) {
+  lineWidth(10.0); 
+
+  // line loop between the 4 vertex
+  glBegin(GL_LINE_LOOP);
+    glVertex3f(+side, +side, +side);
+    glVertex3f(-side, +side, +side);
+    glVertex3f(-side, -side, +side);
+    glVertex3f(+side, -side, +side);
+  glEnd();
 }
 
 // Draws a torus of inner radius r and outer radius R.
@@ -510,8 +525,8 @@ void Env::setupModel() {
 // The perspective is then arbitrarily set up.
 // Height and Width are hardcoded for now
 void Env::setupPersp() {
-  double fovy = 70.0, // field of view angle, in deegres, along y direction
-      zNear = .2, zFar = 1000; // clipping plane distance
+  double fovy = 70.0; // field of view angle, in deegres, along y direction
+  double zNear = .2, zFar = 1000; // clipping plane distance
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();

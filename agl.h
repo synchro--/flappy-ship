@@ -190,6 +190,10 @@ public:
   inline decltype(m_headlight) isHeadlight() { return m_headlight; }
   inline decltype(m_shadow) isShadow() { return m_shadow; }
   inline decltype(m_blending) isBlending() { return m_blending; }
+  inline decltype(m_screenH) get_win_height() { return m_screenH; }
+  inline decltype(m_screenW) get_win_width() { return m_screenW; }
+  inline decltype(m_fps) get_fps() {return m_fps; }
+
 
   /*
     inline decltype(m_eye_dist) eyeDist() { return m_eye_dist; }
@@ -225,6 +229,7 @@ public:
   void drawPlane(float sz, float height, size_t num_quads);
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
+  void drawSquare(const float side); 
   void drawTorus(double r, double R);
 
   inline void disableLighting() { glDisable(GL_LIGHTING); }

@@ -60,8 +60,8 @@
     inline decltype(m_maxx) get_maxX() { return m_maxx; }
     inline decltype(m_maxy) get_maxY() { return m_maxy; }
     
-    Glyph(char m_letter, TexID textureID, GLubyte m_minx, GLubyte m_miny, GLubyte m_advance,
-          GLubyte m_maxx, GLubyte m_maxy); 
+    Glyph(char letter, TexID textureID, GLubyte minx, GLubyte miny, GLubyte advance,
+    GLubyte maxx, GLubyte maxy); 
 };
  
 
@@ -93,7 +93,7 @@ public:
  // quit gracefully
  virtual ~AGLTextRenderer(); 
  // return singleton instance 
- friend AGLTextRenderer* getTextRenderer(); 
+ friend AGLTextRenderer* getTextRenderer(const char * font_path, size_t font_size);
 
 }; 
 

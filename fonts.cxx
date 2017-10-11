@@ -2,6 +2,9 @@
 
 namespace fonts {
     
+ Glyph::Glyph(char letter, TexID textureID, GLubyte minx, GLubyte miny, GLubyte advance,
+    GLubyte maxx, GLubyte maxy) : m_letter(letter), m_texID(textureID), m_minx(minx), m_miny(miny), m_maxx(maxx), m_maxy(maxy), m_advance(advance) {} 
+
     // return the singleton instance 
     AGLTextRenderer* getTextRenderer(const char *font_path, size_t font_size) {
         const static auto TAG = __func__; 
@@ -16,7 +19,7 @@ namespace fonts {
     return s_ptr.get(); 
     }
     
-AGLTextRenderer::AGLTextRenderer(const char *font_path, size_t fontSize) 
+AGLTextRenderer::AGLTextRenderer(const char *font_path, size_t font_size) 
 : m_env(agl::get_env())
 {
     const static auto TAG = __func__; 
@@ -27,7 +30,7 @@ AGLTextRenderer::AGLTextRenderer(const char *font_path, size_t fontSize)
         exit(EXIT_FAILURE);
         }
     
-    m_font_ptr = TTF_OpenFont(fontPath, fontSize);
+    m_font_ptr = TTF_OpenFont(font_path, font_size);
         if (!m_font_ptr) {
          lg::e(TAG, "TTF_OpenFont: %s\n", TTF_GetError());
         }
@@ -37,7 +40,7 @@ AGLTextRenderer::AGLTextRenderer(const char *font_path, size_t fontSize)
     
     // get font m_font_outline
     m_font_outline = TTF_GetFontOutline(m_font_ptr);
-    m_font_height = TTF_m_font_height(m_font_ptr);
+    m_font_height = TTF_FontHeight(m_font_ptr);
     loadTextureVector();
 }
 
@@ -55,14 +58,16 @@ void AGLTextRenderer::loadTextureVector() {
         if (!(surface = TTF_RenderGlyph_Blended(m_font_ptr, i, color))) {
             lg::e(TAG,"%s\n", TTF_GetError());
         }
+
         // generate texture ID 
         glGenTextures(1, &texbind);
         // create Glyph and bind it  
-        Glyph glyph(i, advance, miny, maxy, minx, maxx, texbind);
+        Glyph glyph(i, texbind, miny, maxy, advance, minx, maxx);
         glBindTexture(GL_TEXTURE_2D, glyph.get_textureID());
         // create Texture 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_RGBA,
         GL_UNSIGNED_BYTE, surface->pixels);
+        
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -108,9 +113,9 @@ void AGLTextRenderer::renderChar(char letter, int x_o, int y_o) {
         glTexCoord2f(0, 1);
         glVertex2f(x_o - m_font_outline, y_o - m_font_outline);
         glTexCoord2f(1, 1);
-        glVertex2f(x_o + glyph.get_maxX() - (m_font_outline, y_o - m_font_outline));
+        glVertex2f((x_o + glyph.get_maxX() - m_font_outline), (y_o - m_font_outline));
         glTexCoord2f(1, 0);
-        glVertex2f(x_o + glyph.get_maxX() - m_font_outline, y_o + m_font_height - m_font_outline);
+        glVertex2f((x_o + glyph.get_maxX() - m_font_outline), (y_o + m_font_height - m_font_outline));
     }
     glEnd();
 

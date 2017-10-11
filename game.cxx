@@ -8,7 +8,7 @@ Game::Game(std::string gameID, size_t num_rings)
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0),
       m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0),
       m_penalty_time(0.0), m_num_rings(num_rings), m_cur_ring_index(0),
-      m_env(agl::get_env()), m_num_cubes(10), m_main_win(nullptr),
+      m_num_cubes(10), m_main_win(nullptr),
       m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
 
 /*
@@ -18,12 +18,14 @@ Game::Game(std::string gameID, size_t num_rings)
  */
 void Game::init() {
   // changeState(game::Splash);
+  m_env = agl::get_env(); 
+  m_text_renderer = fonts::getTextRenderer("Fonts/neuropol.ttf" ,24); 
   std::string win_name = "Main Window";
-  m_main_win = m_env.createWindow(win_name, 0, 0, 900, 700);
+  m_main_win = m_env.createWindow(win_name, 0, 0, m_env.get_win_width(), m_env.get_win_height());
   m_main_win->show();
   m_floor = elements::get_floor("Texture/tex1.jpg");
   m_sky = elements::get_sky("Texture/space1.jpg");
-  m_ssh = elements::get_spaceship("Texture/tex2.jpg", "Mesh/Envos.obj");
+  m_ssh = elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
 
   m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
                spaceship::ENVOS_SCALE);
@@ -32,19 +34,19 @@ void Game::init() {
   init_cubes();
 }
 
-void Game::changeState(game::State state) {
+void Game::changeState(game::State next_state) {
 
   static const auto TAG = __func__;
 
-  if (state == m_state)
+  if (next_state == m_state)
     return;
 
-  if (m_state == State::GAME && state == State::SPLASH) {
+  if (m_state == State::GAME && next_state == State::SPLASH) {
     lg::e(TAG, "Can't go back to Splash while playing!");
     return;
   }
 
-  if (m_state == State::SPLASH && state == State::END) {
+  if (m_state == State::SPLASH && next_state == State::END) {
     lg::e(TAG,
           "Can't go from Splash screen directly to the end. You can't skip to "
           "the conclusion..");
@@ -53,23 +55,30 @@ void Game::changeState(game::State state) {
   // dalla fine al menu pure non si può fare, da aggiungere
 
   // change state and callback functions
-  if (state == State::MENU && m_state == State::GAME) {
-    m_state = state;
+  if (next_state == State::MENU && m_state == State::GAME) {
+    m_state = next_state;
     //  openMenu();
   }
 
-  if (state == State::GAME && m_state == State::MENU) {
-    m_state = state;
+  if (next_state == State::GAME && m_state == State::MENU) {
+    m_state = next_state;
     playGame();
   }
 
-  if (state == State::END && m_state == State::GAME) {
-    m_state = state;
+  if (next_state == State::END && m_state == State::GAME) {
+    m_state = next_state;
     // gameOver();
   }
 
   // shoudln't arrive here
-  m_state = state;
+  m_state = next_state;
+}
+
+void Game::drawHUD() {
+  auto fps = m_env.get_fps(); 
+  const static auto X_O = 100; 
+  const static auto Y_O = 100; 
+  m_text_renderer.renderText("FPS ", X_O, Y_O);
 }
 
 void Game::gameAction() {
@@ -110,7 +119,6 @@ void Game::gameAction() {
   if (ring_crossed) {
     m_deadline_time += game::RING_TIME;
     ++m_cur_ring_index;
-    // m_ssh->shadow();
   }
 
   for (auto &cube : m_cubes) {
@@ -267,8 +275,7 @@ void Game::gameOnMouse(MouseEvent ev, int32_t x, int32_t y) {
 void Game::gameRender() {
 
   m_env.lineWidth(3.0);
-  // settiamo il viewport
-  // glViewport(0, 0, scrW, scrH); //-- DENTRO WINDOW
+  // remember to setup the viewport 
   m_main_win->setupViewport();
 
   m_env.clearBuffer();
@@ -307,18 +314,16 @@ void Game::gameRender() {
     m_ssh->shadow();
   }
 
-  // questa è una funzione di env
-
-  // fa parte del HUD
+  drawHUD(); 
   /*
   glBegin(GL_QUADS);
-  float y = m_screenH * m_fps / 100;
-  float ramp = m_fps / 100;
-  glColor3f(1 - ramp, 0, ramp);
-  glVertex2d(10, 0);
-  glVertex2d(10, y);
-  glVertex2d(0, y);
-  glVertex2d(0, 0);
+    float y = m_main_win->m_height * m_env.get_fps() / 100;
+    float ramp = m_env.get_fps() / 100;
+    glColor3f(1 - ramp, 0, ramp);
+    glVertex2d(10, 0);
+    glVertex2d(10, y);
+    glVertex2d(0, y);
+    glVertex2d(0, 0);
   glEnd();
   */
 

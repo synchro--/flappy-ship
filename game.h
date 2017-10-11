@@ -25,11 +25,16 @@ private:
   uint32_t m_penalty_time;
   uint32_t m_last_time;
 
+  // environment 
   agl::Env &m_env;
   std::unique_ptr<agl::SmartWindow> m_main_win;
+  std::unique_prt<fonts::AGLTextRenderer> m_text_renderer;
+
+  // various elements
   std::unique_ptr<elements::Spaceship> m_ssh;
   elements::Floor *m_floor;
   elements::Sky *m_sky;
+
   // Ring stuff
   std::vector<elements::Ring> m_rings;
   size_t m_num_rings;
@@ -51,6 +56,8 @@ private:
   void init_rings();
   void init_cubes();
   void init();
+  // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
+  void drawHUD(); 
 
   inline void change_camera_type() {
     m_camera_type = (m_camera_type + 1) % CAMERA_TYPE_MAX;

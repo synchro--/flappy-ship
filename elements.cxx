@@ -207,7 +207,7 @@ void BadCube::render() {
       glDisable(GL_BLEND);
     } else {
       m_env.setColor(agl::YELLOW);
-      m_env.drawCubeWire(side);
+      m_env.drawSquare(side);
       // m_env.drawCube(side);
     }
 
