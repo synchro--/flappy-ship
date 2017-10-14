@@ -43,3 +43,5 @@ sites
 #Texture 
 #*jpg
 
+#Build 
+./build*

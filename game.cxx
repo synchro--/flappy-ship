@@ -18,7 +18,7 @@ Game::Game(std::string gameID, size_t num_rings)
  */
 void Game::init() {
   // changeState(game::Splash);
-  m_text_renderer = fonts::getTextRenderer("Fonts/neuropol.ttf", 24);
+  m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 24);
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 0, 0, m_env.get_win_width(), m_env.get_win_height());
   m_main_win->show();

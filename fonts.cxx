@@ -1,6 +1,6 @@
-#include "fonts.h"
+#include "agl.h"
 
-namespace fonts {
+namespace agl {
     
  Glyph::Glyph(char letter, TexID textureID, GLubyte minx, GLubyte miny, GLubyte advance,
     GLubyte maxx, GLubyte maxy) : m_letter(letter), m_texID(textureID), m_minx(minx), m_miny(miny), m_maxx(maxx), m_maxy(maxy), m_advance(advance) {} 
@@ -8,7 +8,7 @@ namespace fonts {
     // return the singleton instance 
     AGLTextRenderer* getTextRenderer(const char *font_path, size_t font_size) {
         const static auto TAG = __func__; 
-        lg::i(TAG, "Creating a text renderer, loading the font from %s", font_path);
+        lg::i(TAG, "Creating a text renderer, loading the font %s with size %zu", font_path, font_size);
         
       // having a unique ptr ensures the TextRenderer will be called only during the main
       static std::unique_ptr<AGLTextRenderer> s_ptr(nullptr); 
@@ -55,6 +55,8 @@ void AGLTextRenderer::loadTextureVector() {
     for (char i = ASCII_SPACE_CODE ; i < ASCII_DEL_CODE; ++i) {
         // cache glyph metrics and texture
         TTF_GlyphMetrics(m_font_ptr, i, &minx, &maxx, &miny, &maxy, &advance);
+        // Render the font on a surface as Blended : slower but high quality 
+        // if performance is suffering, try switch to Solid
         if (!(surface = TTF_RenderGlyph_Blended(m_font_ptr, i, color))) {
             lg::e(TAG,"%s\n", TTF_GetError());
         }
@@ -103,7 +105,6 @@ void AGLTextRenderer::renderChar(char letter, int x_o, int y_o) {
     // Texture
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, glyph.get_textureID());
-   // m_env.textureDrawing(glyph.getTextureID(), ); 
     
     // Draw texture with quads 
     glBegin(GL_QUADS);
@@ -136,7 +137,6 @@ int AGLTextRenderer::get_width(const char *str) {
 
 AGLTextRenderer::~AGLTextRenderer() {
     TTF_CloseFont(m_font_ptr);
-    TTF_Quit(); // this is in Env, should it be moved? 
 }
 
-} // namespace fonts 
+} // namespace
