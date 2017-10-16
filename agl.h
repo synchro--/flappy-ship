@@ -193,8 +193,7 @@ public:
   inline decltype(m_blending) isBlending() { return m_blending; }
   inline decltype(m_screenH) get_win_height() { return m_screenH; }
   inline decltype(m_screenW) get_win_width() { return m_screenW; }
-  inline decltype(m_fps) get_fps() {return m_fps; }
-
+  inline decltype(m_fps) get_fps() { return m_fps; }
 
   /*
     inline decltype(m_eye_dist) eyeDist() { return m_eye_dist; }
@@ -230,7 +229,7 @@ public:
   void drawPlane(float sz, float height, size_t num_quads);
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
-  void drawSquare(const float side); 
+  void drawSquare(const float side);
   void drawTorus(double r, double R);
 
   inline void disableLighting() { glDisable(GL_LIGHTING); }
@@ -294,9 +293,9 @@ public:
 Env &get_env();
 
 /*
- * SmartWindow is a class that represents a graphical window, it's basically 
+ * SmartWindow is a class that represents a graphical window, it's basically
  * a wrapper on top of an SDL_Window.
- */ 
+ */
 
 class SmartWindow {
 
@@ -318,87 +317,89 @@ public:
   void show();
 };
 
-
 /* __FONTS__
- * A light and fast library to load and use TTF in OpenGL.  
- * The only way to do render TTF in OpenGL is to render each glyph as a texture, which of course
- * carries a painful overhead on the game at runtime. 
- * The solution is to load an atlas of chars of the selected TTF as a vector
- * of textures and store in memory. Later on, when we'll need to render text 
- * we'll just render it as a list of textured quads from pre-loaded textures.
+ * A light and fast library to load and use TTF in OpenGL.
+ * The only way to do render TTF in OpenGL is to render each glyph as a texture,
+ * which of course carries a painful overhead on the game at runtime. The
+ * solution is to load an atlas of chars of the selected TTF as a vector of
+ * textures and store in memory. Later on, when we'll need to render text we'll
+ * just render it as a list of textured quads from pre-loaded textures.
  */
-  
- // starting offset of the ASCII chars
- static const auto ASCII_SPACE_CODE = 0x20; 
- // ending offset of the ASCII chars 
- static const auto ASCII_DEL_CODE = 0x7F; 
 
- // optimized X GLubyte version of a Glyph 
- class Glyph {
- private: 
-  // members 
+// starting offset of the ASCII chars
+static const auto ASCII_SPACE_CODE = 0x20;
+// ending offset of the ASCII chars
+static const auto ASCII_DEL_CODE = 0x7F;
+
+// optimized X GLubyte version of a Glyph
+class Glyph {
+private:
+  // members
   char m_letter; // freetype glyph index
-  TexID m_texID; 
+  TexID m_texID;
 
-  GLubyte m_minx;  
-  GLubyte m_miny;  
+  GLubyte m_minx;
+  GLubyte m_miny;
   GLubyte m_advance; // number of pixels to advance on x axis
-  GLubyte m_maxx; 
+  GLubyte m_maxx;
   GLubyte m_maxy;
 
- public: 
-    // accessors 
-    // Note: accessors use decltype as the exact type of each member 
-    // can be changed due to memory optimization 
-    
-    inline decltype(m_letter) get_letter() { return m_letter; }
-    inline decltype(m_texID) get_textureID() { return m_texID; }
-    inline decltype(m_advance) get_advance() { return m_advance; }
-    inline decltype(m_minx) get_minX() { return m_minx; }
-    inline decltype(m_miny) get_minY() { return m_miny; }
-    inline decltype(m_maxx) get_maxX() { return m_maxx; }
-    inline decltype(m_maxy) get_maxY() { return m_maxy; }
-    
-    Glyph(char letter, TexID textureID, GLubyte minx, GLubyte miny, GLubyte advance,
-    GLubyte maxx, GLubyte maxy); 
-};
- 
+public:
+  // accessors
+  // Note: accessors use decltype as the exact type of each member
+  // can be changed due to memory optimization
 
-// Abstract GL TextRenderer 
-// Responsible of loading the TTF and initialize the texture atlas vec. 
+  inline decltype(m_letter) get_letter() { return m_letter; }
+  inline decltype(m_texID) get_textureID() { return m_texID; }
+  inline decltype(m_advance) get_advance() { return m_advance; }
+  inline decltype(m_minx) get_minX() { return m_minx; }
+  inline decltype(m_miny) get_minY() { return m_miny; }
+  inline decltype(m_maxx) get_maxX() { return m_maxx; }
+  inline decltype(m_maxy) get_maxY() { return m_maxy; }
+
+  Glyph(char letter, TexID textureID, GLubyte minx, GLubyte miny,
+        GLubyte advance, GLubyte maxx, GLubyte maxy);
+};
+
+// Abstract GL TextRenderer
+// Responsible of loading the TTF and initialize the texture atlas vec.
 
 class AGLTextRenderer {
 private:
-// the texture atlas vector
-std::vector<Glyph> m_glyphs;
-int m_font_outline; 
-int m_font_height; 
-TTF_Font *m_font_ptr; 
-Env& m_env; // cache envinronment 
+  // the texture atlas vector
+  std::vector<Glyph> m_glyphs;
+  int m_font_outline;
+  int m_font_height;
+  TTF_Font *m_font_ptr;
+  Env &m_env; // cache envinronment
 
-inline Glyph &get_glyph_at(size_t index) { return m_glyphs.at(index-ASCII_SPACE_CODE); }
-void loadTextureVector(); 
+  inline Glyph &get_glyph_at(size_t index) {
+    return m_glyphs.at(index - ASCII_SPACE_CODE);
+  }
+  void loadTextureVector();
 
-// prevent to call cons, use friend function instead 
-AGLTextRenderer(const char *font_path, size_t font_size); 
+  // prevent to call cons, use friend function instead
+  AGLTextRenderer(const char *font_path, size_t font_size);
+  void renderChar(int x_o, int y_o, char letter);
 
-public: 
- void renderChar(char letter, int x_o, int y_o); 
- void renderText(char *str, int x_o, int y_o); 
- int get_width(const char *str); 
- 
- inline decltype(m_font_height) get_height() { return m_font_height; }
- 
- // quit gracefully
- virtual ~AGLTextRenderer(); 
- // return singleton instance 
- friend AGLTextRenderer* getTextRenderer(const char * font_path, size_t font_size);
+public:
+  int render(int x_o, int y_o, const char *str);
+  // same as above but for std::string
+  int render(int x_o, int y_o, std::string &str);
+  int renderf(int x_o, int y_o, const char *fmt, ...);  
+  int get_width(const char *str);
 
-}; 
+  inline decltype(m_font_height) get_height() { return m_font_height; }
 
-// singleton loader 
-AGLTextRenderer* getTextRenderer(const char * font_path, size_t font_size); 
+  // quit gracefully
+  virtual ~AGLTextRenderer();
+  // return singleton instance
+  friend AGLTextRenderer *getTextRenderer(const char *font_path,
+                                          size_t font_size);
+};
 
+// singleton loader
+AGLTextRenderer *getTextRenderer(const char *font_path, size_t font_size);
 
 } // namespace agl
 

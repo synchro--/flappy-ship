@@ -20,11 +20,13 @@ void Game::init() {
   // changeState(game::Splash);
   m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 24);
   std::string win_name = "Main Window";
-  m_main_win = m_env.createWindow(win_name, 0, 0, m_env.get_win_width(), m_env.get_win_height());
+  m_main_win = m_env.createWindow(win_name, 0, 0, m_env.get_win_width(),
+                                  m_env.get_win_height());
   m_main_win->show();
   m_floor = elements::get_floor("Texture/tex1.jpg");
   m_sky = elements::get_sky("Texture/space1.jpg");
-  m_ssh = elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
+  m_ssh =
+      elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
 
   m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
                spaceship::ENVOS_SCALE);
@@ -74,10 +76,10 @@ void Game::changeState(game::State next_state) {
 }
 
 void Game::drawHUD() {
-  auto fps = m_env.get_fps(); 
-  const static auto X_O = 100; 
-  const static auto Y_O = 100; 
-  m_text_renderer->renderText("FPS ", X_O, Y_O);
+  auto fps = m_env.get_fps();
+  const static auto X_O = 100;
+  const static auto Y_O = 100;
+  m_text_renderer->renderf(X_O, Y_O, "FPS:%.2fs", fps);
 }
 
 void Game::gameAction() {
@@ -274,7 +276,7 @@ void Game::gameOnMouse(MouseEvent ev, int32_t x, int32_t y) {
 void Game::gameRender() {
 
   m_env.lineWidth(3.0);
-  // remember to setup the viewport 
+  // remember to setup the viewport
   m_main_win->setupViewport();
 
   m_env.clearBuffer();
@@ -313,7 +315,7 @@ void Game::gameRender() {
     m_ssh->shadow();
   }
 
-  drawHUD(); 
+  drawHUD();
   /*
   glBegin(GL_QUADS);
     float y = m_main_win->m_height * m_env.get_fps() / 100;

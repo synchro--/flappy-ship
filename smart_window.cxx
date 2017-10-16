@@ -4,9 +4,9 @@
 #include <SDL2/SDL.h>
 
 /*
- * SmartWindow is a class that represents a graphical window, it's basically 
- * a wrapper on top of an SDL_Window. 
- * Takes also care of initializing the GL Context 
+ * SmartWindow is a class that represents a graphical window, it's basically
+ * a wrapper on top of an SDL_Window.
+ * Takes also care of initializing the GL Context
  */
 
 namespace agl {
@@ -17,8 +17,8 @@ SmartWindow::SmartWindow(std::string &name, size_t x, size_t y, size_t w,
 
   static const auto TAG = __func__;
 
-  lg::i(TAG, "creating SmartWindow(\"%s\", %zu, %zu, %zu, %zu)", name.c_str(), x, y,
-        w, h);
+  lg::i(TAG, "creating SmartWindow(\"%s\", %zu, %zu, %zu, %zu)", name.c_str(),
+        x, y, w, h);
 
   m_win = SDL_CreateWindow(m_name.c_str(), x, y, w, h, SDL_WINDOW_OPENGL);
 

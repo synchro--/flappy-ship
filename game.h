@@ -25,7 +25,7 @@ private:
   uint32_t m_penalty_time;
   uint32_t m_last_time;
 
-  // environment 
+  // environment
   agl::Env &m_env;
   std::unique_ptr<agl::SmartWindow> m_main_win;
   agl::AGLTextRenderer *m_text_renderer;
@@ -57,7 +57,7 @@ private:
   void init_cubes();
   void init();
   // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
-  void drawHUD(); 
+  void drawHUD();
 
   inline void change_camera_type() {
     m_camera_type = (m_camera_type + 1) % CAMERA_TYPE_MAX;

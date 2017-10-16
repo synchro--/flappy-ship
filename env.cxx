@@ -178,7 +178,6 @@ void Env::drawCubeFill(const float S) {
   glEnd();
 }
 
-
 // draw a wireframe cube
 void Env::drawCubeWire(const float side) {
   lineWidth(12.0);
@@ -197,7 +196,6 @@ void Env::drawCubeWire(const float side) {
   glVertex3f(+side, +side, -side);
   glEnd();
 
-
   glBegin(GL_LINES); // 4 segmenti da -z a +z
   glVertex3f(-side, -side, -side);
   glVertex3f(-side, -side, +side);
@@ -211,7 +209,6 @@ void Env::drawCubeWire(const float side) {
   glVertex3f(-side, +side, -side);
   glVertex3f(-side, +side, +side);
   glEnd();
-  
 }
 
 void Env::drawCube(const float side) {
@@ -349,14 +346,14 @@ void Env::drawSphere(double radius, int lats, int longs) {
 }
 
 void Env::drawSquare(const float side) {
-  lineWidth(10.0); 
+  lineWidth(10.0);
 
   // line loop between the 4 vertex
   glBegin(GL_LINE_LOOP);
-    glVertex3f(+side, +side, +side);
-    glVertex3f(-side, +side, +side);
-    glVertex3f(-side, -side, +side);
-    glVertex3f(+side, -side, +side);
+  glVertex3f(+side, +side, +side);
+  glVertex3f(-side, +side, +side);
+  glVertex3f(-side, -side, +side);
+  glVertex3f(+side, -side, +side);
   glEnd();
 }
 
