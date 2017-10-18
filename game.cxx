@@ -18,7 +18,6 @@ Game::Game(std::string gameID, size_t num_rings)
  */
 void Game::init() {
   // changeState(game::Splash);
-  m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 24);
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 0, 0, m_env.get_win_width(),
                                   m_env.get_win_height());
@@ -27,6 +26,8 @@ void Game::init() {
   m_sky = elements::get_sky("Texture/space1.jpg");
   m_ssh =
       elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
+  m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 30);
+
 
   m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
                spaceship::ENVOS_SCALE);
@@ -75,11 +76,25 @@ void Game::changeState(game::State next_state) {
   m_state = next_state;
 }
 
+// draw a simple HeadUP Display 
 void Game::drawHUD() {
   auto fps = m_env.get_fps();
-  const static auto X_O = 100;
-  const static auto Y_O = 100;
-  m_text_renderer->renderf(X_O, Y_O, "FPS:%.2fs", fps);
+  auto X_O = m_main_win->m_width - 850;
+  auto Y_O = m_main_win->m_height - 50;
+  const static auto offset = 280; 
+
+  // draw data on the window 
+  m_main_win->draw_on_pixels([&]{
+    m_env.setColor(agl::WHITE); 
+    m_text_renderer->renderf(X_O, Y_O, "FPS:%2.1f", fps);
+    m_text_renderer->renderf(X_O + offset, Y_O, "TIME:%2.1fS",
+    (m_deadline_time/1000.0));    
+    m_text_renderer->renderf(X_O + 2*offset, Y_O, "RINGS: %d/%d", 
+    m_cur_ring_index, m_num_rings); 
+  });
+
+  // draw minimap
+  // drawMinimap(); 
 }
 
 void Game::gameAction() {

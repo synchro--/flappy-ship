@@ -70,6 +70,34 @@ void SmartWindow::refresh() {
   SDL_GL_SwapWindow(m_win);
 }
 
+// Sets the world coordinates (x,y) to map into the screen coordinates,
+// then calls fn(), cleans up after.
+// remember to reset projection afterwards if it's still needed.
+void SmartWindow::draw_on_pixels(std::function<void ()> fn) {
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  glMatrixMode(GL_MODELVIEW);
+
+  // It's important to create a new scope here; otherwise, we're just erasing
+  // the old matrix.
+  m_env.mat_scope([&]{
+    glLoadIdentity();
+
+    glTranslatef(-1, -1, 0);
+
+    glScalef(2.0 / m_width, 2.0 / m_height, 1);
+
+    fn();
+  });
+
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHTING);
+}
+
 // QUESTI DA CAMBIARE, SENZA USARE LE LAMBDA POSSIBILMENTE
 
 // executes fn() in pixel coordinates mode, after coloring the whole window
@@ -93,34 +121,6 @@ void SmartWindow::color_whole_area(const Color& c, std::function<void()> fn) {
 
     fn();
   });
-}
-
-// Sets the world coordinates (x,y) to map into the screen coordinates,
-// then calls fn(), cleans up after.
-// remember to reset projection afterwards if it's still needed.
-void SmartWindow::draw_on_pixels(std::function<void()> fn) {
-  glDisable(GL_LIGHTING);
-  glDisable(GL_DEPTH_TEST);
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  glMatrixMode(GL_MODELVIEW);
-
-  // It's important to create a new scope here; otherwise, we're just erasing
-  // the old matrix.
-  m_ctx.matrix_scope([&]{
-    glLoadIdentity();
-
-    glTranslatef(-1, -1, 0);
-
-    glScalef(2.0 / width, 2.0 / height, 1);
-
-    fn();
-  });
-
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_LIGHTING);
 }
 
 
@@ -151,6 +151,7 @@ void SmartWindow::texture_whole_area(TexID t, std::function<void()> fn) {
     glDisable(GL_TEXTURE_2D);
 
     fn();
-  });
-}*/
+  }); 
+}*/ 
+
 } // namespace agl

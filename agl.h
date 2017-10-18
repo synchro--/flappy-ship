@@ -315,6 +315,7 @@ public:
   void refresh();
   void setupViewport();
   void show();
+  void draw_on_pixels(std::function<void ()> fn); 
 };
 
 /* __FONTS__
@@ -340,9 +341,9 @@ private:
 
   GLubyte m_minx;
   GLubyte m_miny;
-  GLubyte m_advance; // number of pixels to advance on x axis
   GLubyte m_maxx;
   GLubyte m_maxy;
+  GLubyte m_advance; // number of pixels to advance on x axis
 
 public:
   // accessors
@@ -357,8 +358,7 @@ public:
   inline decltype(m_maxx) get_maxX() { return m_maxx; }
   inline decltype(m_maxy) get_maxY() { return m_maxy; }
 
-  Glyph(char letter, TexID textureID, GLubyte minx, GLubyte miny,
-        GLubyte advance, GLubyte maxx, GLubyte maxy);
+  Glyph(char letter, TexID textureID, GLubyte minx, GLubyte maxx, GLubyte miny, GLubyte maxy, GLubyte advance);
 };
 
 // Abstract GL TextRenderer
@@ -373,9 +373,10 @@ private:
   TTF_Font *m_font_ptr;
   Env &m_env; // cache envinronment
 
-  inline Glyph &get_glyph_at(size_t index) {
-    return m_glyphs.at(index - ASCII_SPACE_CODE);
+  inline Glyph& get_glyph_at(size_t index) {
+    return m_glyphs.at(index - ' ');
   }
+  
   void loadTextureVector();
 
   // prevent to call cons, use friend function instead
