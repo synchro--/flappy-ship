@@ -4,10 +4,9 @@
 #include <SDL2/SDL.h>
 
 /*
- * window.cc provides a concrete implementation for gl::Window, a class that
- * represents a graphical window.
- *
- * Window takes care of initializing the GL context and an SDL_Window.
+ * SmartWindow is a class that represents a graphical window, it's basically
+ * a wrapper on top of an SDL_Window.
+ * Takes also care of initializing the GL Context
  */
 
 namespace agl {
@@ -18,8 +17,8 @@ SmartWindow::SmartWindow(std::string &name, size_t x, size_t y, size_t w,
 
   static const auto TAG = __func__;
 
-  lg::i(TAG, "creating Window(\"%s\", %zu, %zu, %zu, %zu)", name.c_str(), x, y,
-        w, h);
+  lg::i(TAG, "creating SmartWindow(\"%s\", %zu, %zu, %zu, %zu)", name.c_str(),
+        x, y, w, h);
 
   m_win = SDL_CreateWindow(m_name.c_str(), x, y, w, h, SDL_WINDOW_OPENGL);
 
@@ -32,7 +31,7 @@ SmartWindow::SmartWindow(std::string &name, size_t x, size_t y, size_t w,
     lg::e(TAG, "Window error: ", SDL_GetError());
   }
 
-  lg::i(TAG, "Window: init...");
+  lg::i(TAG, "init...");
 
   glEnable(GL_DEPTH_TEST); // zbuffer
   glEnable(GL_LIGHTING);   // lighting
@@ -71,6 +70,34 @@ void SmartWindow::refresh() {
   SDL_GL_SwapWindow(m_win);
 }
 
+// Sets the world coordinates (x,y) to map into the screen coordinates,
+// then calls fn(), cleans up after.
+// remember to reset projection afterwards if it's still needed.
+void SmartWindow::draw_on_pixels(std::function<void ()> fn) {
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  glMatrixMode(GL_MODELVIEW);
+
+  // It's important to create a new scope here; otherwise, we're just erasing
+  // the old matrix.
+  m_env.mat_scope([&]{
+    glLoadIdentity();
+
+    glTranslatef(-1, -1, 0);
+
+    glScalef(2.0 / m_width, 2.0 / m_height, 1);
+
+    fn();
+  });
+
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHTING);
+}
+
 // QUESTI DA CAMBIARE, SENZA USARE LE LAMBDA POSSIBILMENTE
 
 // executes fn() in pixel coordinates mode, after coloring the whole window
@@ -94,34 +121,6 @@ void SmartWindow::color_whole_area(const Color& c, std::function<void()> fn) {
 
     fn();
   });
-}
-
-// Sets the world coordinates (x,y) to map into the screen coordinates,
-// then calls fn(), cleans up after.
-// remember to reset projection afterwards if it's still needed.
-void SmartWindow::draw_on_pixels(std::function<void()> fn) {
-  glDisable(GL_LIGHTING);
-  glDisable(GL_DEPTH_TEST);
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  glMatrixMode(GL_MODELVIEW);
-
-  // It's important to create a new scope here; otherwise, we're just erasing
-  // the old matrix.
-  m_ctx.matrix_scope([&]{
-    glLoadIdentity();
-
-    glTranslatef(-1, -1, 0);
-
-    glScalef(2.0 / width, 2.0 / height, 1);
-
-    fn();
-  });
-
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_LIGHTING);
 }
 
 
@@ -152,6 +151,7 @@ void SmartWindow::texture_whole_area(TexID t, std::function<void()> fn) {
     glDisable(GL_TEXTURE_2D);
 
     fn();
-  });
-}*/
+  }); 
+}*/ 
+
 } // namespace agl

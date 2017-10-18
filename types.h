@@ -41,17 +41,18 @@ const Color BLACK = {.0f, .0f, .0f, 1.0f};
 const Color RED = {.768f, .109f, .109f};
 const Color GREEN = {.447f, .643f, .074f};
 const Color YELLOW = {.913f, .643f, .074f};
-const Color SHADOW = {.4f, .4f, .4f};
+const Color LIGHT_YELLOW = {245.0f, 246.0f, 206.0f};
+const Color SHADOW = {.3f, .3f, .3f};
 
 static const auto PHYS_SAMPLING_STEP = 10U; // millisec of a Physics sim step
-static const auto FPS_SAMPLE = 30U;         // interval length
+static const auto FPS_SAMPLE = 10U;         // interval length
 } // namespace agl
 
 // GAME TYPES
 namespace game {
 
-static const double RING_TIME = 5.0;
-static const double BONUS_TIME = 4.0;
+static const auto RING_TIME = 7000U;
+static const auto BONUS_TIME = 4000U;
 
 enum State { SPLASH, MENU, GAME, SETTINGS, END };
 enum Key {
@@ -72,7 +73,7 @@ enum Key {
   F5,
   N_KEYS
 };
-enum MouseEvent { MOTION, WHEEL }; 
+enum MouseEvent { MOTION, WHEEL };
 
 } // namespace game
 
@@ -92,10 +93,27 @@ enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE, N_MOTION };
 // to be submitted to the Spaceship
 using Command = std::pair<Motion, bool>;
 
-static const auto ENVOS_MESH_SCALE = 0.0099;
-static const auto FALCON_MESH_SCALE = 0.0099;
-static const auto SHUTTLE_SCALE = 0.013;  
+static const auto FAST_ACC = 0.0045;
+static const auto NORMAL_ACC = 0.0035;
+
+// Mesh dimension resizing constants
+static const auto ENVOS_SCALE = 0.0059;
+static const auto FALCON_SCALE = 0.0099;
+static const auto SHUTTLE_SCALE = 0.013;
+
+// Some mesh are built along a particular axis:
+// Therefore a rotation is needed
+
+static const auto ENVOS_ANGLE = 180;
+static const auto SHUTTLE_ANGLE = 270;
+static const auto BOAT_ANGLE = 270;
 
 } // namespace spaceship
+
+// ELEMENTS CONSTANTS
+namespace elements {
+static const auto FLOOR_SIZE = 120.0;
+static const auto SKY_RADIUS = 120.0;
+} // namespace elements
 
 #endif //_TYPES_H_

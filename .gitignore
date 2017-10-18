@@ -38,7 +38,10 @@ sites
 *.app
 
 #Mesh 
-./Mesh/*
+#./Mesh/*
 
 #Texture 
-*jpg
+#*jpg
+
+#Build 
+./build*

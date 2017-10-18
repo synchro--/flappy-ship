@@ -14,6 +14,7 @@
 #include <GL/glu.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "log.h"
 #include "types.h"
@@ -21,7 +22,7 @@
 /*
  * AGL: Abstract Graphic Library
  * The purpose is to create an abstract layer on the top of OpenGL in order to
- * simplify the usage of all the graphic functions in the project
+ * simplify the usage of all the graphic functions in the project.
  *
  * Note: methods have camelCase usually.
  *       Small ones like accessors, however, have _underscore_ case.
@@ -143,7 +144,9 @@ public:
 
 std::unique_ptr<Mesh> loadMesh(const char *mesh_filename);
 
-using game::Key;   // type for game keys
+using game::Key;        // custom type for game keys
+using game::MouseEvent; // custom type for mouse events
+
 class SmartWindow; // pre-declared to be used in Env
 
 /* The Env class represents the Environment of the game.
@@ -158,22 +161,22 @@ private:
   double m_fps;     // fps value in the last interval
   double m_fps_now; // fps currently drawn
   uint m_last_time;
-  float m_eye_dist, m_view_alpha, m_view_beta; 
   int m_screenH, m_screenW;
   int m_camera_type;
   int m_step; // number of steps of Physics currently done
-  bool m_wireframe, m_envmap, m_headlight, m_shadow;
+  bool m_wireframe, m_envmap, m_headlight, m_shadow, m_blending;
 
   /* Callbacks variables:
-   *  they will be the handler for keys, windows events and rendering.
+   *  they will be the handler for keys, mouse & windows events and rendering.
    *  The actual callback function will vary according to the current
    *  state of the game.
-   *  For example, if we are on Menù, the rendering callback will be different
+   *  For example, if we are on Menu, the rendering callback will be different
    *  wrt when we are actually playing.
    */
   std::function<void()> m_action_handler, m_render_handler,
       m_window_event_handler;
   std::function<void(game::Key)> m_key_up_handler, m_key_down_handler;
+  std::function<void(game::MouseEvent, int32_t, int32_t)> m_mouse_event_handler;
 
 public:
   // Friends can touch your private parts.
@@ -187,21 +190,29 @@ public:
   inline decltype(m_envmap) isEnvmap() { return m_envmap; }
   inline decltype(m_headlight) isHeadlight() { return m_headlight; }
   inline decltype(m_shadow) isShadow() { return m_shadow; }
-  
-  inline decltype(m_eye_dist) eyeDist() { return m_eye_dist; }
-  inline decltype(m_view_alpha) alpha() {return m_view_alpha; }
-  inline decltype(m_view_beta) beta() {return m_view_beta; }
+  inline decltype(m_blending) isBlending() { return m_blending; }
+  inline decltype(m_screenH) get_win_height() { return m_screenH; }
+  inline decltype(m_screenW) get_win_width() { return m_screenW; }
+  inline decltype(m_fps) get_fps() { return m_fps; }
+
+  /*
+    inline decltype(m_eye_dist) eyeDist() { return m_eye_dist; }
+    inline decltype(m_view_alpha) alpha() {return m_view_alpha; }
+    inline decltype(m_view_beta) beta() {return m_view_beta; } */
 
   inline void toggle_wireframe() { m_wireframe = !m_wireframe; }
   inline void toggle_envmap() { m_envmap = !m_envmap; }
   inline void toggle_headlight() { m_headlight = !m_headlight; }
   inline void toggle_shadow() { m_shadow = !m_shadow; }
+  inline void toggle_blending() { m_blending = !m_blending; }
 
   // Setters for all the callbacks
   // Default: empty
   void set_action(decltype(m_action_handler) actions = [] {});
   void set_keydown_handler(decltype(m_key_down_handler) onkeydown = [](Key) {});
   void set_keyup_handler(decltype(m_key_up_handler) onkeyup = [](Key) {});
+  void set_mouse_handler(decltype(m_mouse_event_handler) onmousev =
+                             [](MouseEvent, int32_t, int32_t) {});
   void set_render(decltype(m_render_handler) render = [] {});
   void set_winevent_handler(decltype(m_window_event_handler) onwinev = [] {});
 
@@ -211,10 +222,15 @@ public:
   void setColor(const Color &color);
 
   // drawing functions
+  void drawCubeFill(const float side);
+  void drawCubeWire(const float side);
+  void drawCube(const float side);
   void drawFloor(TexID texbind, float sz, float height, size_t num_quads);
-  void drawPlane(float sz, float height, size_t num_quads); 
+  void drawPlane(float sz, float height, size_t num_quads);
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
+  void drawSquare(const float side);
+  void drawTorus(double r, double R);
 
   inline void disableLighting() { glDisable(GL_LIGHTING); }
   inline void enableLighting() { glEnable(GL_LIGHTING); }
@@ -276,6 +292,11 @@ public:
 // return singleton instance
 Env &get_env();
 
+/*
+ * SmartWindow is a class that represents a graphical window, it's basically
+ * a wrapper on top of an SDL_Window.
+ */
+
 class SmartWindow {
 
 private:
@@ -294,7 +315,93 @@ public:
   void refresh();
   void setupViewport();
   void show();
+  void draw_on_pixels(std::function<void ()> fn); 
 };
+
+/* __FONTS__
+ * A light and fast library to load and use TTF in OpenGL.
+ * The only way to do render TTF in OpenGL is to render each glyph as a texture,
+ * which of course carries a painful overhead on the game at runtime. The
+ * solution is to load an atlas of chars of the selected TTF as a vector of
+ * textures and store in memory. Later on, when we'll need to render text we'll
+ * just render it as a list of textured quads from pre-loaded textures.
+ */
+
+// starting offset of the ASCII chars
+static const auto ASCII_SPACE_CODE = 0x20;
+// ending offset of the ASCII chars
+static const auto ASCII_DEL_CODE = 0x7F;
+
+// optimized X GLubyte version of a Glyph
+class Glyph {
+private:
+  // members
+  char m_letter; // freetype glyph index
+  TexID m_texID;
+
+  GLubyte m_minx;
+  GLubyte m_miny;
+  GLubyte m_maxx;
+  GLubyte m_maxy;
+  GLubyte m_advance; // number of pixels to advance on x axis
+
+public:
+  // accessors
+  // Note: accessors use decltype as the exact type of each member
+  // can be changed due to memory optimization
+
+  inline decltype(m_letter) get_letter() { return m_letter; }
+  inline decltype(m_texID) get_textureID() { return m_texID; }
+  inline decltype(m_advance) get_advance() { return m_advance; }
+  inline decltype(m_minx) get_minX() { return m_minx; }
+  inline decltype(m_miny) get_minY() { return m_miny; }
+  inline decltype(m_maxx) get_maxX() { return m_maxx; }
+  inline decltype(m_maxy) get_maxY() { return m_maxy; }
+
+  Glyph(char letter, TexID textureID, GLubyte minx, GLubyte maxx, GLubyte miny, GLubyte maxy, GLubyte advance);
+};
+
+// Abstract GL TextRenderer
+// Responsible of loading the TTF and initialize the texture atlas vec.
+
+class AGLTextRenderer {
+private:
+  // the texture atlas vector
+  std::vector<Glyph> m_glyphs;
+  int m_font_outline;
+  int m_font_height;
+  TTF_Font *m_font_ptr;
+  Env &m_env; // cache envinronment
+
+  inline Glyph& get_glyph_at(size_t index) {
+    return m_glyphs.at(index - ' ');
+  }
+  
+  void loadTextureVector();
+
+  // prevent to call cons, use friend function instead
+  AGLTextRenderer(const char *font_path, size_t font_size);
+  void renderChar(int x_o, int y_o, char letter);
+
+public:
+  int render(int x_o, int y_o, const char *str);
+  // same as above but for std::string
+  int render(int x_o, int y_o, std::string &str);
+  int renderf(int x_o, int y_o, const char *fmt, ...);  
+  int get_width(const char *str);
+
+  inline decltype(m_font_height) get_height() { return m_font_height; }
+
+  // quit gracefully
+  virtual ~AGLTextRenderer();
+  // return singleton instance
+  friend AGLTextRenderer *getTextRenderer(const char *font_path,
+                                          size_t font_size);
+};
+
+// singleton loader
+AGLTextRenderer *getTextRenderer(const char *font_path, size_t font_size);
+
 } // namespace agl
 
 #endif // AGL_H_

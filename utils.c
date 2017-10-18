@@ -1,10 +1,8 @@
 // BUFFER FILE CONTENENTE VECCHIO CODICE CHE MAGARI PUÒ SERVIRE
 // IN FUTURO PER QUALSIVOGLIA MOTIVO
 
-// vecchio codice ora commentato
-// disegna un cubo rasterizzando quads
-void drawCubeFill() {
-  const float S = 100;
+// draw a cube rasterizing quads
+void Env::drawCubeFill(const float S) {
 
   glBegin(GL_QUADS);
 
@@ -49,40 +47,42 @@ void drawCubeFill() {
 
 // disegna un cubo in wireframe
 void drawCubeWire() {
+  static const auto sz = 1.0; 
+
   glBegin(GL_LINE_LOOP); // faccia z=+1
-  glVertex3f(+1, +1, +1);
-  glVertex3f(-1, +1, +1);
-  glVertex3f(-1, -1, +1);
-  glVertex3f(+1, -1, +1);
+  glVertex3f(+sz, +sz, +sz);
+  glVertex3f(-sz, +sz, +sz);
+  glVertex3f(-sz, -sz, +sz);
+  glVertex3f(+sz, -sz, +sz);
   glEnd();
 
-  glBegin(GL_LINE_LOOP); // faccia z=-1
-  glVertex3f(+1, -1, -1);
-  glVertex3f(-1, -1, -1);
-  glVertex3f(-1, +1, -1);
-  glVertex3f(+1, +1, -1);
+  glBegin(GL_LINE_LOOP); // faccia z=-sz
+  glVertex3f(+sz, -sz, -sz);
+  glVertex3f(-sz, -sz, -sz);
+  glVertex3f(-sz, +sz, -sz);
+  glVertex3f(+sz, +sz, -sz);
   glEnd();
 
   glBegin(GL_LINES); // 4 segmenti da -z a +z
-  glVertex3f(-1, -1, -1);
-  glVertex3f(-1, -1, +1);
+  glVertex3f(-sz, -sz, -sz);
+  glVertex3f(-sz, -sz, +sz);
 
-  glVertex3f(+1, -1, -1);
-  glVertex3f(+1, -1, +1);
+  glVertex3f(+sz, -sz, -sz);
+  glVertex3f(+sz, -sz, +sz);
 
-  glVertex3f(+1, +1, -1);
-  glVertex3f(+1, +1, +1);
+  glVertex3f(+sz, +sz, -sz);
+  glVertex3f(+sz, +sz, +sz);
 
-  glVertex3f(-1, +1, -1);
-  glVertex3f(-1, +1, +1);
+  glVertex3f(-sz, +sz, -sz);
+  glVertex3f(-sz, +sz, +sz);
   glEnd();
 }
 
-void drawCube() {
-  glColor3f(.9, .9, .9);
-  drawCubeFill();
-  glColor3f(0, 0, 0);
-  drawCubeWire();
+void drawCube(const float side) {
+  setColor(YELLOW); 
+  drawCubeFill(side);
+  glColor3f(BLACK);
+  drawCubeWire(side);
 }
 
 // Draws a torus of inner radius r and outer radius R.
@@ -120,6 +120,7 @@ void Env::drawTorus(float r, float R) {
           n_z = sin_phi;
 
         glNormal3d(n_x, n_y, n_z);*/
+        
         glNormal3d(x, y, z);
         glVertex3d(2 * x, 2 * y, 2 * z);
       }

@@ -5,7 +5,6 @@ namespace agl {
 // Returns the singleton instance of agl::Env, initializing it if necessary
 Env &get_env() {
   // having a unique ptr ensures the Env will be called only during the main
-  // static std::unique_ptr<Env> s_env(nullptr);
   static std::unique_ptr<Env> s_env(nullptr);
   if (!s_env) {
     s_env.reset(new Env()); // initialize the environment
@@ -22,9 +21,8 @@ Env::Env()
       m_key_up_handler([](Key) {}),
 
       // all environment variables
-      m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0),
-      m_screenH(750), m_screenW(750), m_wireframe(false),
-      m_envmap(true), m_headlight(false), m_shadow(true), m_step(0) {
+      m_screenH(750), m_screenW(900), m_wireframe(false), m_envmap(true),
+      m_headlight(false), m_shadow(false), m_blending(false), m_step(0) {
 
   // "__func__" == function name
   static const auto TAG = __func__;
@@ -74,6 +72,11 @@ void Env::set_keydown_handler(decltype(m_key_down_handler) onkeydown) {
 // Sets the onkeyup callback.
 void Env::set_keyup_handler(decltype(m_key_up_handler) onkeyup) {
   m_key_up_handler = onkeyup;
+}
+
+// Sets the callback for mouse events.
+void Env::set_mouse_handler(decltype(m_mouse_event_handler) onmousev) {
+  m_mouse_event_handler = onmousev;
 }
 
 // Sets the onwindowevent callback, which is called when the window is exposed
@@ -131,40 +134,125 @@ std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x,
   return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h));
 }
 
+// draw a cube rasterizing quads
+void Env::drawCubeFill(const float S) {
+
+  glBegin(GL_QUADS);
+
+  glNormal3f(0, 0, +1);
+  glVertex3f(+S, +S, +S);
+  glVertex3f(-S, +S, +S);
+  glVertex3f(-S, -S, +S);
+  glVertex3f(+S, -S, +S);
+
+  glNormal3f(0, 0, -1);
+  glVertex3f(+S, -S, -S);
+  glVertex3f(-S, -S, -S);
+  glVertex3f(-S, +S, -S);
+  glVertex3f(+S, +S, -S);
+
+  glNormal3f(0, +1, 0);
+  glVertex3f(+S, +S, +S);
+  glVertex3f(-S, +S, +S);
+  glVertex3f(-S, +S, -S);
+  glVertex3f(+S, +S, -S);
+
+  glNormal3f(0, -1, 0);
+  glVertex3f(+S, -S, -S);
+  glVertex3f(-S, -S, -S);
+  glVertex3f(-S, -S, +S);
+  glVertex3f(+S, -S, +S);
+
+  glNormal3f(+1, 0, 0);
+  glVertex3f(+S, +S, +S);
+  glVertex3f(+S, -S, +S);
+  glVertex3f(+S, -S, -S);
+  glVertex3f(+S, +S, -S);
+
+  glNormal3f(-1, 0, 0);
+  glVertex3f(-S, +S, -S);
+  glVertex3f(-S, -S, -S);
+  glVertex3f(-S, -S, +S);
+  glVertex3f(-S, +S, +S);
+
+  glEnd();
+}
+
+// draw a wireframe cube
+void Env::drawCubeWire(const float side) {
+  lineWidth(12.0);
+
+  glBegin(GL_LINE_LOOP); // faccia z=+side
+  glVertex3f(+side, +side, +side);
+  glVertex3f(-side, +side, +side);
+  glVertex3f(-side, -side, +side);
+  glVertex3f(+side, -side, +side);
+  glEnd();
+
+  glBegin(GL_LINE_LOOP); // faccia z=-side
+  glVertex3f(+side, -side, -side);
+  glVertex3f(-side, -side, -side);
+  glVertex3f(-side, +side, -side);
+  glVertex3f(+side, +side, -side);
+  glEnd();
+
+  glBegin(GL_LINES); // 4 segmenti da -z a +z
+  glVertex3f(-side, -side, -side);
+  glVertex3f(-side, -side, +side);
+
+  glVertex3f(+side, -side, -side);
+  glVertex3f(+side, -side, +side);
+
+  glVertex3f(+side, +side, -side);
+  glVertex3f(+side, +side, +side);
+
+  glVertex3f(-side, +side, -side);
+  glVertex3f(-side, +side, +side);
+  glEnd();
+}
+
+void Env::drawCube(const float side) {
+  setColor(LIGHT_YELLOW);
+  drawCubeFill(side);
+  setColor(BLACK);
+  drawCubeWire(side);
+}
+
+// size 'sz' should be ~100.0f
 void Env::drawPlane(float sz, float height, size_t num_quads) {
-  glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
-  auto ratio = (double) sz / num_quads; 
-  glBegin(GL_QUADS); {
+  glNormal3f(0, 1, 0); // normale verticale uguale x tutti
+  auto ratio = (double)sz / num_quads;
+  glBegin(GL_QUADS);
+  {
     for (size_t x = 0; x < num_quads; ++x) {
       for (size_t z = 0; z < num_quads; ++z) {
-        float x0 = -sz + 2 * (x + 0) * ratio; 
-        float x1 = -sz + 2 * (x + 1) * ratio; 
-        float z0 = -sz + 2 * (z + 0) * ratio; 
-        float z1 = -sz + 2 * (z + 1) * ratio; 
+        float x0 = -sz + 2 * (x + 0) * ratio;
+        float x1 = -sz + 2 * (x + 1) * ratio;
+        float z0 = -sz + 2 * (z + 0) * ratio;
+        float z1 = -sz + 2 * (z + 1) * ratio;
 
-        if(!m_wireframe) {
-        // bottom left
-        glTexCoord2f(0.0f, 1.0f);
-        glVertex3d(x0, height, z1);
+        if (!m_wireframe) {
+          // bottom left
+          glTexCoord2f(0.0f, 1.0f);
+          glVertex3d(x0, height, z1);
 
-        // top left 
-        glTexCoord2f(0.0f, 0.0f); 
-        glVertex3d(x0, height, z0);
-        
-        // top right 
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex3d(x1, height, z0);
+          // top left
+          glTexCoord2f(0.0f, 0.0f);
+          glVertex3d(x0, height, z0);
 
-        //bottom right
-        glTexCoord2f(1.0f, 1.0f);
-        glVertex3d(x1, height, z1);
-       } 
-        else {
-        glVertex3d(x0, height, z1);
-        glVertex3d(x0, height, z0);
-        glVertex3d(x1, height, z0);
-        glVertex3d(x1, height, z1);
-       }
+          // top right
+          glTexCoord2f(1.0f, 0.0f);
+          glVertex3d(x1, height, z0);
+
+          // bottom right
+          glTexCoord2f(1.0f, 1.0f);
+          glVertex3d(x1, height, z1);
+        } else {
+          glVertex3d(x0, height, z1);
+          glVertex3d(x0, height, z0);
+          glVertex3d(x1, height, z0);
+          glVertex3d(x1, height, z1);
+        }
       }
     }
   }
@@ -177,12 +265,12 @@ void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
                  [&] {
                    // draw num_quads^2 number of quads
 
-                   if(m_wireframe) {
+                   if (m_wireframe) {
                      glDisable(GL_TEXTURE_2D);
                      glColor3f(SHADOW.r, SHADOW.g, SHADOW.b);
 
                      glDisable(GL_LIGHTING);
-                     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // LINES
+                     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // LINES
                      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Whole floor
                      drawPlane(sz, height, num_quads);
 
@@ -190,12 +278,14 @@ void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
                      glColor3f(WHITE.r, WHITE.g, WHITE.b);
                      glEnable(GL_LIGHTING);
                    } else {
-                     //glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i quads
-                     glNormal3f(0, 1, 0);      // normale verticale uguale x tutti
+                     // glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i
+                     // quads
+                     glNormal3f(0, 1, 0); // normale verticale uguale x tutti
                      drawPlane(sz, height, num_quads);
-                    }
+                   }
 
-                 }, false);
+                 },
+                 false);
 }
 
 // hint: should be 100.0 20.0 20.0 --> see Sky constructor
@@ -220,7 +310,7 @@ void Env::drawSky(TexID texbind, double radius, int lats, int longs) {
                      glDisable(GL_LIGHTING);
 
                      drawSphere(radius, lats, longs);
-                    
+
                      glEnable(GL_LIGHTING);
                    }
 
@@ -240,19 +330,76 @@ void Env::drawSphere(double radius, int lats, int longs) {
     double zr1 = cos(lat1);
 
     glBegin(GL_QUAD_STRIP);
-      for (j = 0; j <= longs; j++) {
-        double lng = 2 * M_PI * (double)(j - 1) / longs;
-        double x = cos(lng);
-        double y = sin(lng);
+    for (j = 0; j <= longs; j++) {
+      double lng = 2 * M_PI * (double)(j - 1) / longs;
+      double x = cos(lng);
+      double y = sin(lng);
 
-        // Normal are needed for the EnvMap
-        glNormal3f(x * zr0, y * zr0, z0);
-        glVertex3f(radius * x * zr0, radius * y * zr0, radius * z0);
-        glNormal3f(x * zr1, y * zr1, z1);
-        glVertex3f(radius * x * zr1, radius * y * zr1, radius * z1);
-      }
+      // Normal are needed for the EnvMap
+      glNormal3f(x * zr0, y * zr0, z0);
+      glVertex3f(radius * x * zr0, radius * y * zr0, radius * z0);
+      glNormal3f(x * zr1, y * zr1, z1);
+      glVertex3f(radius * x * zr1, radius * y * zr1, radius * z1);
+    }
     glEnd();
   }
+}
+
+void Env::drawSquare(const float side) {
+  lineWidth(10.0);
+
+  // line loop between the 4 vertex
+  glBegin(GL_LINE_LOOP);
+  glVertex3f(+side, +side, +side);
+  glVertex3f(-side, +side, +side);
+  glVertex3f(-side, -side, +side);
+  glVertex3f(+side, -side, +side);
+  glEnd();
+}
+
+// Draws a torus of inner radius r and outer radius R.
+void Env::drawTorus(double r, double R) {
+  const static int NUM_C = 50;
+  // number of vertex that approximates the circular ring shape
+  const static int NUM_VERTEX_APPROX = 15;
+  // length of the perimeter of the ring
+  const static double RING_PERIMETER = 2.0 * M_PI;
+  double s, t, x, y, z;
+  double cos_phi, sin_phi, cos_teta, sin_teta;
+
+  for (size_t i = 0; i < NUM_C; ++i) {
+    glBegin(GL_QUAD_STRIP);
+
+    for (size_t j = 0; j <= NUM_VERTEX_APPROX; ++j) {
+      for (int k = 1; k >= 0; --k) {
+        s = (i + k) % NUM_C + 0.5;
+        t = j % NUM_VERTEX_APPROX;
+
+        cos_phi = cos(s * RING_PERIMETER / NUM_C);
+        sin_phi = sin(s * RING_PERIMETER / NUM_C);
+
+        cos_teta = cos(t * RING_PERIMETER / NUM_VERTEX_APPROX);
+        sin_teta = sin(t * RING_PERIMETER / NUM_VERTEX_APPROX);
+
+        x = (R + r * cos_phi) * cos_teta;
+        y = (R + r * cos_phi) * sin_teta;
+        z = r * sin_phi;
+
+        /*
+        double
+          n_x = cos_psi * cos_phi,
+          n_y = sin_psi * cos_phi,
+          n_z = sin_phi;
+
+        glNormal3d(n_x, n_y, n_z);*/
+
+        glNormal3d(x, y, z);
+        glVertex3d(2 * x, 2 * y, 2 * z);
+      }
+    }
+  }
+
+  glEnd();
 }
 
 void Env::lineWidth(float width) { glLineWidth(width); }
@@ -313,10 +460,10 @@ void Env::render() {
 
   if (m_last_time + FPS_SAMPLE < time_now) {
     m_fps = 1000.0 * ((double)m_fps_now) / (time_now - m_last_time);
-    m_fps_now = 0;
+    m_fps_now = 1.0;
     m_last_time = time_now;
   } else {
-    m_fps_now+= PHYS_SAMPLING_STEP;
+    m_fps_now++;
   }
 
   // finally, the rendering we were all waiting for!
@@ -375,8 +522,8 @@ void Env::setupModel() {
 // The perspective is then arbitrarily set up.
 // Height and Width are hardcoded for now
 void Env::setupPersp() {
-  double fovy = 70.0, // field of view angle, in deegres, along y direction
-      zNear = .2, zFar = 1000; // clipping plane distance
+  double fovy = 70.0; // field of view angle, in deegres, along y direction
+  double zNear = .2, zFar = 1000; // clipping plane distance
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -403,6 +550,8 @@ void Env::textureDrawing(TexID texbind, std::function<void()> callback,
   glTexGeni(GL_T, GL_TEXTURE_GEN_MODE,
             m_envmap ? GL_SPHERE_MAP : GL_OBJECT_LINEAR);
 
+  setColor(WHITE); // avoid other colors to mess up the texture original color
+
   //--- call the callback drawing function --- //
   callback();
 
@@ -416,7 +565,5 @@ void Env::textureDrawing(TexID texbind, std::function<void()> callback,
 }
 
 void Env::translate(float x, float y, float z) { glTranslatef(x, y, z); }
-
-
 
 } // namespace agl

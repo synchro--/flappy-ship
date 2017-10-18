@@ -4,14 +4,14 @@
 namespace agl {
 
 /*
-* Main Render Loop: 
-* ----------------
-* Renders the splash screen and then goes into an infinite loop processing
-* events as they arise. 
-* - it dispatch the keys to the proper handler callbacks
-* - calls the action handler to update the game status
-* - finally, calls the rendering handler lambda: m_render_handler()
-*/
+ * Main Render Loop:
+ * ----------------
+ * Renders the splash screen and then goes into an infinite loop processing
+ * events as they arise.
+ * - it dispatch the keys to the proper handler callbacks
+ * - calls the action handler to update the game status
+ * - finally, calls the rendering handler lambda: m_render_handler()
+ */
 
 void Env::renderLoop() {
   // main event loop
@@ -117,32 +117,20 @@ void Env::renderLoop() {
         break;
       }
 
-        //      TODO             //
-        // ---- MOUSE EVENTS --- // 
+        // ---- MOUSE EVENTS --- //
 
-       case SDL_MOUSEMOTION:
-         // handler = m_mouse_event_handler();
+      case SDL_MOUSEMOTION: {
+        auto handler = m_mouse_event_handler;
 
-         if (e.motion.state & SDL_BUTTON(1)) {
-             // handler(MouseEvent::MOTION, e.motion.xrel, e.motion.yrel);
-             m_view_alpha = e.motion.yrel;  
-             m_view_beta =  e.motion.xrel; 
-         }
-         break;
+        if (e.motion.state & SDL_BUTTON(1)) {
+          handler(MouseEvent::MOTION, e.motion.xrel, e.motion.yrel);
+        }
+      } break;
 
-       case SDL_MOUSEWHEEL:
-         if (e.wheel.y < 0) {
-           // zoom in
-           m_eye_dist = m_eye_dist * 0.9;
-           // can't be < 1
-           m_eye_dist = m_eye_dist < 1 ? 1 : m_eye_dist;
-         };
-
-         if (e.wheel.y > 0) {
-           // allontano il punto di vista (zoom out)
-           m_eye_dist = m_eye_dist / 0.9;
-         };
-         break;
+      case SDL_MOUSEWHEEL: {
+        auto handler = m_mouse_event_handler;
+        handler(MouseEvent::WHEEL, e.wheel.y, -1.0);
+      } break;
 
       default:
         break;
@@ -156,8 +144,8 @@ void Env::renderLoop() {
     // Render once each cycle
     render();
 
-   } // while loop
+  } // while loop
 
- } // function mainLoop
+} // function mainLoop
 
-}
+} // namespace agl

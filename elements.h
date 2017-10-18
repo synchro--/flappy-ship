@@ -72,14 +72,96 @@ public:
 Sky *get_sky(const char *filename);
 
 /*
- TODO class RING coming soon
- oppure trovare un'altra idea
- tipo paletti in cui si passa di fianco dalla direzione corretta
- e si fa quindi una sorta di slalom --> SpaceSlalom
+ * RING class.
+ * Rings are torus polygons that must be crossed to win the game.
+ * Whenever a ring is crossed the player gets bonus time for the next one.
+ * Whenever a ring is crossed a next one will be spawned somewhere (random
+ * coords)
+ *
+ * When the player crossed all the required rings, a special Final Gate will be
+ * triggered. See class Gate.
+ */
 
- - come stabilire la direzione corretta e rilevera se si passa l'ostacolo dalla
- - parte giusta ? discutere con cillo
-*/
+class Ring {
+private:
+  float m_px, m_py, m_pz; // coords
+  float m_ship_old_z;     // the previous ship position wrt ring ref frame
+  float m_angle;          // wrt Y-axis
+  bool m_3D_FLIGHT; // when true rings can have positive y-coord, thus be in the
+                    // "sky"
+  bool m_triggered;
+  agl::Env &m_env; // env reference
+
+public:
+  // static members
+  // colors for when the ring is triggered or not
+  static const agl::Color TRIGGERED;
+  static const agl::Color NOT_TRIGGERED;
+  // view UP vector
+  static const agl::Vec3 s_viewUP;
+  // radius values
+  static const float s_r;
+  static const float s_R;
+
+  Ring(float x, float y, float z, float angle = 30.0, bool m_3D_FLIGHT = false);
+
+  void render();
+
+  // check if the new ship position has crossed the ring
+  void checkCrossing(float x, float z);
+  // same but for flight mode
+  void checkCrossing(float x, float y, float z);
+
+  // accessors
+  inline float x() { return m_px; }
+  inline float y() { return m_py; }
+  inline float z() { return m_pz; }
+  inline bool isTriggered() { return m_triggered; }
+};
+
+/*
+ * Introducing: the BAD cube.
+ * It's a simple wireframe cube, but if the spaceship touches it the player gets
+ * a penalty time.
+ * Besides, the spaceship starts flickering to indicate that something bad
+ * happened.
+ */
+
+class BadCube {
+private:
+  float m_px, m_py, m_pz; // coords
+  float m_ship_old_z;     // the previous ship position wrt ring ref frame
+  float m_angle;          // wrt Y-axis
+  bool
+      m_3D_FLIGHT; // when true, cubes can have positive y-coord, thus be in the
+                   // "sky"
+                   // bool m_triggered;
+
+  agl::Env &m_env; // env reference
+
+public:
+  // static members
+  // view UP vector
+  static const agl::Vec3 s_viewUP;
+  // radius values
+  static const float side;
+
+  BadCube(float x, float y, float z, float angle = 30.0,
+          bool m_3D_FLIGHT = false);
+
+  void render();
+
+  // check if the new ship position has crossed the ring
+  bool checkCrossing(float x, float z);
+  // same but for flight mode
+  bool checkCrossing(float x, float y, float z);
+
+  // accessors
+  inline float x() { return m_px; }
+  inline float y() { return m_py; }
+  inline float z() { return m_pz; }
+  // inline bool isTriggered() { return m_triggered; }
+};
 
 /*
  * The Spaceship class.
@@ -106,11 +188,12 @@ private:
   float m_speedX, m_speedY, m_speedZ; // velocity
 
   // Spaceship Stats: this will be constant over time
-  float m_steer_speed, m_steer_return, m_grip, m_frictionX,
-      m_frictionY, m_frictionZ, m_max_acceleration;
+  float m_steer_speed, m_steer_return, m_grip, m_frictionX, m_frictionY,
+      m_frictionZ, m_max_acceleration;
 
   float m_scaleX, m_scaleY, m_scaleZ; // dimension scaling
-  agl::Vec3 m_viewUP, m_front_axis; // axis representing viewUP vector and front-facing vec
+  agl::Vec3 m_viewUP,
+      m_front_axis; // axis representing viewUP vector and front-facing vec
 
   // internal state of the spaceship. Each element represent a motion (on-off),
   // as described above.
@@ -129,17 +212,23 @@ private:
   // instance is obtained through get_spaceship()
   Spaceship(const char *texture_filename, const char *mesh_filename);
 
-  // internal logic and physics of the spaceship
-
+  // drawing methods
   void draw() const;
+  void drawFlicker() const;
   void drawHeadlight(float x, float y, float z, int lightN) const;
-  void doMotion();
+
+  // inner logic and physics of the spaceship
   bool get_state(spaceship::Motion mt);
 
   void init();
   void processCommand();
-  void shadow() const;
-  void updateFly(); 
+  void updateFly();
+  void updatePosition();
+  bool updateSteering();
+  bool updateVelocity();
+
+  bool computePhysics();
+  void doMotion();
 
 public:
   friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
@@ -147,6 +236,8 @@ public:
 
   // accessors
   inline float facing() const { return m_facing; }
+  inline bool is_steering() const { return m_steering; }
+  inline bool has_velocity() const { return m_speedZ; }
   inline float x() const { return m_px; }
   inline float y() const { return m_py; }
   inline float z() const { return m_pz; }
@@ -155,10 +246,10 @@ public:
   void execute();
   void sendCommand(spaceship::Motion motion, bool on_off);
   void scale(float x, float y, float z);
+
   // render the Spaceship: TexID + Mesh
-  void render() const;
-  // rotate the view around the ship, to be used only on CAMERA_MOUSE mode
-  void rotateView(int32_t view_alpha, int32_t view_beta);
+  void render(bool flicker = false);
+  void shadow();
 };
 
 std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,

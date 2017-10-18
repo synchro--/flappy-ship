@@ -4,6 +4,7 @@
 #include "types.h"
 
 #include "agl.h"
+#include "coord_system.h"
 #include "elements.h"
 
 /*The logic of the game, putting all together*/
@@ -19,33 +20,52 @@ private:
   bool m_game_started;
   bool m_restart_game;
   int m_camera_type;
+  float m_eye_dist, m_view_alpha, m_view_beta;
   double m_deadline_time; // fps currently drawn
+  uint32_t m_penalty_time;
   uint32_t m_last_time;
 
+  // environment
   agl::Env &m_env;
   std::unique_ptr<agl::SmartWindow> m_main_win;
+  agl::AGLTextRenderer *m_text_renderer;
+
+  // various elements
   std::unique_ptr<elements::Spaceship> m_ssh;
   elements::Floor *m_floor;
   elements::Sky *m_sky;
 
-  void setupShipCamera();
+  // Ring stuff
+  std::vector<elements::Ring> m_rings;
+  size_t m_num_rings;
+  size_t m_cur_ring_index;
 
+  // Cube stuff
+  std::vector<elements::BadCube> m_cubes;
+  size_t m_num_cubes;
+
+  void setupShipCamera();
   void changeState(game::State state);
   void gameAction();
   void gameOnKey(game::Key, bool pressed);
-  void gameOnMouse(MouseEvent ev, int32_t x, int32_t y);
+  void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
   void gameRender();
+  // set the callbacks to the game functions
   void playGame();
 
+  void init_rings();
+  void init_cubes();
   void init();
+  // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
+  void drawHUD();
 
   inline void change_camera_type() {
     m_camera_type = (m_camera_type + 1) % CAMERA_TYPE_MAX;
   }
 
 public:
-  Game(std::string gameID); // constructor
+  Game(std::string gameID, size_t num_rings); // constructor
   void run();
- };
+};
 } // namespace game
 #endif // GAME_H_
