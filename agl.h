@@ -315,7 +315,9 @@ public:
   void refresh();
   void setupViewport();
   void show();
-  void draw_on_pixels(std::function<void ()> fn); 
+  void printOnScreen(std::function<void()> fn);
+  void colorWindow(const Color& color); 
+  void textureWindow(TexID texbind); 
 };
 
 /* __FONTS__
@@ -358,7 +360,8 @@ public:
   inline decltype(m_maxx) get_maxX() { return m_maxx; }
   inline decltype(m_maxy) get_maxY() { return m_maxy; }
 
-  Glyph(char letter, TexID textureID, GLubyte minx, GLubyte maxx, GLubyte miny, GLubyte maxy, GLubyte advance);
+  Glyph(char letter, TexID textureID, GLubyte minx, GLubyte maxx, GLubyte miny,
+        GLubyte maxy, GLubyte advance);
 };
 
 // Abstract GL TextRenderer
@@ -373,10 +376,8 @@ private:
   TTF_Font *m_font_ptr;
   Env &m_env; // cache envinronment
 
-  inline Glyph& get_glyph_at(size_t index) {
-    return m_glyphs.at(index - ' ');
-  }
-  
+  inline Glyph &get_glyph_at(size_t index) { return m_glyphs.at(index - ' '); }
+
   void loadTextureVector();
 
   // prevent to call cons, use friend function instead
@@ -387,7 +388,7 @@ public:
   int render(int x_o, int y_o, const char *str);
   // same as above but for std::string
   int render(int x_o, int y_o, std::string &str);
-  int renderf(int x_o, int y_o, const char *fmt, ...);  
+  int renderf(int x_o, int y_o, const char *fmt, ...);
   int get_width(const char *str);
 
   inline decltype(m_font_height) get_height() { return m_font_height; }

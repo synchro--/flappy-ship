@@ -66,14 +66,14 @@ void SmartWindow::setupViewport() { glViewport(0, 0, m_width, m_height); }
 void SmartWindow::show() { SDL_ShowWindow(m_win); }
 
 void SmartWindow::refresh() {
+  // wait for it
   glFinish();
   SDL_GL_SwapWindow(m_win);
 }
 
-// Sets the world coordinates (x,y) to map into the screen coordinates,
-// then calls fn(), cleans up after.
-// remember to reset projection afterwards if it's still needed.
-void SmartWindow::draw_on_pixels(std::function<void ()> fn) {
+// Set the world coords to map into the screen
+// Accepts a function fn to be executed afterwards
+void SmartWindow::printOnScreen(std::function<void()> fn) {
   glDisable(GL_LIGHTING);
   glDisable(GL_DEPTH_TEST);
 
@@ -82,9 +82,7 @@ void SmartWindow::draw_on_pixels(std::function<void ()> fn) {
 
   glMatrixMode(GL_MODELVIEW);
 
-  // It's important to create a new scope here; otherwise, we're just erasing
-  // the old matrix.
-  m_env.mat_scope([&]{
+  m_env.mat_scope([&] {
     glLoadIdentity();
 
     glTranslatef(-1, -1, 0);
@@ -98,39 +96,31 @@ void SmartWindow::draw_on_pixels(std::function<void ()> fn) {
   glEnable(GL_LIGHTING);
 }
 
-// QUESTI DA CAMBIARE, SENZA USARE LE LAMBDA POSSIBILMENTE
 
-// executes fn() in pixel coordinates mode, after coloring the whole window
-// with a solid color c.
-/*
-void SmartWindow::color_whole_area(const Color& c, std::function<void()> fn) {
-  draw_on_pixels([&]{
-    glColor3f(c.r, c.g, c.b);
+// color the whole window with a solid Color
+void SmartWindow::colorWindow(const Color& color) {
+    glColor3f(color.r, color.g, color.b);
 
     glBegin(GL_POLYGON);
     {
       glVertex2f(0.0f, 0.0f);
 
-      glVertex2f(width, 0.0f);
+      glVertex2f(m_width, 0.0f);
 
-      glVertex2f(width, height);
+      glVertex2f(m_width, m_height);
 
-      glVertex2f(0.0f, height);
+      glVertex2f(0.0f, m_height);
     }
     glEnd();
-
-    fn();
-  });
 }
 
 
-// Like color_whole_area() but with a texture. Useful to show images.
-void SmartWindow::texture_whole_area(TexID t, std::function<void()> fn) {
-  draw_on_pixels([&]{
+// Apply a texture on the whole window to show a background image 
+void SmartWindow::textureWindow(TexID texbind) {
     glColor3f(1.0f, 1.0f, 1.0f);
 
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, t);
+    glBindTexture(GL_TEXTURE_2D, texbind);
 
     glBegin(GL_POLYGON);
     {
@@ -138,20 +128,17 @@ void SmartWindow::texture_whole_area(TexID t, std::function<void()> fn) {
       glVertex2f(0.0f, 0.0f);
 
       glTexCoord2f(1.0f, 0.0f);
-      glVertex2f(width, 0.0f);
+      glVertex2f(m_width, 0.0f);
 
       glTexCoord2f(1.0f, 1.0f);
-      glVertex2f(width, height);
+      glVertex2f(m_width, m_height);
 
       glTexCoord2f(0.0f, 1.0f);
-      glVertex2f(0.0f, height);
+      glVertex2f(0.0f, m_height);
     }
     glEnd();
 
     glDisable(GL_TEXTURE_2D);
-
-    fn();
-  }); 
-}*/ 
+}
 
 } // namespace agl

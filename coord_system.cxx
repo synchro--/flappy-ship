@@ -12,8 +12,8 @@ std::pair<float, float> genCoord2D(uint8_t quadrant) {
   int angle = quadrant * 90;            // base angle related to the quadrant
   angle += ((int)dist(mt) % (int)91.0); // random angle between 0-90
   angle *= M_PI / 180.0f;               // convert to Rads
-  float d = dist(mt) +
-            30.0f; // always choose a distane at least at distance 30 from (0,0)
+  float d =
+      dist(mt) + 30.0f; // always choose a distance at least at 30 from (0,0)
 
   // return the pair of coordinates
   return {

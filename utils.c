@@ -228,6 +228,18 @@ case SDL_MOUSEWHEEL:
   break;
 
 
+
+  // OLD HEAD UP DISPLAY 
+  glBegin(GL_QUADS);
+    float y = m_main_win->m_height * m_env.get_fps() / 100;
+    float ramp = m_env.get_fps() / 100;
+    glColor3f(1 - ramp, 0, ramp);
+    glVertex2d(10, 0);
+    glVertex2d(10, y);
+    glVertex2d(0, y);
+    glVertex2d(0, 0);
+  glEnd();
+  
   //--------------- JOYSTICK HANDLING ------------------------ // 
 /*
        case SDL_JOYAXISMOTION: // Handle Joystick Motion

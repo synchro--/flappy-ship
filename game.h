@@ -19,6 +19,7 @@ private:
   State m_state;
   bool m_game_started;
   bool m_restart_game;
+  bool m_victory;
   int m_camera_type;
   float m_eye_dist, m_view_alpha, m_view_beta;
   double m_deadline_time; // fps currently drawn
@@ -34,6 +35,7 @@ private:
   std::unique_ptr<elements::Spaceship> m_ssh;
   elements::Floor *m_floor;
   elements::Sky *m_sky;
+  agl::TexID m_splash_tex, m_menu_tex, m_win_tex, m_lost_tex; 
 
   // Ring stuff
   std::vector<elements::Ring> m_rings;
@@ -46,22 +48,30 @@ private:
 
   void setupShipCamera();
   void changeState(game::State state);
-  void gameAction();
-  void gameOnKey(game::Key, bool pressed);
-  void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
-  void gameRender();
-  // set the callbacks to the game functions
-  void playGame();
-
-  void init_rings();
-  void init_cubes();
-  void init();
-  // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
-  void drawHUD();
-
   inline void change_camera_type() {
     m_camera_type = (m_camera_type + 1) % CAMERA_TYPE_MAX;
   }
+  void gameAction();
+  void gameMenu();
+  void gameOnKey(game::Key, bool pressed);
+  void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
+  void gameOver();
+  void gameRender();
+  void splashRender();
+
+  // callback setters according to the state of the game
+  void playGame();
+  void splash(); 
+
+  // initialization functions for rings, cubes and game
+  void init_rings();
+  void init_cubes();
+  void init();
+
+  // Draw the Minimap with all the current rings
+  void drawMiniMap();
+  // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
+  void drawHUD();
 
 public:
   Game(std::string gameID, size_t num_rings); // constructor
