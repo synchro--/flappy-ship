@@ -29,7 +29,11 @@ private:
   // environment
   agl::Env &m_env;
   std::unique_ptr<agl::SmartWindow> m_main_win;
-  agl::AGLTextRenderer *m_text_renderer;
+  // agl::AGLTextRenderer *m_text_renderer;
+  // agl::AGLTextRenderer *m_text_big; 
+  std::unique_ptr<agl::AGLTextRenderer> m_text_renderer; 
+  std::unique_ptr<agl::AGLTextRenderer> m_text_big;   
+
 
   // various elements
   std::unique_ptr<elements::Spaceship> m_ssh;
@@ -57,7 +61,7 @@ private:
   void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
   void gameOver();
   void gameRender();
-  void splashRender();
+  void drawSplash();
 
   // callback setters according to the state of the game
   void playGame();

@@ -396,13 +396,16 @@ public:
   // quit gracefully
   virtual ~AGLTextRenderer();
   // return singleton instance
-  friend AGLTextRenderer *getTextRenderer(const char *font_path,
+  // friend AGLTextRenderer *getTextRenderer(const char *font_path,
+  //                                         size_t font_size);
+  friend std::unique_ptr<AGLTextRenderer> getTextRenderer(const char *font_path,
                                           size_t font_size);
 };
 
-// singleton loader
-AGLTextRenderer *getTextRenderer(const char *font_path, size_t font_size);
 
+// AGLTextRenderer *getTextRenderer(const char *font_path, size_t font_size);
+std::unique_ptr<AGLTextRenderer> getTextRenderer(const char *font_path,
+                                          size_t font_size);
 } // namespace agl
 
 #endif // AGL_H_

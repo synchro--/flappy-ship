@@ -8,20 +8,14 @@ Glyph::Glyph(char letter, TexID textureID, GLubyte minx, GLubyte maxx,
     : m_letter(letter), m_texID(textureID), m_minx(minx), m_miny(miny),
       m_maxx(maxx), m_maxy(maxy), m_advance(advance) {}
 
-// TextRenderer: return the singleton instance
-AGLTextRenderer *getTextRenderer(const char *font_path, size_t font_size) {
+// TextRenderer: return unique pointer referring to a font wt specific size
+std::unique_ptr<AGLTextRenderer> getTextRenderer(const char *font_path, size_t font_size) {
   const static auto TAG = __func__;
   lg::i(TAG, "Creating a text renderer, loading the font %s with size %zu",
         font_path, font_size);
 
-  // having a unique ptr ensures the TextRenderer will be called only during the
-  // main
-  static std::unique_ptr<AGLTextRenderer> s_ptr(nullptr);
-  if (!s_ptr) {
-    s_ptr.reset(new AGLTextRenderer(font_path, font_size));
-  }
-
-  return s_ptr.get();
+  return std::unique_ptr<AGLTextRenderer>(new AGLTextRenderer(font_path, 
+    font_size));
 }
 
 AGLTextRenderer::AGLTextRenderer(const char *font_path, size_t font_size)

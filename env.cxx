@@ -361,7 +361,7 @@ void Env::drawSquare(const float side) {
 void Env::drawTorus(double r, double R) {
   const static int NUM_C = 50;
   // number of vertex that approximates the circular ring shape
-  const static int NUM_VERTEX_APPROX = 15;
+  const static int NUM_VERTEX_APPROX = 35;
   // length of the perimeter of the ring
   const static double RING_PERIMETER = 2.0 * M_PI;
   double s, t, x, y, z;
@@ -531,7 +531,7 @@ void Env::setupPersp() {
 }
 
 // Helper function to draw textured objects
-// Accepts a lambda as a drawing function to be called afte the texture
+// Accepts a lambda as a drawing function to be called after the texture
 // is applied.
 void Env::textureDrawing(TexID texbind, std::function<void()> callback,
                          bool gen_coordinates) {

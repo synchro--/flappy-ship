@@ -71,6 +71,7 @@ void SmartWindow::refresh() {
   SDL_GL_SwapWindow(m_win);
 }
 
+// Helper function: 
 // Set the world coords to map into the screen
 // Accepts a function fn to be executed afterwards
 void SmartWindow::printOnScreen(std::function<void()> fn) {
@@ -99,6 +100,7 @@ void SmartWindow::printOnScreen(std::function<void()> fn) {
 
 // color the whole window with a solid Color
 void SmartWindow::colorWindow(const Color& color) {
+  printOnScreen([&]{ 
     glColor3f(color.r, color.g, color.b);
 
     glBegin(GL_POLYGON);
@@ -112,13 +114,14 @@ void SmartWindow::colorWindow(const Color& color) {
       glVertex2f(0.0f, m_height);
     }
     glEnd();
+  });  
 }
 
 
 // Apply a texture on the whole window to show a background image 
 void SmartWindow::textureWindow(TexID texbind) {
+  printOnScreen([&] {
     glColor3f(1.0f, 1.0f, 1.0f);
-
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texbind);
 
@@ -137,8 +140,9 @@ void SmartWindow::textureWindow(TexID texbind) {
       glVertex2f(0.0f, m_height);
     }
     glEnd();
-
+    
     glDisable(GL_TEXTURE_2D);
+  });    
 }
 
 } // namespace agl

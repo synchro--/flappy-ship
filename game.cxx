@@ -6,7 +6,7 @@ namespace game {
 Game::Game(std::string gameID, size_t num_rings)
     : m_gameID(gameID), m_state(State::SPLASH), m_camera_type(CAMERA_BACK_CAR),
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0), m_victory(false),
-      m_game_started(false), m_deadline_time(RING_TIME), m_last_time(.0),
+      m_game_started(false), m_deadline_time(0.0), m_last_time(.0),
       m_penalty_time(0.0), m_num_rings(num_rings), m_cur_ring_index(0),
       m_env(agl::get_env()), m_num_cubes(10), m_main_win(nullptr),
       m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
@@ -26,7 +26,8 @@ void Game::init() {
   m_ssh =
       elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
   m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 30);
-  m_splash_tex = m_env.loadTexture("Texture/splash.jpg");
+  m_text_big = agl::getTextRenderer("Fonts/neuropol.ttf", 72);
+  m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
 
   m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
                spaceship::ENVOS_SCALE);
@@ -150,27 +151,6 @@ void Game::gameAction() {
   }
 }
 
-void Game::splash() {
-  m_env.set_render(std::bind(&Game::splashRender, this));
-
-}
-
-// Load a texture image to be shown as a Splash screen
-void Game::splashRender() {
-
-  std::string title = "Truman Escape"; 
-  std::string subtitle = "Press Enter to start";
-  const static auto X_O = m_main_win->m_width - 850; 
-  const static auto Y_O = m_main_win->m_height - 50; 
-  m_main_win->textureWindow(m_splash_tex); 
-  m_main_win->printOnScreen([&]{
-    m_env.setColor(agl::WHITE); 
-    m_text_renderer->render(X_O, Y_O, title); 
-    m_text_renderer->render(X_O, Y_O+200, subtitle); 
-  }); 
-
-
-}
 
 void Game::init_rings() {
   m_rings.clear();
