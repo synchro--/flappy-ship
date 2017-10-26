@@ -222,11 +222,13 @@ public:
   void setColor(const Color &color);
 
   // drawing functions
+  void drawCircle(double cx, double cy, double radius);
   void drawCubeFill(const float side);
   void drawCubeWire(const float side);
   void drawCube(const float side);
   void drawFloor(TexID texbind, float sz, float height, size_t num_quads);
   void drawPlane(float sz, float height, size_t num_quads);
+  void drawPoint(double x, double y);
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
   void drawSquare(const float side);
