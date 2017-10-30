@@ -77,11 +77,55 @@ void Game::changeState(game::State next_state) {
   }
 }
 
+
+void Game::drawMiniMap() {
+    // coords
+    const auto X_O = m_main_win->m_width - 835;
+    const auto Y_O = m_main_win->m_height - 500;
+
+    // draw on pixel coords
+    m_main_win->printOnScreen([&]{
+        // draw circle
+        float map_radius = 50.0f;
+        float ratio = map_radius / 100.0f; // sky-to-minimap radius ratio
+        m_env.drawCircle(X_O, Y_O, map_radius);
+
+        // draw spaceship dot
+        float dot_radius = 3.0f;
+        m_env.setColor(agl::BLACK);
+        float ship_x = m_ssh->x() * ratio;
+        float ship_y = m_ssh->z() * ratio;
+        m_env.drawCircle(X_O-ship_x, Y_O-ship_y, dot_radius);
+
+        // draw ring dots
+        for(size_t i = 0; i < m_cur_ring_index+1; ++i) {
+
+            auto ring = m_rings.at(i);
+            m_env.setColor(ring.isTriggered() ? agl::RED : agl::GREEN);
+            float ring_x = ring.x() * ratio;
+            float ring_y = ring.z() * ratio;
+            m_env.drawCircle(X_O-ring_x, Y_O-ring_y, dot_radius);
+        }
+
+
+        // draw badcubes dots
+        for(size_t i = 0; i < m_num_cubes; ++i) {
+            auto cube = m_cubes.at(i);
+            m_env.setColor(agl::YELLOW);
+            float cube_x = cube.x() * ratio;
+            float cube_y = cube.z() * ratio;
+         //   m_env.drawCircle(X_O-cube_x, Y_O-cube_y, dot_radius);
+        }
+
+        // facultative: draw even the bad cubes
+    });
+}
+
 // draw a simple HeadUP Display
 void Game::drawHUD() {
   auto fps = m_env.get_fps();
-  auto X_O = m_main_win->m_width - 850;
-  auto Y_O = m_main_win->m_height - 50;
+  const auto X_O = m_main_win->m_width - 850;
+  const auto Y_O = m_main_win->m_height - 50;
   const static auto offset = 280;
 
   // draw data on the window
@@ -95,7 +139,7 @@ void Game::drawHUD() {
   });
 
   // draw minimap
-  // drawMinimap();
+  drawMiniMap();
 }
 
 void Game::gameAction() {
@@ -116,9 +160,6 @@ void Game::gameAction() {
     m_deadline_time -= diff;
     // if a penalty has been triggered, compute its remaining time
     m_penalty_time = m_penalty_time > 0.0 ? (m_penalty_time - 100) : 0.0;
-
-    lg::i(__func__, "Time left: %f %f", (m_deadline_time / 1000.0),
-          m_penalty_time / 1000.0);
     m_last_time = time_now;
 
     if (m_deadline_time < 0) { // let's leave a last second hope
