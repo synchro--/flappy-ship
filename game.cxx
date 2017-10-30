@@ -6,10 +6,10 @@ namespace game {
 Game::Game(std::string gameID, size_t num_rings)
     : m_gameID(gameID), m_state(State::SPLASH), m_camera_type(CAMERA_BACK_CAR),
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0), m_victory(false),
-      m_game_started(false), m_deadline_time(0.0), m_last_time(.0),
-      m_penalty_time(0.0), m_num_rings(num_rings), m_cur_ring_index(0),
-      m_env(agl::get_env()), m_num_cubes(10), m_main_win(nullptr),
-      m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
+      m_flappy3D(false), m_game_started(false), m_deadline_time(0.0),
+      m_last_time(.0), m_penalty_time(0.0), m_num_rings(num_rings),
+      m_cur_ring_index(0), m_env(agl::get_env()), m_num_cubes(10),
+      m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
 
 /*
  * Init the game:
@@ -44,27 +44,28 @@ void Game::changeState(game::State next_state) {
     return;
 
   switch (next_state) {
-   case State::SPLASH:
+  case State::SPLASH:
     if ((!m_game_started) || (m_state == State::MENU && m_restart_game)) {
       m_state = next_state;
       splash();
     }
     break;
 
-   case State::MENU: 
-    if(m_state == State::GAME) {
-    m_state = next_state;
-    // gameMenu();
-  } break;
+  case State::MENU:
+    if (m_state == State::GAME) {
+      m_state = next_state;
+      // gameMenu();
+    }
+    break;
 
-   case State::GAME:
+  case State::GAME:
     if (m_state == State::SPLASH || m_state == State::MENU) {
       m_state = next_state;
       playGame();
     }
     break;
 
-   case State::END:
+  case State::END:
     if (m_state == State::GAME) {
       m_state = next_state;
       // gameOver();
@@ -150,7 +151,6 @@ void Game::gameAction() {
     }
   }
 }
-
 
 void Game::init_rings() {
   m_rings.clear();
@@ -377,7 +377,7 @@ void Game::run() {
   init();
 
   splash();
-  //playGame();
+  // playGame();
 
   m_env.renderLoop();
 }

@@ -316,8 +316,8 @@ public:
   void setupViewport();
   void show();
   void printOnScreen(std::function<void()> fn);
-  void colorWindow(const Color& color); 
-  void textureWindow(TexID texbind); 
+  void colorWindow(const Color &color);
+  void textureWindow(TexID texbind);
 };
 
 /* __FONTS__
@@ -399,13 +399,12 @@ public:
   // friend AGLTextRenderer *getTextRenderer(const char *font_path,
   //                                         size_t font_size);
   friend std::unique_ptr<AGLTextRenderer> getTextRenderer(const char *font_path,
-                                          size_t font_size);
+                                                          size_t font_size);
 };
-
 
 // AGLTextRenderer *getTextRenderer(const char *font_path, size_t font_size);
 std::unique_ptr<AGLTextRenderer> getTextRenderer(const char *font_path,
-                                          size_t font_size);
+                                                 size_t font_size);
 } // namespace agl
 
 #endif // AGL_H_

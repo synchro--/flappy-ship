@@ -17,29 +17,31 @@ private:
   // variables
   std::string m_gameID;
   State m_state;
+
   bool m_game_started;
   bool m_restart_game;
   bool m_victory;
+  
+  // special var for 3D flight, it affects the whole game
+  bool m_flappy3D; 
+
   int m_camera_type;
   float m_eye_dist, m_view_alpha, m_view_beta;
-  double m_deadline_time; // fps currently drawn
-  uint32_t m_penalty_time;
-  uint32_t m_last_time;
+  
+  double m_deadline_time; 
+  uint32_t m_penalty_time, m_last_time; 
 
   // environment
   agl::Env &m_env;
   std::unique_ptr<agl::SmartWindow> m_main_win;
-  // agl::AGLTextRenderer *m_text_renderer;
-  // agl::AGLTextRenderer *m_text_big; 
-  std::unique_ptr<agl::AGLTextRenderer> m_text_renderer; 
-  std::unique_ptr<agl::AGLTextRenderer> m_text_big;   
-
+  std::unique_ptr<agl::AGLTextRenderer> m_text_renderer;
+  std::unique_ptr<agl::AGLTextRenderer> m_text_big;
 
   // various elements
   std::unique_ptr<elements::Spaceship> m_ssh;
   elements::Floor *m_floor;
   elements::Sky *m_sky;
-  agl::TexID m_splash_tex, m_menu_tex, m_win_tex, m_lost_tex; 
+  agl::TexID m_splash_tex, m_menu_tex, m_win_tex, m_lost_tex;
 
   // Ring stuff
   std::vector<elements::Ring> m_rings;
@@ -50,36 +52,45 @@ private:
   std::vector<elements::BadCube> m_cubes;
   size_t m_num_cubes;
 
+  struct Setting {
+    char * name; 
+    char * 
+  }
+
+  // methods 
   void setupShipCamera();
   void changeState(game::State state);
   inline void change_camera_type() {
     m_camera_type = (m_camera_type + 1) % CAMERA_TYPE_MAX;
   }
+
+  // Draw the Minimap with all the current rings
+  void drawMiniMap();
+  // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
+  void drawHUD();
+  void drawSplash();
+
   void gameAction();
   void gameMenu();
   void gameOnKey(game::Key, bool pressed);
   void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
   void gameOver();
   void gameRender();
-  void drawSplash();
 
-  // callback setters according to the state of the game
+  // callback setters: change handlers according to the state of the game
+  void openMenu();
   void playGame();
-  void splash(); 
+  void splash();
 
   // initialization functions for rings, cubes and game
   void init_rings();
   void init_cubes();
   void init();
 
-  // Draw the Minimap with all the current rings
-  void drawMiniMap();
-  // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
-  void drawHUD();
-
 public:
   Game(std::string gameID, size_t num_rings); // constructor
   void run();
 };
+
 } // namespace game
 #endif // GAME_H_
