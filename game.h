@@ -21,15 +21,15 @@ private:
   bool m_game_started;
   bool m_restart_game;
   bool m_victory;
-  
+
   // special var for 3D flight, it affects the whole game
-  bool m_flappy3D; 
+  bool m_flappy3D;
 
   int m_camera_type;
   float m_eye_dist, m_view_alpha, m_view_beta;
-  
-  double m_deadline_time; 
-  uint32_t m_penalty_time, m_last_time; 
+
+  double m_deadline_time, m_player_time;
+  uint32_t m_penalty_time, m_last_time;
 
   // environment
   agl::Env &m_env;
@@ -53,11 +53,12 @@ private:
   size_t m_num_cubes;
 
   struct Setting {
-    char * name; 
-    char * 
-  }
+    char *name;
+    char *on_txt;
+    char *off_txt;
+  };
 
-  // methods 
+  // methods
   void setupShipCamera();
   void changeState(game::State state);
   inline void change_camera_type() {
@@ -68,7 +69,9 @@ private:
   void drawMiniMap();
   // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
   void drawHUD();
+  void drawRanking();
   void drawSplash();
+  void updateRanking();
 
   void gameAction();
   void gameMenu();

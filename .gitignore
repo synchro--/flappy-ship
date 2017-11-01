@@ -74,6 +74,7 @@ target_wrapper.*
 
 # QtCreator
 *.autosave
+Game*
 
 # QtCtreator CMake
 CMakeLists.txt.user*

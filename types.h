@@ -54,6 +54,8 @@ namespace game {
 static const auto RING_TIME = 7000U;
 static const auto BONUS_TIME = 4000U;
 
+using Entry = std::pair<std::string, double>;
+
 enum State { SPLASH, MENU, GAME, SETTINGS, END };
 enum Key {
   W,

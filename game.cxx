@@ -18,7 +18,7 @@ Game::Game(std::string gameID, size_t num_rings)
  */
 void Game::init() {
   std::string win_name = "Main Window";
-  m_main_win = m_env.createWindow(win_name, 0, 0, m_env.get_win_width(),
+  m_main_win = m_env.createWindow(win_name, 100, 0, m_env.get_win_width(),
                                   m_env.get_win_height());
   m_main_win->show();
   m_floor = elements::get_floor("Texture/tex1.jpg");
@@ -28,6 +28,7 @@ void Game::init() {
   m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 30);
   m_text_big = agl::getTextRenderer("Fonts/neuropol.ttf", 72);
   m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
+  m_menu_tex = m_env.loadTexture("Texture/menu.jpg");
 
   m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
                spaceship::ENVOS_SCALE);
@@ -68,78 +69,14 @@ void Game::changeState(game::State next_state) {
   case State::END:
     if (m_state == State::GAME) {
       m_state = next_state;
-      // gameOver();
+      gameOver();
     }
+    break;
 
   default:
     // shoudln't arrive here
     lg::e(TAG, "Game status not recognized");
   }
-}
-
-
-void Game::drawMiniMap() {
-    // coords
-    const auto X_O = m_main_win->m_width - 835;
-    const auto Y_O = m_main_win->m_height - 500;
-
-    // draw on pixel coords
-    m_main_win->printOnScreen([&]{
-        // draw circle
-        float map_radius = 50.0f;
-        float ratio = map_radius / 100.0f; // sky-to-minimap radius ratio
-        m_env.drawCircle(X_O, Y_O, map_radius);
-
-        // draw spaceship dot
-        float dot_radius = 3.0f;
-        m_env.setColor(agl::BLACK);
-        float ship_x = m_ssh->x() * ratio;
-        float ship_y = m_ssh->z() * ratio;
-        m_env.drawCircle(X_O-ship_x, Y_O-ship_y, dot_radius);
-
-        // draw ring dots
-        for(size_t i = 0; i < m_cur_ring_index+1; ++i) {
-
-            auto ring = m_rings.at(i);
-            m_env.setColor(ring.isTriggered() ? agl::RED : agl::GREEN);
-            float ring_x = ring.x() * ratio;
-            float ring_y = ring.z() * ratio;
-            m_env.drawCircle(X_O-ring_x, Y_O-ring_y, dot_radius);
-        }
-
-
-        // draw badcubes dots
-        for(size_t i = 0; i < m_num_cubes; ++i) {
-            auto cube = m_cubes.at(i);
-            m_env.setColor(agl::YELLOW);
-            float cube_x = cube.x() * ratio;
-            float cube_y = cube.z() * ratio;
-         //   m_env.drawCircle(X_O-cube_x, Y_O-cube_y, dot_radius);
-        }
-
-        // facultative: draw even the bad cubes
-    });
-}
-
-// draw a simple HeadUP Display
-void Game::drawHUD() {
-  auto fps = m_env.get_fps();
-  const auto X_O = m_main_win->m_width - 850;
-  const auto Y_O = m_main_win->m_height - 50;
-  const static auto offset = 280;
-
-  // draw data on the window
-  m_main_win->printOnScreen([&] {
-    m_env.setColor(agl::WHITE);
-    m_text_renderer->renderf(X_O, Y_O, "FPS:%2.1f", fps);
-    m_text_renderer->renderf(X_O + offset, Y_O, "TIME:%2.1fS",
-                             (m_deadline_time / 1000.0));
-    m_text_renderer->renderf(X_O + 2 * offset, Y_O, "RINGS: %d/%d",
-                             m_cur_ring_index, m_num_rings);
-  });
-
-  // draw minimap
-  drawMiniMap();
 }
 
 void Game::gameAction() {
@@ -164,11 +101,11 @@ void Game::gameAction() {
 
     if (m_deadline_time < 0) { // let's leave a last second hope
       m_victory = false;
-      // changeState(State::END);
+      changeState(State::END);
     }
   }
 
-  auto &current_ring = m_rings[m_cur_ring_index];
+  auto &current_ring = m_rings.at(m_cur_ring_index);
   // check se gli anelli sono stati attraversati
   // spawn nuovo anello + bonus time || crea porta finale (time diventa rosso)
   current_ring.checkCrossing(m_ssh->x(), m_ssh->z());
@@ -177,10 +114,13 @@ void Game::gameAction() {
 
   if (ring_crossed) {
     m_deadline_time += game::RING_TIME;
-    if (++m_cur_ring_index == m_num_rings) {
+    m_cur_ring_index++;
+    if (m_cur_ring_index >= m_num_rings) {
+      // victory: change state and save time for ranking
       lg::i(__func__, "GAME END!!");
       m_victory = true;
-      // changeState(State::END);
+      m_player_time = m_env.getTicks();
+      changeState(State::END);
     }
   }
 
@@ -290,6 +230,7 @@ void Game::gameOnKey(Key key, bool pressed) {
     if (!m_game_started) {
       m_game_started = true;
       m_last_time = m_env.getTicks();
+      m_player_time = m_env.getTicks();
       m_deadline_time = game::RING_TIME;
     }
 
@@ -366,7 +307,7 @@ void Game::gameRender() {
 
   // rings: render till the first ring that's not triggered yet
   for (size_t i = 0; i < m_num_rings; ++i) {
-    auto &ring = m_rings[i];
+    auto &ring = m_rings.at(i);
     ring.render();
 
     if (!ring.isTriggered()) {

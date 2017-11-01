@@ -1,5 +1,13 @@
 #include "log.h"
 
+#include <cstdarg>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <unistd.h>
+#include <vector>
+
 namespace lg {
 
 const char *level_to_str(Level lv) {
@@ -95,6 +103,61 @@ void Logger::panic(const char *tag, const char *fmt, ...) {
   vpanic(tag, fmt, ap);
 }
 
+// log formatted text appending it to the specified file
+void Logger::append(const char *tag, const char *file_name, const char *fmt,
+                    ...) {
+  std::va_list ap;
+  va_start(ap, fmt);
+  char *str = nullptr;
+  // let's just call vasprintf
+  vasprintf(&str, fmt, ap);
+
+  std::ofstream outfile;
+
+  outfile.open(file_name, std::ios_base::app);
+  outfile << tag << ':' << str;
+  // free the pointer dude
+  std::free(str);
+  va_end(ap);
+}
+
+// std::string version
+void Logger::append(const char *tag, const char *file_name, std::string &str) {
+  std::ofstream outfile;
+  outfile.open(file_name, std::ios_base::app);
+  outfile << tag << ':' << str;
+}
+
+std::vector<game::Entry> Logger::readRankingData(const char *file_name) {
+  std::vector<game::Entry> ret;
+  std::ifstream infile(file_name);
+  std::string name;
+  double time;
+
+  while (infile >> name >> time) {
+    ret.emplace(ret.begin(), std::make_pair(name, time));
+  }
+
+  return ret;
+}
+
+void Logger::logRanking(const char *file_name,
+                        const std::vector<game::Entry> &data) {
+  const static auto MAX_ENTRIES = 5;
+  std::ofstream outfile;
+  outfile.open(file_name, std::ofstream::trunc);
+
+  for (auto &entry : data) {
+    std::ostringstream oss;
+    oss << entry.first << " " << entry.second << std::endl;
+    outfile << oss.str();
+    std::cout << oss.str();
+  }
+}
+
+// *************** //
+// Global Instance //
+
 static Logger s_logger;
 
 Logger &global() { return s_logger; }
@@ -138,4 +201,23 @@ void panic(const char *tag, const char *fmt, ...) {
 
   s_logger.vpanic(tag, fmt, ap);
 }
+
+// log formatted text appending it to the specified file
+void append(const char *tag, const char *file_name, const char *fmt, ...) {
+  s_logger.append(tag, file_name, fmt);
+}
+
+// std::string version
+void append(const char *tag, const char *file_name, std::string &str) {
+  s_logger.append(tag, file_name, str);
+}
+
+std::vector<game::Entry> readRankingData(const char *file_name) {
+  return s_logger.readRankingData(file_name);
+}
+
+void logRanking(const char *file_name, const std::vector<game::Entry> &data) {
+  s_logger.logRanking(file_name, data);
+}
+
 } // namespace lg

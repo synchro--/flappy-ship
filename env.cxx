@@ -136,20 +136,18 @@ std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x,
 
 // draw a circle
 void Env::drawCircle(double cx, double cy, double radius) {
-        const static auto N_SEGMENTS = 25;
+  const static auto N_SEGMENTS = 25;
 
-        glBegin(GL_TRIANGLE_FAN);
-        for(int i = 0; i < N_SEGMENTS; ++i)
-        {
-            float theta = 2.0f * M_PI * float(i) / float(N_SEGMENTS); // current angle
+  glBegin(GL_TRIANGLE_FAN);
+  for (int i = 0; i < N_SEGMENTS; ++i) {
+    float theta = 2.0f * M_PI * float(i) / float(N_SEGMENTS); // current angle
 
-            float x = radius * cosf(theta); //calculate the x component
-            float y = radius * sinf(theta); //calculate the y component
+    float x = radius * cosf(theta); // calculate the x component
+    float y = radius * sinf(theta); // calculate the y component
 
-            glVertex2f(x + cx, y + cy); //output vertex
-
-        }
-        glEnd();
+    glVertex2f(x + cx, y + cy); // output vertex
+  }
+  glEnd();
 }
 
 // draw a cube rasterizing quads
@@ -307,11 +305,11 @@ void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
 }
 
 void Env::drawPoint(double x, double y) {
- //   glClear ( GL_COLOR_BUFFER_BIT ); //clear pixel buffer
-    glBegin(GL_POINTS); // render with points
-    glVertex2i(x, y);   // display a point
-    glEnd();
-    glFlush();
+  //   glClear ( GL_COLOR_BUFFER_BIT ); //clear pixel buffer
+  glBegin(GL_POINTS); // render with points
+  glVertex2i(x, y);   // display a point
+  glEnd();
+  glFlush();
 }
 
 // hint: should be TexID, 100.0, 20.0, 20.0 --> see Sky constructor

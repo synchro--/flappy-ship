@@ -25,6 +25,7 @@ Texture/tex2.jpg
 Texture/truman-texture.jpg
 Texture/truman.jpg
 Texture/wood1.jpg
+UI.cxx
 agl.h
 coord_system.cxx
 coord_system.h
@@ -37,7 +38,6 @@ game.h
 log.cxx
 log.h
 main.cxx
-menu.cxx
 mesh.cxx
 point.cxx
 render_loop.cxx

@@ -264,6 +264,7 @@ public:
   // compute the FPS and Renders!
   void render();
   void renderLoop();
+  void quitLoop();
 
   void rotate(float angle, const Vec3 &axis);
   void scale(float scale_x, float scale_y, float scale_z);
