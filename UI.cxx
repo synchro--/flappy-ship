@@ -101,6 +101,17 @@ void Game::drawHUD() {
   drawMiniMap();
 }
 
+void Game::renderMenu() {
+  // draw texture 
+  // draw menu options 
+  //  - if option is chosen color Yellow 
+  
+  m_main_win->textureWindow(m_menu_tex); 
+  m_main_win->printOnScreen([&] {
+    
+  });
+}
+
 // read ranking.txt file, sort players time and log it
 void Game::updateRanking() {
   // gather ranking data

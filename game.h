@@ -52,12 +52,6 @@ private:
   std::vector<elements::BadCube> m_cubes;
   size_t m_num_cubes;
 
-  struct Setting {
-    char *name;
-    char *on_txt;
-    char *off_txt;
-  };
-
   // methods
   void setupShipCamera();
   void changeState(game::State state);
