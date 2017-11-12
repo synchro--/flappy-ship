@@ -84,6 +84,7 @@ private:
   void init_cubes();
   void init();
 
+  void restartGame(); 
 public:
   Game(std::string gameID, size_t num_rings); // constructor
   void run();
