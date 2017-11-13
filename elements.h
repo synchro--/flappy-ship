@@ -220,7 +220,6 @@ private:
   // inner logic and physics of the spaceship
   bool get_state(spaceship::Motion mt);
 
-  void init();
   void processCommand();
   void updateFly();
   void updatePosition();
@@ -241,6 +240,9 @@ public:
   inline float x() const { return m_px; }
   inline float y() const { return m_py; }
   inline float z() const { return m_pz; }
+
+  // reset spaceship status
+  void init();
 
   // APIs to interact with the spaceship
   void execute();

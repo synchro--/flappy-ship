@@ -64,6 +64,7 @@ private:
   // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
   void drawHUD();
   void drawRanking();
+  void drawSetting(Setting &sg, size_t Ycoord);
   void drawSplash();
   void updateRanking();
 
@@ -73,6 +74,7 @@ private:
   void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
   void gameOver();
   void gameRender();
+  void renderMenu();
 
   // callback setters: change handlers according to the state of the game
   void openMenu();
@@ -84,7 +86,8 @@ private:
   void init_cubes();
   void init();
 
-  void restartGame(); 
+  void restartGame();
+
 public:
   Game(std::string gameID, size_t num_rings); // constructor
   void run();

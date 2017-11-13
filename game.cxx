@@ -8,7 +8,7 @@ Game::Game(std::string gameID, size_t num_rings)
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0), m_victory(false),
       m_flappy3D(false), m_game_started(false), m_deadline_time(0.0),
       m_last_time(.0), m_penalty_time(0.0), m_num_rings(num_rings),
-      m_env(agl::get_env()), m_num_cubes(10),
+      m_env(agl::get_env()), m_num_cubes(10), m_restart_game(false),
       m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr), m_ssh(nullptr) {}
 
 /*
@@ -63,9 +63,10 @@ void Game::changeState(game::State next_state) {
     if (m_state == State::SPLASH || m_state == State::MENU) {
       m_state = next_state;
       playGame();
-    } else if(m_state == State::END && m_restart_game) {
-      m_restart_game = false; 
-      restartGame(); 
+    } else if (m_state == State::END && m_restart_game) {
+      m_state = next_state;
+      m_restart_game = false;
+      restartGame();
     }
     break;
 
@@ -138,7 +139,7 @@ void Game::gameAction() {
 
 void Game::init_rings() {
   m_rings.clear();
-  m_cur_ring_index = 0; 
+  m_cur_ring_index = 0;
 
   // generate coordinate to place the rings using the coordinate generator
   // see coord_system.h
@@ -356,24 +357,24 @@ void Game::playGame() {
 }
 
 void Game::restartGame() {
-  static const auto TAG = __func__; 
+  static const auto TAG = __func__;
 
-  lg::i(TAG, "Starting NEW game..."); 
+  lg::i(TAG, "Starting NEW game...");
   // handle 3D flight if activated
-  // game vars 
-  m_game_started = false; 
-  m_player_time = 0.0; 
+  // game vars
+  m_game_started = false;
+  m_player_time = m_deadline_time = 0.0;
   m_penalty_time = m_last_time = 0;
-  
-  // camera 
-  m_camera_type = CAMERA_BACK_CAR; 
 
-  // elements 
-  m_ssh->init(); // reset 
-  init_rings(); 
-  init_cubes(); 
-  
-  playGame(); 
+  // camera
+  m_camera_type = CAMERA_BACK_CAR;
+
+  // elements
+  m_ssh->init(); // reset
+  init_rings();
+  init_cubes();
+
+  playGame();
 }
 
 /*
@@ -384,7 +385,7 @@ void Game::run() {
   init();
 
   splash();
-  
+
   m_env.renderLoop();
 }
 

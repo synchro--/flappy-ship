@@ -36,7 +36,7 @@ Spaceship::Spaceship(const char *texture_filename,
 
 void Spaceship::init() {
   // The "Envos" spaceship mesh is huge. Here we set proper re-scaling.
-  m_scaleX = m_scaleY = m_scaleZ = SHUTTLE_SCALE;
+  m_scaleX = m_scaleY = m_scaleZ = ENVOS_SCALE;
 
   m_px = 0.0;
   m_pz = 0.0;

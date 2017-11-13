@@ -53,20 +53,19 @@ namespace game {
 
 static const auto RING_TIME = 7000U;
 static const auto BONUS_TIME = 4000U;
-static const auto N_SETTINGS = 4; 
+static const auto N_SETTINGS = 4;
 
 using Entry = std::pair<std::string, double>;
 
 struct Setting {
-  bool &on; 
-  const char *name; 
-  const char *txt_on; 
+  bool &on;
+  const char *name;
+  const char *txt_on;
   const char *txt_off;
-  
-  Setting(bool &on, const char *name, const char *text_on, const char* text_off) 
-  : on(on), name(name), txt_on(text_on), txt_off(text_off) {}
-  
-}; 
+
+  Setting(bool &on, const char *name, const char *text_on, const char *text_off)
+      : on(on), name(name), txt_on(text_on), txt_off(text_off) {}
+};
 
 enum State { SPLASH, MENU, GAME, SETTINGS, END };
 enum Key {

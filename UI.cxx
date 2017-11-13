@@ -7,7 +7,8 @@ namespace game {
 
 void Game::splash() {
   //  if this is set, then the splash will redraw itself at every cycle,
-  //  pointless m_env.set_render(std::bind(&Game::drawSplash, this));
+  //  pointless
+  // m_env.set_render(std::bind(&Game::drawSplash, this));
   m_env.set_winevent_handler(std::bind(&Game::drawSplash, this));
 
   // modify keydown handler with a small lambda
@@ -101,14 +102,30 @@ void Game::drawHUD() {
   drawMiniMap();
 }
 
-void Game::renderMenu() {
-  // draw texture 
-  // draw menu options 
-  //  - if option is chosen color Yellow 
-  
-  m_main_win->textureWindow(m_menu_tex); 
+// Draw one setting entry
+void Game::drawSetting(Setting &sg, size_t Ycoord) {
+  static const auto OFFSET = 400;
+  const auto Xcoord = m_main_win->m_width - 850;
+  std::string str_onoff;
+
+  str_onoff = (sg.on) ? (std::string("> ") + sg.txt_on + "\t" + sg.txt_off)
+                      : (std::string(sg.txt_on) + "\t" + "> " + sg.txt_off);
+
+  // draw data on the window
   m_main_win->printOnScreen([&] {
-    
+    m_text_renderer->render(Xcoord, Ycoord, sg.name);
+    m_text_renderer->render(Xcoord + OFFSET, Ycoord, str_onoff);
+  });
+}
+
+void Game::renderMenu() {
+  // draw texture
+  // draw menu options
+  //  - if option is chosen color Yellow
+
+  m_main_win->textureWindow(m_menu_tex);
+  m_main_win->printOnScreen([&] {
+
   });
 }
 
@@ -119,7 +136,7 @@ void Game::updateRanking() {
   // sort it with the time of the new winner and log new ranking
   Entry new_entry(m_gameID, m_player_time / 1000.0);
   entries.push_back(new_entry);
-  // sort with a simple lambda
+  // sort with a simple lambda, according to game TIME
   std::sort(entries.begin(), entries.end(), [](const Entry e1, const Entry e2) {
     return e1.second < e2.second;
   });
@@ -129,26 +146,50 @@ void Game::updateRanking() {
 
 // update ranking and set the proper callbacks
 void Game::gameOver() {
+  static const auto TAG = __func__;
+  m_restart_game = false;
   if (m_victory) {
     updateRanking();
   }
-
   // reset handlers that must NOT be used
   m_env.set_keyup_handler();
   m_env.set_action();
   m_env.set_mouse_handler();
+
   // set proper callbacks
   m_env.set_render(std::bind(&Game::drawRanking, this));
   m_env.set_winevent_handler(std::bind(&Game::drawRanking, this));
 
   // modify keydown handler with a small lambda
-  // it's easy: if return is pressed then we enter the game
+  // every time we press UP or DOWN we cycle through restart or quit
+  // changing the bool value accordingly
   m_env.set_keydown_handler([&](Key key) {
-    if (key == Key::RETURN) {
-      // changeState(State::SPLASH);
-      m_env.quitLoop();
+
+    switch (key) {
+    case Key::UP:
+      m_restart_game = !m_restart_game;
+      break;
+
+    case Key::DOWN:
+      m_restart_game = !m_restart_game;
+      break;
+
+    case Key::RETURN:
+      if (m_restart_game) {
+        changeState(State::GAME);
+      } else {
+        m_env.quitLoop();
+      }
+      break;
+
+    default:
+      lg::i(TAG, "Key not recognized");
+      break;
     }
   });
+
+  // first call
+  drawRanking();
 }
 
 // log ranking time and print it to screen
@@ -171,15 +212,19 @@ void Game::drawRanking() {
     size_t todo = MAX_ENTRIES < entries.size() ? MAX_ENTRIES : entries.size();
     for (size_t i = 0; i < todo; ++i) {
       m_text_renderer->render(X_O - 100, Y_O - 100, "RANKING:");
+      // print name
       m_text_renderer->render(X_O + 100, Y_O - OFFSET + (i * INTERVAL),
-                              entries.at(i).first); // name
+                              entries.at(i).first);
+      // print time
       m_text_renderer->renderf(X_O + 200, Y_O - OFFSET + (i * INTERVAL),
-                               ": %2.2f", entries.at(i).second); // time
+                               ": %2.2f", entries.at(i).second);
     }
 
     // restart or quit
-    m_text_renderer->render(X_O - 100, 150, "restart");
-    m_text_renderer->render(780, 150, "quit");
+    std::string restart = m_restart_game ? "> restart" : "restart";
+    std::string quit = m_restart_game ? "quit" : "> quit";
+    m_text_renderer->render(X_O - 100, 150, restart);
+    m_text_renderer->render(780, 150, quit);
   });
 
   // refresh window
