@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 
   // std::string name(argv[1]);
   std::string name("Ciao");
-  size_t num_rings = 3; // debug and dev stage still
+  size_t num_rings = 2; // debug and dev stage still
   game::Game game(name, num_rings);
   game.run();
 

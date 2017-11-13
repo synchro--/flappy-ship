@@ -222,11 +222,13 @@ public:
   void setColor(const Color &color);
 
   // drawing functions
+  void drawCircle(double cx, double cy, double radius);
   void drawCubeFill(const float side);
   void drawCubeWire(const float side);
   void drawCube(const float side);
   void drawFloor(TexID texbind, float sz, float height, size_t num_quads);
   void drawPlane(float sz, float height, size_t num_quads);
+  void drawPoint(double x, double y);
   void drawSky(TexID texbind, double radius, int lats, int longs);
   void drawSphere(double r, int lats, int longs);
   void drawSquare(const float side);
@@ -262,6 +264,7 @@ public:
   // compute the FPS and Renders!
   void render();
   void renderLoop();
+  void quitLoop();
 
   void rotate(float angle, const Vec3 &axis);
   void scale(float scale_x, float scale_y, float scale_z);
@@ -315,7 +318,9 @@ public:
   void refresh();
   void setupViewport();
   void show();
-  void draw_on_pixels(std::function<void ()> fn); 
+  void printOnScreen(std::function<void()> fn);
+  void colorWindow(const Color &color);
+  void textureWindow(TexID texbind);
 };
 
 /* __FONTS__
@@ -358,7 +363,8 @@ public:
   inline decltype(m_maxx) get_maxX() { return m_maxx; }
   inline decltype(m_maxy) get_maxY() { return m_maxy; }
 
-  Glyph(char letter, TexID textureID, GLubyte minx, GLubyte maxx, GLubyte miny, GLubyte maxy, GLubyte advance);
+  Glyph(char letter, TexID textureID, GLubyte minx, GLubyte maxx, GLubyte miny,
+        GLubyte maxy, GLubyte advance);
 };
 
 // Abstract GL TextRenderer
@@ -373,10 +379,8 @@ private:
   TTF_Font *m_font_ptr;
   Env &m_env; // cache envinronment
 
-  inline Glyph& get_glyph_at(size_t index) {
-    return m_glyphs.at(index - ' ');
-  }
-  
+  inline Glyph &get_glyph_at(size_t index) { return m_glyphs.at(index - ' '); }
+
   void loadTextureVector();
 
   // prevent to call cons, use friend function instead
@@ -387,7 +391,7 @@ public:
   int render(int x_o, int y_o, const char *str);
   // same as above but for std::string
   int render(int x_o, int y_o, std::string &str);
-  int renderf(int x_o, int y_o, const char *fmt, ...);  
+  int renderf(int x_o, int y_o, const char *fmt, ...);
   int get_width(const char *str);
 
   inline decltype(m_font_height) get_height() { return m_font_height; }
@@ -395,13 +399,15 @@ public:
   // quit gracefully
   virtual ~AGLTextRenderer();
   // return singleton instance
-  friend AGLTextRenderer *getTextRenderer(const char *font_path,
-                                          size_t font_size);
+  // friend AGLTextRenderer *getTextRenderer(const char *font_path,
+  //                                         size_t font_size);
+  friend std::unique_ptr<AGLTextRenderer> getTextRenderer(const char *font_path,
+                                                          size_t font_size);
 };
 
-// singleton loader
-AGLTextRenderer *getTextRenderer(const char *font_path, size_t font_size);
-
+// AGLTextRenderer *getTextRenderer(const char *font_path, size_t font_size);
+std::unique_ptr<AGLTextRenderer> getTextRenderer(const char *font_path,
+                                                 size_t font_size);
 } // namespace agl
 
 #endif // AGL_H_

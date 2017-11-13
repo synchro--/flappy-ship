@@ -2,11 +2,9 @@
 #define _LOG_H_
 
 #include "types.h"
-
 #include <cstdarg>
-#include <cstdio>
 #include <iostream>
-#include <unistd.h>
+#include <vector>
 
 // pretty simple logging utility with printf-like formatting
 // Levels are: INFO, ERROR, PANIC, defined in typesh
@@ -34,6 +32,12 @@ public:
   void i(const char *tag, const char *fmt, ...);
   void e(const char *tag, const char *fmt, ...);
   void panic(const char *tag, const char *fmt, ...);
+
+  // file I/O
+  void append(const char *tag, const char *file_name, const char *fmt, ...);
+  void append(const char *tag, const char *file_name, std::string &str);
+  std::vector<game::Entry> readRankingData(const char *file_name);
+  void logRanking(const char *file_name, std::vector<game::Entry> const &data);
 };
 
 // return the static global logger instance
@@ -51,6 +55,13 @@ void i(const char *tag, const char *fmt, ...);
 void e(const char *tag, const char *fmt, ...);
 // Panic: GET OUTTA HERE
 void panic(const char *tag, const char *fmt, ...);
+
+// file editing
+void append(const char *file_name, const char *fmt, ...);
+void append(const char *tag, const char *file_name, std::string &str);
+std::vector<game::Entry> readRankingData(const char *file_name);
+void logRanking(const char *file_name, std::vector<game::Entry> const &data);
+
 } // namespace lg
 
 #endif //_LOG_H__

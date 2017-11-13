@@ -36,10 +36,10 @@ Spaceship::Spaceship(const char *texture_filename,
 
 void Spaceship::init() {
   // The "Envos" spaceship mesh is huge. Here we set proper re-scaling.
-  m_scaleX = m_scaleY = m_scaleZ = SHUTTLE_SCALE;
+  m_scaleX = m_scaleY = m_scaleZ = ENVOS_SCALE;
 
-  m_px = 0;
-  m_pz = 0;
+  m_px = 0.0;
+  m_pz = 0.0;
   m_py = 2.0; // Spaceship skills™
 
   m_facing = m_steering = 0.0;
@@ -58,7 +58,7 @@ void Spaceship::init() {
   // small friction on Z-axis
   m_frictionZ = 0.991;
 
-  m_steer_speed = 3.4;   // A
+  m_steer_speed = 3.1;   // A
   m_steer_return = 0.93; // B ==> max steering = A*B / (1-B) == 2.4
 
   m_max_acceleration = FAST_ACC;
@@ -131,7 +131,6 @@ void Spaceship::drawHeadlight(float x, float y, float z, int lightN) const {
   glLightf(usedLight, GL_LINEAR_ATTENUATION, 1);
 }
 
-// DA FARE + MODULARE
 void Spaceship::doMotion() {
   // Here we compute the evolution of the Spaceship during time
 
@@ -141,60 +140,6 @@ void Spaceship::doMotion() {
   if (done_something) {
     updatePosition();
   }
-
-  /*
-    float vel_xm, vel_ym, vel_zm; // velocita in spazio macchina
-
-    // da vel frame mondo a vel frame macchina
-    float cosf = cos(m_facing * M_PI / 180.0);
-    float sinf = sin(m_facing * M_PI / 180.0);
-    vel_xm = +cosf * m_speedX - sinf * m_speedZ;
-    // vel_ym = m_speedY;
-    vel_zm = +sinf * m_speedX + cosf * m_speedZ;
-
-    // *** Velocity Update *** //
-    // ----------------------- //
-
-    bool throttle = get_state(Motion::THROTTLE);
-    bool brake = get_state(Motion::BRAKE);
-
-    if (throttle ^ brake) {
-      int sign = throttle ? -1 : 1;
-
-      vel_zm += sign*m_max_acceleration;
-      // Spaceships don't fly backwards
-      vel_zm = (vel_zm > 0.05) ? 0 : vel_zm;
-    }
-
-    vel_xm *= m_frictionX;
-    // vel_ym *= m_frictionY;
-    vel_zm *= m_frictionZ;
-
-    // *** Steering Update *** //
-    // ----------------------- //
-
-    bool left = get_state(Motion::STEER_L);
-    bool right = get_state(Motion::STEER_R);
-
-   if (left ^ right) {
-      int sign = left ? 1 : -1;
-      m_steering += sign * m_steer_speed;
-    }
-    // steer return straight back
-    m_steering *= m_steer_return;
-
-    m_facing = m_facing - (vel_zm * m_grip) * m_steering;
-
-    // ritorno a vel coord mondo
-    m_speedX = +cosf * vel_xm + sinf * vel_zm;
-    //m_speedY = vel_ym;
-    m_speedZ = -sinf * vel_xm + cosf * vel_zm;
-
-    // posizione = posizione + velocita * delta t (ma delta t e' costante)
-    m_px += m_speedX;
-    // m_py += m_speedY;
-    m_pz += m_speedZ;
-  */
 }
 
 bool Spaceship::computePhysics() {
