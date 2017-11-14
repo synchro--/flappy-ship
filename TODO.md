@@ -34,4 +34,8 @@ La posizione se non erro dovrebbe essere Z = Floor::SIZE e X = 0 tipo
 ### Menu: 
 - ombre e lights dovrebbero essere nel menù
 
+# BUGS:
+- Il tempo non si ferma nel menu (y??)
+- Le variabili booleane continuano a risettarsi come pare a loro
+
 
