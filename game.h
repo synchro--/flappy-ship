@@ -15,7 +15,6 @@ class Game final {
 
 private:
   // variables
-  std::string m_gameID;
   State m_state;
 
   bool m_game_started;
@@ -92,6 +91,8 @@ private:
   void restartGame();
 
 public:
+  std::string m_gameID;
+
   Game(std::string gameID, size_t num_rings); // constructor
   void run();
 };

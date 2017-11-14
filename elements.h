@@ -192,8 +192,10 @@ private:
       m_frictionZ, m_max_acceleration;
 
   float m_scaleX, m_scaleY, m_scaleZ; // dimension scaling
+  float m_rotation_angle; // depending on how the mesh has been designed
   agl::Vec3 m_viewUP,
       m_front_axis; // axis representing viewUP vector and front-facing vec
+  
 
   // internal state of the spaceship. Each element represent a motion (on-off),
   // as described above.

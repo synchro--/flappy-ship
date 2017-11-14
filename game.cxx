@@ -17,25 +17,46 @@ Game::Game(std::string gameID, size_t num_rings)
  * 2. Load textures and mesh
  */
 void Game::init() {
+  
+  if(m_gameID == "Truman") {
+    m_floor = elements::get_floor("Texture/truman-texture.jpg");
+    m_sky = elements::get_sky("Texture/truman.jpg");
+    m_ssh =
+    elements::get_spaceship("Texture/sea.jpg", "Mesh/Boat.obj");
+    
+    m_splash_tex = m_env.loadTexture("Texture/truman.jpg");
+    m_menu_tex = m_env.loadTexture("Texture/menu.jpg");
+    
+    m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
+           spaceship::);
+    
+  } else {
+    m_floor = elements::get_floor("Texture/tex1.jpg");
+    m_sky = elements::get_sky("Texture/space1.jpg");
+    m_ssh =
+       elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
+
+    m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
+    m_menu_tex = m_env.loadTexture("Texture/menu.jpg");
+
+    m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
+               spaceship::ENVOS_SCALE);
+  }
+    
+
+  
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 100, 0, m_env.get_win_width(),
                                   m_env.get_win_height());
   m_main_win->show();
-  m_floor = elements::get_floor("Texture/tex1.jpg");
-  m_sky = elements::get_sky("Texture/space1.jpg");
-  m_ssh =
-      elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
+  
   m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 30);
   m_text_big = agl::getTextRenderer("Fonts/neuropol.ttf", 72);
-  m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
-  m_menu_tex = m_env.loadTexture("Texture/menu.jpg");
-
-  m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
-               spaceship::ENVOS_SCALE);
-
+  
   init_rings();
   init_cubes();
   init_settings();
+
 }
 
 void Game::changeState(game::State next_state) {
@@ -164,7 +185,8 @@ void Game::init_cubes() {
 // set up settings in the vector ready to be printed in the settings screen
 void Game::init_settings() {
   m_cur_setting = 0; 
-  m_settings.emplace_back(Setting{m_env.m_blending, "Blending", "ON", "OFF"});
+ //  m_settings.emplace_back(Setting{m_env.m_blending, "Blending", "ON", "OFF"});
+  m_settings.emplace_back(Setting{m_env.m_wireframe, "Wireframe", "ON", "OFF"});
   m_settings.emplace_back(Setting{m_flappy3D, "3D Flight (HARD)", "ON", "OFF"});
 }
 

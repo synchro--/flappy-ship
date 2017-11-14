@@ -27,7 +27,7 @@ void Game::splash() {
 
 // Load a texture image to be shown as a Splash screen
 void Game::drawSplash() {
-  std::string title = "Truman Escape";
+  std::string title = m_gameID == "Truman" ? "Truman Escape" : "Space Crack";
   std::string subtitle = "Press Enter to start";
   const static auto X_O = m_main_win->m_width - 800;
   const static auto Y_O = m_main_win->m_height - 300;
@@ -112,9 +112,6 @@ void Game::drawSettingOnOff(size_t Ycoord, Setting &sg, bool isSelected) const {
   static const auto OFFSET = 400;
   const auto Xcoord = m_main_win->m_width - 850;
   std::string str_onoff;
-  if(!sg.active) {
-      puts("sono gay");
-  }
 
   str_onoff = (sg.active) ? (std::string("> ") + sg.txt_on + "      " + sg.txt_off)
                       : (std::string(sg.txt_on) + "      " + "> " + sg.txt_off);
