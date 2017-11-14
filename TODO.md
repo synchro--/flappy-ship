@@ -23,6 +23,8 @@ Anelli avranno una componente Y che li spawnerà in alto
 ### Menu: 
 - possibilità di cambiare spaceship ==> causa il restart del gioco 
 - ombre e lights dovrebbero essere nel menù
+- quando si ricomincia controllare la variabile "game started"
+- quando si quitta farlo con invio
 
 ### Ranking: 
 Il nome inserito come parametro in start_game sarà inserito in un file di testo ranking.txt che verrà stampato a schermo al termine del gioco. 

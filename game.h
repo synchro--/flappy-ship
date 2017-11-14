@@ -21,6 +21,7 @@ private:
   bool m_game_started;
   bool m_restart_game;
   bool m_victory;
+  size_t m_cur_setting; // setting currently highlighted 
 
   // special var for 3D flight, it affects the whole game
   bool m_flappy3D;
@@ -42,6 +43,7 @@ private:
   elements::Floor *m_floor;
   elements::Sky *m_sky;
   agl::TexID m_splash_tex, m_menu_tex, m_win_tex, m_lost_tex;
+  std::vector<Setting> m_settings; 
 
   // Ring stuff
   std::vector<elements::Ring> m_rings;
@@ -64,12 +66,12 @@ private:
   // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
   void drawHUD();
   void drawRanking();
-  void drawSetting(Setting &sg, size_t Ycoord);
+  void drawSettingOnOff(size_t Ycoord, Setting &sg, bool isSelected = false) const;
+  void drawSettingItem(size_t Xcoord, size_t Yoord, const char *name, bool isSelected = false) const;
   void drawSplash();
   void updateRanking();
 
   void gameAction();
-  void gameMenu();
   void gameOnKey(game::Key, bool pressed);
   void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
   void gameOver();
@@ -77,13 +79,14 @@ private:
   void renderMenu();
 
   // callback setters: change handlers according to the state of the game
-  void openMenu();
+  void openSettings();
   void playGame();
   void splash();
 
   // initialization functions for rings, cubes and game
   void init_rings();
   void init_cubes();
+  void init_settings(); 
   void init();
 
   void restartGame();

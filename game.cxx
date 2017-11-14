@@ -35,10 +35,10 @@ void Game::init() {
 
   init_rings();
   init_cubes();
+  init_settings();
 }
 
 void Game::changeState(game::State next_state) {
-
   static const auto TAG = __func__;
 
   if (next_state == m_state)
@@ -48,6 +48,7 @@ void Game::changeState(game::State next_state) {
   case State::SPLASH:
     if ((!m_game_started) || (m_state == State::MENU && m_restart_game)) {
       m_state = next_state;
+      restartGame();
       splash();
     }
     break;
@@ -55,7 +56,7 @@ void Game::changeState(game::State next_state) {
   case State::MENU:
     if (m_state == State::GAME) {
       m_state = next_state;
-      // gameMenu();
+      openSettings();
     }
     break;
 
@@ -65,7 +66,6 @@ void Game::changeState(game::State next_state) {
       playGame();
     } else if (m_state == State::END && m_restart_game) {
       m_state = next_state;
-      m_restart_game = false;
       restartGame();
     }
     break;
@@ -159,6 +159,13 @@ void Game::init_cubes() {
     float y = 2.5; // height of the ring
     m_cubes.emplace_back(coords.first, y, coords.second);
   }
+}
+
+// set up settings in the vector ready to be printed in the settings screen
+void Game::init_settings() {
+  m_cur_setting = 0; 
+  m_settings.emplace_back(Setting{m_env.m_blending, "Blending", "ON", "OFF"});
+  m_settings.emplace_back(Setting{m_flappy3D, "3D Flight (HARD)", "ON", "OFF"});
 }
 
 void Game::gameOnKey(Key key, bool pressed) {
@@ -362,6 +369,7 @@ void Game::restartGame() {
   lg::i(TAG, "Starting NEW game...");
   // handle 3D flight if activated
   // game vars
+  m_restart_game = false;
   m_game_started = false;
   m_player_time = m_deadline_time = 0.0;
   m_penalty_time = m_last_time = 0;

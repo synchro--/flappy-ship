@@ -164,7 +164,6 @@ private:
   int m_screenH, m_screenW;
   int m_camera_type;
   int m_step; // number of steps of Physics currently done
-  bool m_wireframe, m_envmap, m_headlight, m_shadow, m_blending;
 
   /* Callbacks variables:
    *  they will be the handler for keys, mouse & windows events and rendering.
@@ -179,6 +178,9 @@ private:
   std::function<void(game::MouseEvent, int32_t, int32_t)> m_mouse_event_handler;
 
 public:
+  // share this vars outside the class
+  bool m_wireframe, m_envmap, m_headlight, m_shadow, m_blending;
+
   // Friends can touch your private parts.
   friend Env &get_env();
 
