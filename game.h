@@ -20,6 +20,7 @@ private:
   bool m_game_started;
   bool m_restart_game;
   bool m_victory;
+  bool m_easter_egg;    // * Surprise *
   size_t m_cur_setting; // setting currently highlighted
 
   // special var for 3D flight, it affects the whole game

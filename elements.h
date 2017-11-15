@@ -192,7 +192,7 @@ private:
       m_frictionZ, m_max_acceleration;
 
   float m_scaleX, m_scaleY, m_scaleZ; // dimension scaling
-  float m_rotation_angle; // depending on how the mesh has been designed
+  size_t m_rotation_angle; // depending on how the mesh has been designed
   agl::Vec3 m_viewUP,
       m_front_axis; // axis representing viewUP vector and front-facing vec
 
@@ -241,9 +241,11 @@ public:
   inline float x() const { return m_px; }
   inline float y() const { return m_py; }
   inline float z() const { return m_pz; }
-
+  
+  inline void set_rotation_angle(size_t angle) { m_rotation_angle = angle; }
+  inline void set_front_axis(agl::Vec3 axis) { m_front_axis = axis; }
   // reset spaceship status
-  void init();
+  void init(bool truman = false);
 
   // APIs to interact with the spaceship
   void execute();

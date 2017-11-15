@@ -26,30 +26,28 @@ void Game::init() {
   m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 30);
   m_text_big = agl::getTextRenderer("Fonts/neuropol.ttf", 72);
 
-  if (m_gameID == "Truman") {
+  m_easter_egg = m_gameID == "Truman"; 
+
+  if (m_easter_egg) {
     m_floor = elements::get_floor("Texture/truman-texture.jpg");
-    m_sky = elements::get_sky("Texture/truman.jpg");
-    m_ssh = elements::get_spaceship("Texture/sea.jpg", "Mesh/Boat.obj");
+    m_sky = elements::get_sky("Texture/truman.jpg");    
+    m_splash_tex = m_env.loadTexture("Texture/splash3.jpg");
 
-    m_splash_tex = m_env.loadTexture("Texture/truman.jpg");
-    m_menu_tex = m_env.loadTexture("Texture/menu.jpg");
-
-    m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
-                 spaceship::ENVOS_SCALE);
+    m_ssh = elements::get_spaceship("Texture/wood1.jpg", "Mesh/boat.obj");
 
   } else {
     m_floor = elements::get_floor("Texture/tex1.jpg");
     m_sky = elements::get_sky("Texture/space1.jpg");
     m_ssh =
-        elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
+        elements::get_spaceship("Texture/tex3.jpg", "Mesh/Envos.obj");
 
     m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
-    m_menu_tex = m_env.loadTexture("Texture/menu.jpg");
-
-    m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
-                 spaceship::ENVOS_SCALE);
   }
 
+  // init spaceship according to the surprise... or not. 
+  m_ssh->init(m_easter_egg);
+
+  m_menu_tex = m_env.loadTexture("Texture/menu.jpg");  
   init_rings();
   init_cubes();
   init_settings();
@@ -396,7 +394,7 @@ void Game::restartGame() {
   m_camera_type = CAMERA_BACK_CAR;
 
   // elements
-  m_ssh->init(); // reset
+  m_ssh->init(m_easter_egg); // reset
   init_rings();
   init_cubes();
   init_settings();

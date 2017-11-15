@@ -51,7 +51,7 @@ static const auto FPS_SAMPLE = 10U;         // interval length
 // GAME TYPES
 namespace game {
 
-static const auto RING_TIME = 7000U;
+static const auto RING_TIME = 8000U; // 8 secs
 static const auto BONUS_TIME = 4000U;
 
 using Entry = std::pair<std::string, double>;
@@ -112,6 +112,7 @@ static const auto NORMAL_ACC = 0.0035;
 static const auto ENVOS_SCALE = 0.0059;
 static const auto FALCON_SCALE = 0.0099;
 static const auto SHUTTLE_SCALE = 0.013;
+static const auto BOAT_SCALE = 0.17; 
 
 // Some mesh are built along a particular axis:
 // Therefore a rotation is needed
