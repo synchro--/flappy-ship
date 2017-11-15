@@ -34,12 +34,13 @@ Spaceship::Spaceship(const char *texture_filename,
   init();
 }
 
-void Spaceship::init() {
+void Spaceship::init(bool truman) {
   // The "Envos" spaceship mesh is huge. Here we set proper re-scaling.
-  m_scaleX = m_scaleY = m_scaleZ = SHUTTLE_SCALE;
+  m_scaleX = m_scaleY = m_scaleZ = truman ? BOAT_SCALE : ENVOS_SCALE; 
+  m_rotation_angle = truman ? BOAT_ANGLE : ENVOS_ANGLE;
 
-  m_px = 0;
-  m_pz = 0;
+  m_px = 0.0;
+  m_pz = 0.0;
   m_py = 2.0; // Spaceship skills™
 
   m_facing = m_steering = 0.0;
@@ -49,7 +50,7 @@ void Spaceship::init() {
   //---------------//
 
   m_viewUP = agl::Vec3(0, 1, 0);
-  m_front_axis = agl::Vec3(0, 0, 1);
+  m_front_axis = truman ? agl::Vec3(1, 0, 0) : agl::Vec3(0,0,1);
 
   // strong friction on X-axis, if you wanna drift, go buy Need For Speed
   m_frictionX = 0.9;
@@ -58,7 +59,7 @@ void Spaceship::init() {
   // small friction on Z-axis
   m_frictionZ = 0.991;
 
-  m_steer_speed = 3.4;   // A
+  m_steer_speed = 3.1;   // A
   m_steer_return = 0.93; // B ==> max steering = A*B / (1-B) == 2.4
 
   m_max_acceleration = FAST_ACC;
@@ -84,7 +85,7 @@ void Spaceship::draw() const {
 
   // if headlight is on in the Env, then draw headlights
   if (m_env.isHeadlight()) {
-    lg::i(__func__, "Headlights toggled!");
+    // lg::i(__func__, "Headlights toggled!");
     drawHeadlight(0, 0, -1, 8);
   }
 }
@@ -100,7 +101,7 @@ void Spaceship::drawFlicker() const {
 
   // if headlight is on in the Env, then draw headlights
   if (m_env.isHeadlight()) {
-    lg::i(__func__, "Headlights toggled!");
+    // lg::i(__func__, "Headlights toggled!");
     drawHeadlight(0, 0, -1, 8);
   }
 }
@@ -131,7 +132,6 @@ void Spaceship::drawHeadlight(float x, float y, float z, int lightN) const {
   glLightf(usedLight, GL_LINEAR_ATTENUATION, 1);
 }
 
-// DA FARE + MODULARE
 void Spaceship::doMotion() {
   // Here we compute the evolution of the Spaceship during time
 
@@ -141,60 +141,6 @@ void Spaceship::doMotion() {
   if (done_something) {
     updatePosition();
   }
-
-  /*
-    float vel_xm, vel_ym, vel_zm; // velocita in spazio macchina
-
-    // da vel frame mondo a vel frame macchina
-    float cosf = cos(m_facing * M_PI / 180.0);
-    float sinf = sin(m_facing * M_PI / 180.0);
-    vel_xm = +cosf * m_speedX - sinf * m_speedZ;
-    // vel_ym = m_speedY;
-    vel_zm = +sinf * m_speedX + cosf * m_speedZ;
-
-    // *** Velocity Update *** //
-    // ----------------------- //
-
-    bool throttle = get_state(Motion::THROTTLE);
-    bool brake = get_state(Motion::BRAKE);
-
-    if (throttle ^ brake) {
-      int sign = throttle ? -1 : 1;
-
-      vel_zm += sign*m_max_acceleration;
-      // Spaceships don't fly backwards
-      vel_zm = (vel_zm > 0.05) ? 0 : vel_zm;
-    }
-
-    vel_xm *= m_frictionX;
-    // vel_ym *= m_frictionY;
-    vel_zm *= m_frictionZ;
-
-    // *** Steering Update *** //
-    // ----------------------- //
-
-    bool left = get_state(Motion::STEER_L);
-    bool right = get_state(Motion::STEER_R);
-
-   if (left ^ right) {
-      int sign = left ? 1 : -1;
-      m_steering += sign * m_steer_speed;
-    }
-    // steer return straight back
-    m_steering *= m_steer_return;
-
-    m_facing = m_facing - (vel_zm * m_grip) * m_steering;
-
-    // ritorno a vel coord mondo
-    m_speedX = +cosf * vel_xm + sinf * vel_zm;
-    //m_speedY = vel_ym;
-    m_speedZ = -sinf * vel_xm + cosf * vel_zm;
-
-    // posizione = posizione + velocita * delta t (ma delta t e' costante)
-    m_px += m_speedX;
-    // m_py += m_speedY;
-    m_pz += m_speedZ;
-  */
 }
 
 bool Spaceship::computePhysics() {
@@ -356,8 +302,6 @@ void Spaceship::processCommand() {
 void Spaceship::render(bool flicker) {
   m_env.mat_scope([&] {
 
-    agl::Vec3 front_boat = agl::Vec3(1, 0, 0);
-
     // translate the camera to follow the ship movements
     m_env.translate(m_px, m_py, m_pz);
 
@@ -365,10 +309,10 @@ void Spaceship::render(bool flicker) {
     m_env.rotate(m_facing, m_viewUP);
 
     // the Mesh is loaded on the other side
-    m_env.rotate(ENVOS_ANGLE, m_viewUP);
+    m_env.rotate(m_rotation_angle, m_viewUP);
 
     // rotate the ship acc. to steering val, to represent tilting
-    int sign = -1;
+    int sign = m_rotation_angle == ENVOS_ANGLE ? -1 : 1; 
     m_env.rotate(sign * m_steering, m_front_axis);
     //   m_env.rotate(sign * m_steering, front_boat);
 

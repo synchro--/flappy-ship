@@ -134,6 +134,22 @@ std::unique_ptr<SmartWindow> Env::createWindow(std::string &name, size_t x,
   return std::unique_ptr<SmartWindow>(new SmartWindow(name, x, y, w, h));
 }
 
+// draw a circle
+void Env::drawCircle(double cx, double cy, double radius) {
+  const static auto N_SEGMENTS = 25;
+
+  glBegin(GL_TRIANGLE_FAN);
+  for (int i = 0; i < N_SEGMENTS; ++i) {
+    float theta = 2.0f * M_PI * float(i) / float(N_SEGMENTS); // current angle
+
+    float x = radius * cosf(theta); // calculate the x component
+    float y = radius * sinf(theta); // calculate the y component
+
+    glVertex2f(x + cx, y + cy); // output vertex
+  }
+  glEnd();
+}
+
 // draw a cube rasterizing quads
 void Env::drawCubeFill(const float S) {
 
@@ -288,7 +304,15 @@ void Env::drawFloor(TexID texbind, float sz, float height, size_t num_quads) {
                  false);
 }
 
-// hint: should be 100.0 20.0 20.0 --> see Sky constructor
+void Env::drawPoint(double x, double y) {
+  //   glClear ( GL_COLOR_BUFFER_BIT ); //clear pixel buffer
+  glBegin(GL_POINTS); // render with points
+  glVertex2i(x, y);   // display a point
+  glEnd();
+  glFlush();
+}
+
+// hint: should be TexID, 100.0, 20.0, 20.0 --> see Sky constructor
 void Env::drawSky(TexID texbind, double radius, int lats, int longs) {
 
   textureDrawing(texbind,
@@ -361,7 +385,7 @@ void Env::drawSquare(const float side) {
 void Env::drawTorus(double r, double R) {
   const static int NUM_C = 50;
   // number of vertex that approximates the circular ring shape
-  const static int NUM_VERTEX_APPROX = 15;
+  const static int NUM_VERTEX_APPROX = 35;
   // length of the perimeter of the ring
   const static double RING_PERIMETER = 2.0 * M_PI;
   double s, t, x, y, z;
@@ -531,7 +555,7 @@ void Env::setupPersp() {
 }
 
 // Helper function to draw textured objects
-// Accepts a lambda as a drawing function to be called afte the texture
+// Accepts a lambda as a drawing function to be called after the texture
 // is applied.
 void Env::textureDrawing(TexID texbind, std::function<void()> callback,
                          bool gen_coordinates) {

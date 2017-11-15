@@ -148,4 +148,11 @@ void Env::renderLoop() {
 
 } // function mainLoop
 
+// inject a SDL_QUIT event, thus quitting the game
+void Env::quitLoop() {
+  SDL_Event e;
+  e.type = SDL_QUIT;
+  SDL_PushEvent(&e);
+}
+
 } // namespace agl
