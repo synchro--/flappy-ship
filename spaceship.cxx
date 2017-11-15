@@ -34,9 +34,10 @@ Spaceship::Spaceship(const char *texture_filename,
   init();
 }
 
-void Spaceship::init() {
+void Spaceship::init(bool truman) {
   // The "Envos" spaceship mesh is huge. Here we set proper re-scaling.
-  m_scaleX = m_scaleY = m_scaleZ = ENVOS_SCALE;
+  m_scaleX = m_scaleY = m_scaleZ = truman ? BOAT_SCALE : ENVOS_SCALE; 
+  m_rotation_angle = truman ? BOAT_ANGLE : ENVOS_ANGLE;
 
   m_px = 0.0;
   m_pz = 0.0;
@@ -49,7 +50,7 @@ void Spaceship::init() {
   //---------------//
 
   m_viewUP = agl::Vec3(0, 1, 0);
-  m_front_axis = agl::Vec3(0, 0, 1);
+  m_front_axis = truman ? agl::Vec3(1, 0, 0) : agl::Vec3(0,0,1);
 
   // strong friction on X-axis, if you wanna drift, go buy Need For Speed
   m_frictionX = 0.9;
@@ -84,7 +85,7 @@ void Spaceship::draw() const {
 
   // if headlight is on in the Env, then draw headlights
   if (m_env.isHeadlight()) {
-    lg::i(__func__, "Headlights toggled!");
+    // lg::i(__func__, "Headlights toggled!");
     drawHeadlight(0, 0, -1, 8);
   }
 }
@@ -100,7 +101,7 @@ void Spaceship::drawFlicker() const {
 
   // if headlight is on in the Env, then draw headlights
   if (m_env.isHeadlight()) {
-    lg::i(__func__, "Headlights toggled!");
+    // lg::i(__func__, "Headlights toggled!");
     drawHeadlight(0, 0, -1, 8);
   }
 }
@@ -301,8 +302,6 @@ void Spaceship::processCommand() {
 void Spaceship::render(bool flicker) {
   m_env.mat_scope([&] {
 
-    agl::Vec3 front_boat = agl::Vec3(1, 0, 0);
-
     // translate the camera to follow the ship movements
     m_env.translate(m_px, m_py, m_pz);
 
@@ -310,10 +309,10 @@ void Spaceship::render(bool flicker) {
     m_env.rotate(m_facing, m_viewUP);
 
     // the Mesh is loaded on the other side
-    m_env.rotate(ENVOS_ANGLE, m_viewUP);
+    m_env.rotate(m_rotation_angle, m_viewUP);
 
     // rotate the ship acc. to steering val, to represent tilting
-    int sign = -1;
+    int sign = m_rotation_angle == ENVOS_ANGLE ? -1 : 1; 
     m_env.rotate(sign * m_steering, m_front_axis);
     //   m_env.rotate(sign * m_steering, front_boat);
 

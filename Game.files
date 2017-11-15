@@ -1,3 +1,4 @@
+Fonts/NotoSerif.ttf
 Fonts/neuropol.ttf
 Mesh/Boat/boat.3ds
 Mesh/Boat/boat.blend
@@ -15,6 +16,7 @@ TODO.md
 Texture/envmap_flipped.jpg
 Texture/floor1.jpg
 Texture/logo.jpg
+Texture/menu.jpg
 Texture/sea.jpg
 Texture/sky_ok.jpg
 Texture/space1.jpg
@@ -27,6 +29,7 @@ Texture/truman.jpg
 Texture/wood1.jpg
 UI.cxx
 agl.h
+assignment.md
 coord_system.cxx
 coord_system.h
 elements.cxx
@@ -39,7 +42,9 @@ log.cxx
 log.h
 main.cxx
 mesh.cxx
+notes.txt
 point.cxx
+ranking.txt
 render_loop.cxx
 smart_window.cxx
 spaceship.cxx

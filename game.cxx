@@ -17,28 +17,43 @@ Game::Game(std::string gameID, size_t num_rings)
  * 2. Load textures and mesh
  */
 void Game::init() {
+
   std::string win_name = "Main Window";
   m_main_win = m_env.createWindow(win_name, 100, 0, m_env.get_win_width(),
                                   m_env.get_win_height());
   m_main_win->show();
-  m_floor = elements::get_floor("Texture/tex1.jpg");
-  m_sky = elements::get_sky("Texture/space1.jpg");
-  m_ssh =
-      elements::get_spaceship("Texture/envmap_flipped.jpg", "Mesh/Envos.obj");
+
   m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 30);
   m_text_big = agl::getTextRenderer("Fonts/neuropol.ttf", 72);
-  m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
-  m_menu_tex = m_env.loadTexture("Texture/menu.jpg");
 
-  m_ssh->scale(spaceship::ENVOS_SCALE, spaceship::ENVOS_SCALE,
-               spaceship::ENVOS_SCALE);
+  m_easter_egg = m_gameID == "Truman"; 
 
+  if (m_easter_egg) {
+    m_floor = elements::get_floor("Texture/truman-texture.jpg");
+    m_sky = elements::get_sky("Texture/truman.jpg");    
+    m_splash_tex = m_env.loadTexture("Texture/splash3.jpg");
+
+    m_ssh = elements::get_spaceship("Texture/wood1.jpg", "Mesh/boat.obj");
+
+  } else {
+    m_floor = elements::get_floor("Texture/tex1.jpg");
+    m_sky = elements::get_sky("Texture/space1.jpg");
+    m_ssh =
+        elements::get_spaceship("Texture/tex3.jpg", "Mesh/Envos.obj");
+
+    m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
+  }
+
+  // init spaceship according to the surprise... or not. 
+  m_ssh->init(m_easter_egg);
+
+  m_menu_tex = m_env.loadTexture("Texture/menu.jpg");  
   init_rings();
   init_cubes();
+  init_settings();
 }
 
 void Game::changeState(game::State next_state) {
-
   static const auto TAG = __func__;
 
   if (next_state == m_state)
@@ -48,6 +63,7 @@ void Game::changeState(game::State next_state) {
   case State::SPLASH:
     if ((!m_game_started) || (m_state == State::MENU && m_restart_game)) {
       m_state = next_state;
+      restartGame();
       splash();
     }
     break;
@@ -55,7 +71,7 @@ void Game::changeState(game::State next_state) {
   case State::MENU:
     if (m_state == State::GAME) {
       m_state = next_state;
-      // gameMenu();
+      openSettings();
     }
     break;
 
@@ -65,7 +81,6 @@ void Game::changeState(game::State next_state) {
       playGame();
     } else if (m_state == State::END && m_restart_game) {
       m_state = next_state;
-      m_restart_game = false;
       restartGame();
     }
     break;
@@ -161,6 +176,14 @@ void Game::init_cubes() {
   }
 }
 
+// set up settings in the vector ready to be printed in the settings screen
+void Game::init_settings() {
+  m_cur_setting = 0;
+  m_settings.emplace_back(Setting{m_env.m_blending, "Blending", "ON", "OFF"});
+  m_settings.emplace_back(
+      Setting{m_flappy3D, "Flappy-Ship (HARD)", "ON", "OFF"});
+}
+
 void Game::gameOnKey(Key key, bool pressed) {
   bool trig_motion = false;
   spaceship::Motion mt;
@@ -236,7 +259,7 @@ void Game::gameOnKey(Key key, bool pressed) {
       m_game_started = true;
       m_last_time = m_env.getTicks();
       m_player_time = m_env.getTicks();
-      m_deadline_time = game::RING_TIME;
+      m_deadline_time = RING_TIME; //starting time
     }
 
     m_ssh->sendCommand(mt, pressed);
@@ -362,6 +385,7 @@ void Game::restartGame() {
   lg::i(TAG, "Starting NEW game...");
   // handle 3D flight if activated
   // game vars
+  m_restart_game = false;
   m_game_started = false;
   m_player_time = m_deadline_time = 0.0;
   m_penalty_time = m_last_time = 0;
@@ -370,9 +394,10 @@ void Game::restartGame() {
   m_camera_type = CAMERA_BACK_CAR;
 
   // elements
-  m_ssh->init(); // reset
+  m_ssh->init(m_easter_egg); // reset
   init_rings();
   init_cubes();
+  init_settings();
 
   playGame();
 }

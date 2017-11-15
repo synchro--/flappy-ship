@@ -135,7 +135,7 @@ std::vector<game::Entry> Logger::readRankingData(const char *file_name) {
   double time;
 
   while (infile >> name >> time) {
-    ret.emplace(ret.begin(), std::make_pair(name, time));
+    ret.emplace_back(std::make_pair(name, time));
   }
 
   return ret;
@@ -151,7 +151,7 @@ void Logger::logRanking(const char *file_name,
     std::ostringstream oss;
     oss << entry.first << " " << entry.second << std::endl;
     outfile << oss.str();
-    std::cout << oss.str();
+   // std::cout << oss.str();
   }
 }
 
