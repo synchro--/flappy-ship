@@ -27,10 +27,10 @@ void Game::splash() {
 
 // Load a texture image to be shown as a Splash screen
 void Game::drawSplash() {
-  std::string title = m_gameID == "Truman" ? "Truman Escape" : "Space Crack";
+  std::string title = m_gameID == "Truman" ? "Truman Escape" : "FlappyShip";
   std::string subtitle = "Press Enter to start";
-  const static auto X_O = m_main_win->m_width - 800;
-  const static auto Y_O = m_main_win->m_height - 300;
+  const static auto X_O = m_main_win->m_width * 0.2;
+  const static auto Y_O = m_main_win->m_height - 100;
   // draw texture and print title
   m_main_win->textureWindow(m_splash_tex);
   m_main_win->printOnScreen([&] {

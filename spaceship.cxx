@@ -85,7 +85,7 @@ void Spaceship::draw() const {
 
   // if headlight is on in the Env, then draw headlights
   if (m_env.isHeadlight()) {
-    l// g::i(__func__, "Headlights toggled!");
+    // lg::i(__func__, "Headlights toggled!");
     drawHeadlight(0, 0, -1, 8);
   }
 }
