@@ -103,7 +103,7 @@ public:
   static const float s_r;
   static const float s_R;
 
-  Ring(float x, float y, float z, float angle = 30.0, bool m_3D_FLIGHT = false);
+  Ring(float x, float y, float z, bool m_3D_FLIGHT = false, float angle = 30.0);
 
   void render();
 
@@ -146,8 +146,7 @@ public:
   // radius values
   static const float side;
 
-  BadCube(float x, float y, float z, float angle = 30.0,
-          bool m_3D_FLIGHT = false);
+  BadCube(float x, float y, float z,  bool m_3D_FLIGHT = false, float angle = 30.0);
 
   void render();
 

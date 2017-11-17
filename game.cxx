@@ -160,9 +160,11 @@ void Game::init_rings() {
   // see coord_system.h
   // todo: add a check on minimum distance between each of the rings
   for (size_t i = 0; i < m_num_rings; ++i) {
-    auto coords = coordinateGenerator::randomCoord2D();
+    /* auto coords = coordinateGenerator::randomCoord2D();
     float y = 1.5; // height of the ring
-    m_rings.emplace_back(coords.first, y, coords.second);
+    m_rings.emplace_back(coords.first, y, coords.second);*/ 
+    auto coords = coordinateGenerator::randomCoord3D(); 
+    m_rings.emplace_back(coords.x, coords.y, coords.z, m_easter_egg);
   }
 }
 
@@ -170,9 +172,8 @@ void Game::init_cubes() {
   // cubes
   m_cubes.clear();
   for (size_t i = 0; i < m_num_cubes; ++i) {
-    auto coords = coordinateGenerator::randomCoord2D();
-    float y = 2.5; // height of the ring
-    m_cubes.emplace_back(coords.first, y, coords.second);
+    auto coords = coordinateGenerator::randomCoord3D(); 
+    m_cubes.emplace_back(coords.x, coords.y, coords.z, m_easter_egg);
   }
 }
 
