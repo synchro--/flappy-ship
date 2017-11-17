@@ -65,7 +65,7 @@ struct Setting {
   //   : active(active), name(name), txt_on(text_on), txt_off(text_off) {}
 };
 
-enum Settings { BLENDING, FLAPPY3D, N_SETTINGS };
+enum Settings { BLENDING, WIREFRAME, ENVMAP, FLAPPY3D, N_SETTINGS };
 enum State { SPLASH, MENU, GAME, SETTINGS, END };
 enum Key {
   W,

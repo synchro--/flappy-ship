@@ -39,7 +39,7 @@ void Game::init() {
     m_floor = elements::get_floor("Texture/tex1.jpg");
     m_sky = elements::get_sky("Texture/space1.jpg");
     m_ssh =
-        elements::get_spaceship("Texture/tex3.jpg", "Mesh/Envos.obj");
+        elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj");
 
     m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
   }
@@ -180,6 +180,8 @@ void Game::init_cubes() {
 void Game::init_settings() {
   m_cur_setting = 0;
   m_settings.emplace_back(Setting{m_env.m_blending, "Blending", "ON", "OFF"});
+  m_settings.emplace_back(Setting{m_env.m_wireframe, "Wireframe", "ON", "OFF"}); 
+  m_settings.emplace_back(Setting{m_env.m_envmap, "Env-Mapping", "ON", "OFF"});   
   m_settings.emplace_back(
       Setting{m_flappy3D, "Flappy-Ship (HARD)", "ON", "OFF"});
 }
@@ -392,6 +394,8 @@ void Game::restartGame() {
 
   // camera
   m_camera_type = CAMERA_BACK_CAR;
+
+  m_env.reset(); 
 
   // elements
   m_ssh->init(m_easter_egg); // reset

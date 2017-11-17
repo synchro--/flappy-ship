@@ -1,4 +1,9 @@
 Jin 10.41
 Ale 12.222
 Truman 12.652
+Truman 15.369
+Truman 20.355
+Ale 25.434
+Truman 26.825
 Hank 28.818
+lol 30.116

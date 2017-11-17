@@ -22,7 +22,7 @@ Env::Env()
 
       // all environment variables
       m_screenH(750), m_screenW(900), m_wireframe(false), m_envmap(true),
-      m_headlight(false), m_shadow(false), m_blending(false), m_step(0) {
+      m_headlight(false), m_shadow(false), m_blending(false) {
 
   // "__func__" == function name
   static const auto TAG = __func__;
@@ -493,6 +493,12 @@ void Env::render() {
   // finally, the rendering we were all waiting for!
   m_render_handler();
 }
+
+// set environment variables to initial values
+void Env::reset() {
+  m_envmap = m_wireframe = m_headlight  = m_shadow = m_blending = false; 
+}
+
 
 void Env::rotate(float angle, const Vec3 &axis) {
   glRotatef(angle, axis.x, axis.y, axis.z);

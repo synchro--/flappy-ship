@@ -68,7 +68,8 @@ void Spaceship::init(bool truman) {
   // init internal states
   m_state = {false};
 
-  // init queue size
+  // init queue: common idiom for clearing standard containers 
+  // is swapping with an empty version of the container:
   decltype(m_cmds)().swap(m_cmds);
 }
 
