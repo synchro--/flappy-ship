@@ -184,12 +184,12 @@ class Spaceship {
 private:
   /* Spaceship state: doMotion() will update this variables at each step*/
   float m_px, m_py, m_pz, m_facing;   // position
-  float m_steering;                   // internal state
+  float m_steering, m_steer_flight;   // internal state
   float m_speedX, m_speedY, m_speedZ; // velocity
 
   // Spaceship Stats: this will be constant over time
   float m_steer_speed, m_steer_return, m_grip, m_frictionX, m_frictionY,
-      m_frictionZ, m_max_acceleration;
+      m_frictionZ, m_max_acceleration, m_max_flight_acc;
 
   float m_scaleX, m_scaleY, m_scaleZ; // dimension scaling
   size_t m_rotation_angle; // depending on how the mesh has been designed
@@ -222,9 +222,10 @@ private:
   bool get_state(spaceship::Motion mt);
 
   void processCommand();
-  void updateFly();
+  bool updateFly();
   void updatePosition();
   bool updateSteering();
+  bool updateSteerFlight(); 
   bool updateVelocity();
 
   bool computePhysics();

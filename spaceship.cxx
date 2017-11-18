@@ -63,6 +63,7 @@ void Spaceship::init(bool truman) {
   m_steer_return = 0.93; // B ==> max steering = A*B / (1-B) == 2.4
 
   m_max_acceleration = FAST_ACC;
+  m_max_flight_acc = NORMAL_ACC;
   m_grip = 0.45;
 
   // init internal states
@@ -146,17 +147,16 @@ void Spaceship::doMotion() {
 
 bool Spaceship::computePhysics() {
   bool steering = updateSteering();
+  bool steer_flight = updateSteerFlight(); 
   bool velocity = updateVelocity();
 
-  return steering || velocity;
+  return steering || steer_flight || velocity;
 }
 
 // process the next command in the queue and execute the motion
 void Spaceship::execute() {
   processCommand();
   doMotion();
-  // still has to develop a 2nd kind of ship
-  // updateFly();
 }
 
 void Spaceship::updatePosition() {
@@ -173,8 +173,11 @@ void Spaceship::updatePosition() {
 
   // position = position + velocity * delta_t (but the latter is == 1)
   m_px += vel_xm;
-  // m_py += m_speedY;
+  m_py += m_speedY;
   m_pz += vel_zm;
+
+  // limit on Y-motion: we can't get under the floor
+  m_py = (m_py < 2.0) ? 2.0 : m_py;
 
   //--- angular update ---//
 
@@ -183,33 +186,23 @@ void Spaceship::updatePosition() {
   m_facing -= (m_speedZ * m_grip) * m_steering;
 }
 
-// Compute the velocity update during time
-// return false if no update is needed
-bool Spaceship::updateVelocity() {
 
+bool Spaceship::updateSteerFlight() {
   bool throttle = get_state(Motion::THROTTLE);
   bool brake = get_state(Motion::BRAKE);
 
-  // if the spaceship is still and no key is pressed, then return
-  if (!has_velocity() && !brake && !throttle) {
+  // if the spaceship is not in the middle of a steering and no key is pressed
+  if (!has_velocity() && !throttle && !brake) {
     return false;
   }
 
-  // if both THROTTLE and BRAKE (aka W-S) have been pressed,
-  // they cancel out each other
-  // so we compute the update only if the XOR returns true
-
   if (throttle ^ brake) {
-    int sign = throttle ? -1 : 1;
-
-    m_speedZ += sign * m_max_acceleration;
-    // Spaceships don't fly backwards
-    m_speedZ = (m_speedZ > 0.05) ? 0 : m_speedZ;
+    int sign = throttle ? 1 : -1;
+    m_steer_flight += sign * m_steer_speed;
   }
 
-  // apply friction
-  m_speedX *= m_frictionX;
-  m_speedZ *= m_frictionZ;
+  // steer return straight back
+  m_steer_flight *= m_steer_return;
   return true;
 }
 
@@ -235,16 +228,58 @@ bool Spaceship::updateSteering() {
   return true;
 }
 
+// Compute the velocity update during time
+// return false if no update is needed
+bool Spaceship::updateVelocity() {
+  const static auto FLY_FRICTION = 0.98;
+  const static auto FLY_RETURN = 0.033;
+
+  bool throttle = get_state(Motion::THROTTLE);
+  bool brake = get_state(Motion::BRAKE);
+
+  // if the spaceship is still and no key is pressed, then return
+  if (!has_velocity() && !brake && !throttle) {
+    return false;
+  }
+
+  // if both THROTTLE and BRAKE (aka W-S) have been pressed,
+  // they cancel out each other
+  // so we compute the update only if the XOR returns true
+
+  if (throttle ^ brake) {
+    int sign = throttle ? -1 : 1;
+
+    m_speedY -= sign * FLIGHT_ACC; 
+    m_speedZ += sign * VERY_FAST_ACC;
+    // Spaceships don't fly backwards
+    m_speedZ = (m_speedZ > 0.05) ? 0 : m_speedZ;
+  }
+
+  // apply friction
+  m_speedX *= m_frictionX;
+  m_speedZ *= m_frictionZ;
+
+  // apply flight friction
+  m_speedY *= FLY_FRICTION;
+  m_speedY -= FLY_RETURN;
+  return true;
+}
+
 // ONLY TO BE USED IN FLIGHT MODE:
 // it updates y-values to make the spaceship fly vertically
 // NEED TO BE CHANGED LIKE WITH STEERING
 // -flying curvature variable etc
-void Spaceship::updateFly() {
+bool Spaceship::updateFly() {
   const static auto FLY_FRICTION = 0.98;
   const static auto FLY_RETURN = 0.060;
 
   bool throttle = get_state(Motion::THROTTLE);
   bool brake = get_state(Motion::BRAKE);
+
+  // if the spaceship is still and no key is pressed, then return
+  if (!has_velocity() && !brake && !throttle) {
+    return false;
+  }
 
   if (throttle ^ brake) {
     int sign = throttle ? 1 : -1;
@@ -254,11 +289,9 @@ void Spaceship::updateFly() {
 
   m_speedY *= FLY_FRICTION;
   m_speedY -= FLY_RETURN;
-
-  m_py += m_speedY;
-  // limit on Y-motion: we can't get under the floor
-  m_py = (m_py < 1) ? 1 : m_py;
+  return true; 
 }
+
 
 bool Spaceship::get_state(Motion mt) { return m_state[mt]; }
 
@@ -316,6 +349,10 @@ void Spaceship::render(bool flicker) {
     int sign = m_rotation_angle == ENVOS_ANGLE ? -1 : 1; 
     m_env.rotate(sign * m_steering, m_front_axis);
     //   m_env.rotate(sign * m_steering, front_boat);
+
+    // rotate on the X-axis to represent tilting in flight mode, on the nose of the ship 
+    agl::Vec3 Xaxis = agl::Vec3(1,0,0);
+    m_env.rotate(sign * m_steer_flight, Xaxis);
 
     if (flicker) {
       drawFlicker();
