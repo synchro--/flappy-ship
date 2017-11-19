@@ -496,7 +496,8 @@ void Env::render() {
 
 // set environment variables to initial values
 void Env::reset() {
-  m_envmap = m_wireframe = m_headlight  = m_shadow = m_blending = false; 
+  m_wireframe = m_headlight  = m_shadow = m_blending = false; 
+  m_envmap = true; 
 }
 
 

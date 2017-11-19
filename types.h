@@ -105,8 +105,10 @@ enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE, N_MOTION };
 // to be submitted to the Spaceship
 using Command = std::pair<Motion, bool>;
 
+static const auto VERY_FAST_ACC = 0.01;
 static const auto FAST_ACC = 0.0045;
 static const auto NORMAL_ACC = 0.0035;
+static const auto FLIGHT_ACC = 0.078; 
 
 // Mesh dimension resizing constants
 static const auto ENVOS_SCALE = 0.0059;
