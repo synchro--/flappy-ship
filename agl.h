@@ -242,6 +242,7 @@ public:
   inline void enableLighting() { glEnable(GL_LIGHTING); }
 
   void enableDoubleBuffering();
+  void enableVSync(); 
   void enableZbuffer(int depth);
   void enableJoystick();
 

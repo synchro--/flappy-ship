@@ -27,7 +27,7 @@ void Game::splash() {
 
 // Load a texture image to be shown as a Splash screen
 void Game::drawSplash() {
-  std::string title = m_easter_egg ? "Truman Escape" : "FlappyShip";
+  std::string title = m_easter_egg ? "Truman Escape" : "Flappy Ship";
   std::string subtitle = "Press Enter to start";
   const static auto X_O = m_main_win->m_width * (m_easter_egg ? 0.1 : 0.2);
   const static auto Y_O = m_main_win->m_height - 100;

@@ -5,5 +5,7 @@ Truman 15.369
 Truman 20.355
 Ale 25.434
 Truman 26.825
+ale 28.374
 Hank 28.818
 lol 30.116
+ale 79.681

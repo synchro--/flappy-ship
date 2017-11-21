@@ -22,6 +22,7 @@ void Game::init() {
   m_main_win = m_env.createWindow(win_name, 100, 0, m_env.get_win_width(),
                                   m_env.get_win_height());
   m_main_win->show();
+  m_env.enableVSync(); 
 
   m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 30);
   m_text_big = agl::getTextRenderer("Fonts/neuropol.ttf", 72);
@@ -132,7 +133,8 @@ void Game::gameAction() {
   ring_crossed = current_ring.isTriggered();
 
   if (ring_crossed) {
-    m_deadline_time += game::RING_TIME;
+    auto bonus = m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME; 
+    m_deadline_time += bonus; 
     m_cur_ring_index++;
     if (m_cur_ring_index >= m_num_rings) {
       // victory: change state and save time for ranking
@@ -164,7 +166,7 @@ void Game::init_rings() {
     float y = 1.5; // height of the ring
     m_rings.emplace_back(coords.first, y, coords.second);*/ 
     auto coords = coordinateGenerator::randomCoord3D(); 
-    m_rings.emplace_back(coords.x, coords.y, coords.z, m_easter_egg);
+    m_rings.emplace_back(coords.x, coords.y, coords.z, m_flappy3D);
   }
 }
 
@@ -173,7 +175,7 @@ void Game::init_cubes() {
   m_cubes.clear();
   for (size_t i = 0; i < m_num_cubes; ++i) {
     auto coords = coordinateGenerator::randomCoord3D(); 
-    m_cubes.emplace_back(coords.x, coords.y, coords.z, m_easter_egg);
+    m_cubes.emplace_back(coords.x, coords.y, coords.z, m_flappy3D);
   }
 }
 
@@ -262,7 +264,8 @@ void Game::gameOnKey(Key key, bool pressed) {
       m_game_started = true;
       m_last_time = m_env.getTicks();
       m_player_time = m_env.getTicks();
-      m_deadline_time = RING_TIME; //starting time
+      auto starting_time = m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME;
+      m_deadline_time = starting_time; 
     }
 
     m_ssh->sendCommand(mt, pressed);

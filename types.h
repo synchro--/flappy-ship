@@ -51,8 +51,10 @@ static const auto FPS_SAMPLE = 10U;         // interval length
 // GAME TYPES
 namespace game {
 
-static const auto RING_TIME = 8000U; // 8 secs
-static const auto BONUS_TIME = 4000U;
+static const auto RING_TIME = 7000U; // 8 secs
+static const auto BONUS_TIME = 5000U;
+static const auto FLAPPY_RING_TIME = 11000U; // 11 secs 
+static const auto FLAPPY_BONUS_TIME = 7000U; 
 
 using Entry = std::pair<std::string, double>;
 
@@ -105,6 +107,7 @@ enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE, N_MOTION };
 // to be submitted to the Spaceship
 using Command = std::pair<Motion, bool>;
 
+// acceleration contants 
 static const auto VERY_FAST_ACC = 0.01;
 static const auto FAST_ACC = 0.0045;
 static const auto NORMAL_ACC = 0.0035;
@@ -118,7 +121,6 @@ static const auto BOAT_SCALE = 0.17;
 
 // Some mesh are built along a particular axis:
 // Therefore a rotation is needed
-
 static const auto ENVOS_ANGLE = 180;
 static const auto SHUTTLE_ANGLE = 270;
 static const auto BOAT_ANGLE = 270;
