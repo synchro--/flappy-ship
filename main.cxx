@@ -19,11 +19,9 @@ int main(int argc, char **argv) {
   lg::set_level(lg::Level::INFO);
 
   std::string name(argv[1]);
-  // std::string name("Ciao");
-  size_t num_rings = 2; // debug and dev stage still
+  size_t num_rings = 4; 
   game::Game game(name, num_rings);
   game.run();
 
-  // praying god everything's run ok
   return EXIT_SUCCESS;
 }
