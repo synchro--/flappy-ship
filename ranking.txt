@@ -1,8 +1,10 @@
 ale 0
 Jin 10.41
 Truman 11.905
+Trum 12.206
 Ale 12.222
 Truman 12.652
+Trum 13.185
 Truman 15.369
 Truman 20.355
 Ale 25.434

@@ -264,7 +264,6 @@ void Game::gameOnKey(Key key, bool pressed) {
     if (!m_game_started) {
       m_game_started = true;
       m_last_time = m_env.getTicks();
-      m_player_time = m_env.getTicks();
       auto starting_time = m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME;
       m_deadline_time = starting_time; 
     }
