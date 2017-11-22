@@ -11,7 +11,7 @@ using namespace spaceship;
 
 // get Singleton
 std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
-                                         const char *mesh_filename) {
+                                         const char *mesh_filename, bool m_flappy3D) {
   const static auto TAG = __func__;
   lg::i(TAG, "Loading Spaceship --> texture: %s Mesh: %s", texture_filename,
         mesh_filename);
@@ -20,9 +20,13 @@ std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
   if (!s_Spaceship) {
     s_Spaceship.reset(new Spaceship(texture_filename, mesh_filename)); // Init
 } */
-
-  return std::unique_ptr<Spaceship>(new Spaceship(texture_filename,
+  if(m_flappy3D) {
+    return std::unique_ptr<Spaceship>(new FlappyShip(texture_filename,
+                                                  mesh_filename));
+  } else {
+     return std::unique_ptr<Spaceship>(new Spaceship(texture_filename,
                                                   mesh_filename)); // init
+   }
 }
 
 Spaceship::Spaceship(const char *texture_filename,
@@ -68,7 +72,8 @@ void Spaceship::init(bool truman) {
   // init internal states
   m_state = {false};
 
-  // init queue size
+  // init queue: common idiom for clearing standard containers 
+  // is swapping with an empty version of the container:
   decltype(m_cmds)().swap(m_cmds);
 }
 
@@ -234,30 +239,6 @@ bool Spaceship::updateSteering() {
   return true;
 }
 
-// ONLY TO BE USED IN FLIGHT MODE:
-// it updates y-values to make the spaceship fly vertically
-// NEED TO BE CHANGED LIKE WITH STEERING
-// -flying curvature variable etc
-void Spaceship::updateFly() {
-  const static auto FLY_FRICTION = 0.98;
-  const static auto FLY_RETURN = 0.060;
-
-  bool throttle = get_state(Motion::THROTTLE);
-  bool brake = get_state(Motion::BRAKE);
-
-  if (throttle ^ brake) {
-    int sign = throttle ? 1 : -1;
-
-    m_speedY += sign * 0.1;
-  }
-
-  m_speedY *= FLY_FRICTION;
-  m_speedY -= FLY_RETURN;
-
-  m_py += m_speedY;
-  // limit on Y-motion: we can't get under the floor
-  m_py = (m_py < 1) ? 1 : m_py;
-}
 
 bool Spaceship::get_state(Motion mt) { return m_state[mt]; }
 

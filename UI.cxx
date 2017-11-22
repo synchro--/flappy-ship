@@ -27,9 +27,9 @@ void Game::splash() {
 
 // Load a texture image to be shown as a Splash screen
 void Game::drawSplash() {
-  std::string title = m_gameID == "Truman" ? "Truman Escape" : "FlappyShip";
+  std::string title = m_easter_egg ? "Truman Escape" : "Flappy Ship";
   std::string subtitle = "Press Enter to start";
-  const static auto X_O = m_main_win->m_width * 0.2;
+  const static auto X_O = m_main_win->m_width * (m_easter_egg ? 0.1 : 0.2);
   const static auto Y_O = m_main_win->m_height - 100;
   // draw texture and print title
   m_main_win->textureWindow(m_splash_tex);
@@ -209,7 +209,7 @@ void Game::openSettings() {
         m_restart_game = true;
         changeState(State::SPLASH);
       }
-      // else return to gam
+      // else return to game changing the correspondent setting
       else {
         // IMPORTANT: time loss must be counted only AFTER you close the menu!
         m_last_time = m_env.getTicks();

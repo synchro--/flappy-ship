@@ -103,7 +103,7 @@ public:
   static const float s_r;
   static const float s_R;
 
-  Ring(float x, float y, float z, float angle = 30.0, bool m_3D_FLIGHT = false);
+  Ring(float x, float y, float z, bool m_3D_FLIGHT = false, float angle = 30.0);
 
   void render();
 
@@ -146,8 +146,7 @@ public:
   // radius values
   static const float side;
 
-  BadCube(float x, float y, float z, float angle = 30.0,
-          bool m_3D_FLIGHT = false);
+  BadCube(float x, float y, float z,  bool m_3D_FLIGHT = false, float angle = 30.0);
 
   void render();
 
@@ -181,15 +180,16 @@ public:
  */
 
 class Spaceship {
-private:
+protected:
   /* Spaceship state: doMotion() will update this variables at each step*/
   float m_px, m_py, m_pz, m_facing;   // position
-  float m_steering;                   // internal state
+  float m_steering, m_steer_flight;   // internal state
   float m_speedX, m_speedY, m_speedZ; // velocity
 
   // Spaceship Stats: this will be constant over time
   float m_steer_speed, m_steer_return, m_grip, m_frictionX, m_frictionY,
-      m_frictionZ, m_max_acceleration;
+      m_frictionZ, m_max_acceleration; 
+  float m_max_flight_acc;
 
   float m_scaleX, m_scaleY, m_scaleZ; // dimension scaling
   size_t m_rotation_angle; // depending on how the mesh has been designed
@@ -209,7 +209,7 @@ private:
       m_mesh; // mesh structure for the Aventador Spaceship
   // angles, grip and friction
 
-  // private constructor to ensure singleton instance
+  // protected constructor to ensure singleton instance
   // instance is obtained through get_spaceship()
   Spaceship(const char *texture_filename, const char *mesh_filename);
 
@@ -222,17 +222,17 @@ private:
   bool get_state(spaceship::Motion mt);
 
   void processCommand();
-  void updateFly();
-  void updatePosition();
   bool updateSteering();
-  bool updateVelocity();
-
-  bool computePhysics();
+  // these methods will differ between the Flappy 3D flight ship 
+  // and the normal one. 
+  virtual void updatePosition();
+  virtual bool updateVelocity();
+  virtual bool computePhysics();
   void doMotion();
 
 public:
   friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
-                                                  const char *mesh_filename);
+                                                  const char *mesh_filename, bool m_flappy3D);
 
   // accessors
   inline float facing() const { return m_facing; }
@@ -253,12 +253,34 @@ public:
   void scale(float x, float y, float z);
 
   // render the Spaceship: TexID + Mesh
-  void render(bool flicker = false);
+  virtual void render(bool flicker = false);
   void shadow();
 };
 
+
+class FlappyShip : Spaceship {
+  private: 
+  // override physics methods 
+  void updatePosition() override; 
+  bool updateVelocity() override; 
+  bool computePhysics() override; 
+
+  // methods for 3D flight only   
+  bool updateSteerFlight(); 
+
+  FlappyShip(const char *texture_filename, const char *mesh_filename);
+
+  public: 
+  // get flappy ship instance
+  friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
+                                                  const char *mesh_filename, bool m_flappy3D);
+
+  void render(bool flicker = false) override; 
+
+}; 
+
 std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
-                                         const char *mesh_filename);
+                                         const char *mesh_filename, bool m_flappy3D);
 } // namespace elements
 
 #endif //_ELEMENTS_H_

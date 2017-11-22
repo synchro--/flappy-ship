@@ -22,6 +22,7 @@ void Game::init() {
   m_main_win = m_env.createWindow(win_name, 100, 0, m_env.get_win_width(),
                                   m_env.get_win_height());
   m_main_win->show();
+  m_env.enableVSync(); 
 
   m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 30);
   m_text_big = agl::getTextRenderer("Fonts/neuropol.ttf", 72);
@@ -33,13 +34,13 @@ void Game::init() {
     m_sky = elements::get_sky("Texture/truman.jpg");    
     m_splash_tex = m_env.loadTexture("Texture/splash3.jpg");
 
-    m_ssh = elements::get_spaceship("Texture/wood1.jpg", "Mesh/boat.obj");
+    m_ssh = elements::get_spaceship("Texture/wood1.jpg", "Mesh/boat.obj", m_flappy3D);
 
   } else {
     m_floor = elements::get_floor("Texture/tex1.jpg");
     m_sky = elements::get_sky("Texture/space1.jpg");
     m_ssh =
-        elements::get_spaceship("Texture/tex3.jpg", "Mesh/Envos.obj");
+        elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj", m_flappy3D);
 
     m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
   }
@@ -114,6 +115,7 @@ void Game::gameAction() {
     auto time_now = m_env.getTicks();
     auto diff = time_now - m_last_time;
     m_deadline_time -= diff;
+    m_player_time += diff;
     // if a penalty has been triggered, compute its remaining time
     m_penalty_time = m_penalty_time > 0.0 ? (m_penalty_time - 100) : 0.0;
     m_last_time = time_now;
@@ -132,13 +134,14 @@ void Game::gameAction() {
   ring_crossed = current_ring.isTriggered();
 
   if (ring_crossed) {
-    m_deadline_time += game::RING_TIME;
+    auto bonus = m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME; 
+    m_deadline_time += bonus; 
     m_cur_ring_index++;
     if (m_cur_ring_index >= m_num_rings) {
       // victory: change state and save time for ranking
       lg::i(__func__, "GAME END!!");
       m_victory = true;
-      m_player_time = m_env.getTicks();
+      m_player_time += (m_env.getTicks() - m_last_time); 
       changeState(State::END);
     }
   }
@@ -160,9 +163,11 @@ void Game::init_rings() {
   // see coord_system.h
   // todo: add a check on minimum distance between each of the rings
   for (size_t i = 0; i < m_num_rings; ++i) {
-    auto coords = coordinateGenerator::randomCoord2D();
+    /* auto coords = coordinateGenerator::randomCoord2D();
     float y = 1.5; // height of the ring
-    m_rings.emplace_back(coords.first, y, coords.second);
+    m_rings.emplace_back(coords.first, y, coords.second);*/ 
+    auto coords = coordinateGenerator::randomCoord3D(); 
+    m_rings.emplace_back(coords.x, coords.y, coords.z, m_flappy3D);
   }
 }
 
@@ -170,9 +175,8 @@ void Game::init_cubes() {
   // cubes
   m_cubes.clear();
   for (size_t i = 0; i < m_num_cubes; ++i) {
-    auto coords = coordinateGenerator::randomCoord2D();
-    float y = 2.5; // height of the ring
-    m_cubes.emplace_back(coords.first, y, coords.second);
+    auto coords = coordinateGenerator::randomCoord3D(); 
+    m_cubes.emplace_back(coords.x, coords.y, coords.z, m_flappy3D);
   }
 }
 
@@ -180,6 +184,8 @@ void Game::init_cubes() {
 void Game::init_settings() {
   m_cur_setting = 0;
   m_settings.emplace_back(Setting{m_env.m_blending, "Blending", "ON", "OFF"});
+  m_settings.emplace_back(Setting{m_env.m_wireframe, "Wireframe", "ON", "OFF"}); 
+  m_settings.emplace_back(Setting{m_env.m_envmap, "Env-Mapping", "ON", "OFF"});   
   m_settings.emplace_back(
       Setting{m_flappy3D, "Flappy-Ship (HARD)", "ON", "OFF"});
 }
@@ -258,8 +264,8 @@ void Game::gameOnKey(Key key, bool pressed) {
     if (!m_game_started) {
       m_game_started = true;
       m_last_time = m_env.getTicks();
-      m_player_time = m_env.getTicks();
-      m_deadline_time = RING_TIME; //starting time
+      auto starting_time = m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME;
+      m_deadline_time = starting_time; 
     }
 
     m_ssh->sendCommand(mt, pressed);
@@ -393,7 +399,15 @@ void Game::restartGame() {
   // camera
   m_camera_type = CAMERA_BACK_CAR;
 
-  // elements
+  m_env.reset(); 
+
+  // elements 
+
+  // if player chose flappy mode we need to retrieve the proper Ship type
+  if(m_flappy3D) {
+    m_ssh =         elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj", m_flappy3D);
+  }
+
   m_ssh->init(m_easter_egg); // reset
   init_rings();
   init_cubes();

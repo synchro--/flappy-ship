@@ -67,13 +67,13 @@ Sky *get_sky(const char *texture_filename) {
  *
  */
 
-Ring::Ring(float x, float y, float z, float angle, bool flight_mode)
+Ring::Ring(float x, float y, float z, bool flight_mode, float angle)
     : m_ship_old_z(INFINITY), m_triggered(false), m_env(agl::get_env()) {
+  m_3D_FLIGHT = flight_mode;
   m_px = x;
-  m_py = y;
+  m_py = m_3D_FLIGHT ? y : 1.5; 
   m_pz = z;
   m_angle = angle;
-  m_3D_FLIGHT = flight_mode;
 }
 
 // initaliazing static members of Ring class
@@ -177,13 +177,13 @@ void Ring::checkCrossing(float x, float y, float z) {
  *
  */
 
-BadCube::BadCube(float x, float y, float z, float angle, bool flight_mode)
+BadCube::BadCube(float x, float y, float z, bool flight_mode, float angle)
     : m_ship_old_z(INFINITY), m_env(agl::get_env()) {
+  m_3D_FLIGHT = flight_mode;
   m_px = x;
-  m_py = y;
+  m_py = m_3D_FLIGHT ? y : 2.5; 
   m_pz = z;
   m_angle = angle;
-  m_3D_FLIGHT = flight_mode;
 }
 
 // initaliazing static members of BadCube class

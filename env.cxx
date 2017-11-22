@@ -22,7 +22,7 @@ Env::Env()
 
       // all environment variables
       m_screenH(750), m_screenW(900), m_wireframe(false), m_envmap(true),
-      m_headlight(false), m_shadow(false), m_blending(false), m_step(0) {
+      m_headlight(false), m_shadow(false), m_blending(true) {
 
   // "__func__" == function name
   static const auto TAG = __func__;
@@ -100,6 +100,26 @@ void Env::enableDoubleBuffering() {
   lg::i(__func__, "Enabling double-buffer");
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 }
+
+
+// Enable Vertical Synchronization (VSync). 
+// This prevents the video card from changing the display memory until the monitor is done with its current refresh cycle.
+// When applied, the rendering engine would match the maximum refresh rate of the monitor *if* the frame rate being produced 
+// by the application is higher. 
+// First tries to enable advanced adaptive vsync; if fails, fallbacks on the normal one. 
+
+void Env::enableVSync() {
+	static const auto TAG = __func__; 
+	
+	lg::i(TAG, "Try to enable adactive VSync..."); 
+	if (SDL_GL_SetSwapInterval(-1) < 0) {
+	  lg::i(TAG, "Adaptive VSync not available. Trying for normal vsync..."); 
+      if (SDL_GL_SetSwapInterval(1) < 0) {
+	  lg::i(TAG, "VSync not available!"); 
+      }
+	}
+}
+
 
 /* enables joystick
 void Env::enableJoystick() {
@@ -493,6 +513,13 @@ void Env::render() {
   // finally, the rendering we were all waiting for!
   m_render_handler();
 }
+
+// set environment variables to initial values
+void Env::reset() {
+  m_wireframe = m_headlight  = m_shadow = false;
+  m_envmap = m_blending = true; 
+}
+
 
 void Env::rotate(float angle, const Vec3 &axis) {
   glRotatef(angle, axis.x, axis.y, axis.z);

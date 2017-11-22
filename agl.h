@@ -162,10 +162,6 @@ private:
   double m_fps_now; // fps currently drawn
   uint m_last_time;
   int m_screenH, m_screenW;
-  int m_camera_type;
-  int m_step; // number of steps of Physics currently done
-
-  bool m_wireframe, m_envmap, m_headlight, m_shadow; // environment
 
   /* Callbacks variables:
    *  they will be the handler for keys, mouse & windows events and rendering.
@@ -180,8 +176,8 @@ private:
   std::function<void(game::MouseEvent, int32_t, int32_t)> m_mouse_event_handler;
 
 public:
-  // share this outside the class
-  bool m_blending;
+  // expose environment vars outside the class 
+  bool m_wireframe, m_envmap, m_headlight, m_shadow, m_blending;
 
   // Friends can touch your private parts.
   friend Env &get_env();
@@ -220,6 +216,10 @@ public:
   void set_render(decltype(m_render_handler) render = [] {});
   void set_winevent_handler(decltype(m_window_event_handler) onwinev = [] {});
 
+  // reset environment variables 
+  void reset(); 
+
+
   std::unique_ptr<SmartWindow> createWindow(std::string &name, size_t x,
                                             size_t y, size_t w, size_t h);
   void clearBuffer();
@@ -242,6 +242,7 @@ public:
   inline void enableLighting() { glEnable(GL_LIGHTING); }
 
   void enableDoubleBuffering();
+  void enableVSync(); 
   void enableZbuffer(int depth);
   void enableJoystick();
 
