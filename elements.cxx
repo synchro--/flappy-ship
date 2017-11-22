@@ -71,7 +71,7 @@ Ring::Ring(float x, float y, float z, bool flight_mode, float angle)
     : m_ship_old_z(INFINITY), m_triggered(false), m_env(agl::get_env()) {
   m_3D_FLIGHT = flight_mode;
   m_px = x;
-  m_py = m_3D_FLIGHT ? y : 1.5; 
+  m_py = m_3D_FLIGHT ? y : 1.5;
   m_pz = z;
   m_angle = angle;
 }
@@ -181,7 +181,7 @@ BadCube::BadCube(float x, float y, float z, bool flight_mode, float angle)
     : m_ship_old_z(INFINITY), m_env(agl::get_env()) {
   m_3D_FLIGHT = flight_mode;
   m_px = x;
-  m_py = m_3D_FLIGHT ? y : 2.5; 
+  m_py = m_3D_FLIGHT ? y : 2.5;
   m_pz = z;
   m_angle = angle;
 }
@@ -267,21 +267,22 @@ bool BadCube::checkCrossing(float x, float y, float z) {
 
 /*
  * The Final Door. See elements::Door
- * 
+ *
  */
 
-// get Door instance 
-std::unique_ptr<Door> get_door(const char *mesh_filename) {
-    const static auto TAG = __func__;
-    lg::i(TAG, "Loading Final Door --> Mesh: %s", mesh_filename);
-    // init
-    return std::unique_ptr<Door>(new Door(mesh_filename));
+// get Door instance
+std::unique_ptr<Door> get_door(const char *mesh_filename, const char *texture_filename) {
+  const static auto TAG = __func__;
+  lg::i(TAG, "Loading Final Door --> Mesh: %s", mesh_filename);
+  // init
+  return std::unique_ptr<Door>(new Door(mesh_filename, texture_filename));
 }
 
-Door::Door(const char *mesh_filename)
-    : m_px(0), m_py(0), m_pz(FLOOR_SIZE-10), m_scaleX(DOOR_SCALE), m_scaleY(DOOR_SCALE), m_scaleZ(DOOR_SCALE), m_angle(0), m_ship_old_z(INFINITY), m_env(agl::get_env()), m_mesh(agl::loadMesh(mesh_filename)) 
-    { }
-
+Door::Door(const char *mesh_filename, const char *texture_filename)
+    : m_px(0), m_py(6.0), m_pz(-(FLOOR_SIZE - 1.0)), m_scaleX(DOOR_SCALE),
+      m_scaleY(DOOR_SCALE), m_scaleZ(DOOR_SCALE), m_angle(30),
+      m_ship_old_z(INFINITY), m_env(agl::get_env()),
+      m_mesh(agl::loadMesh(mesh_filename)), m_tex(m_env.loadTexture(texture_filename)) {}
 
 // initaliazing static members of Door class
 // view UP vector
@@ -289,12 +290,18 @@ const agl::Vec3 Door::s_viewUP = agl::Vec3(0.0, 1.0, 0.0);
 const float Door::side = 2.5; // door side
 
 void Door::render() {
+    m_env.textureDrawing(m_tex, [&] {
   m_env.mat_scope([&] {
     m_env.translate(m_px, m_py, m_pz);
+    // adjust mesh pre-defined angle
     m_env.rotate(m_angle, s_viewUP);
+    m_env.rotate(90, agl::Vec3(1.0, 0.0, 0.0));
+    m_env.rotate(45, agl::Vec3(0, 0, 1));
+    // scale mesh
     m_env.scale(m_scaleX, m_scaleY, m_scaleZ);
     m_mesh->renderGouraud(m_env.isWireframe());
   });
+    });
 }
 
 bool Door::checkCrossing(float x, float z) {

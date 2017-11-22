@@ -53,8 +53,8 @@ namespace game {
 
 static const auto RING_TIME = 7000U; // 8 secs
 static const auto BONUS_TIME = 5000U;
-static const auto FLAPPY_RING_TIME = 11000U; // 11 secs 
-static const auto FLAPPY_BONUS_TIME = 7000U; 
+static const auto FLAPPY_RING_TIME = 11000U; // 11 secs
+static const auto FLAPPY_BONUS_TIME = 7000U;
 
 using Entry = std::pair<std::string, double>;
 
@@ -107,17 +107,17 @@ enum Motion { THROTTLE, STEER_L, STEER_R, BRAKE, N_MOTION };
 // to be submitted to the Spaceship
 using Command = std::pair<Motion, bool>;
 
-// acceleration contants 
+// acceleration contants
 static const auto VERY_FAST_ACC = 0.01;
 static const auto FAST_ACC = 0.0045;
 static const auto NORMAL_ACC = 0.0035;
-static const auto FLIGHT_ACC = 0.078; 
+static const auto FLIGHT_ACC = 0.078;
 
 // Mesh dimension resizing constants
 static const auto ENVOS_SCALE = 0.0059;
 static const auto FALCON_SCALE = 0.0099;
 static const auto SHUTTLE_SCALE = 0.013;
-static const auto BOAT_SCALE = 0.17; 
+static const auto BOAT_SCALE = 0.17;
 
 // Some mesh are built along a particular axis:
 // Therefore a rotation is needed
@@ -131,7 +131,7 @@ static const auto BOAT_ANGLE = 270;
 namespace elements {
 static const auto FLOOR_SIZE = 120.0;
 static const auto SKY_RADIUS = 120.0;
-static const auto DOOR_SCALE = 0.07;
+static const auto DOOR_SCALE = 0.7;
 } // namespace elements
 
 #endif //_TYPES_H_

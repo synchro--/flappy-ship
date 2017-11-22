@@ -205,7 +205,7 @@ void Game::openSettings() {
 
     case Key::ESC:
       // if 3D flight is chosen, restart
-      if (m_settings.at(Settings::FLAPPY3D).active) {
+      if (m_settings.at(Settings::FLAPPY3D).active && !m_easter_egg) {
         m_restart_game = true;
         changeState(State::SPLASH);
       }
@@ -259,7 +259,8 @@ void Game::gameOver() {
   static const auto TAG = __func__;
   m_restart_game = false;
   if (m_victory) {
-    lg::i(TAG, "CONGRATULATIONS! Your personal time is: %2.2f", m_player_time/1000.0); 
+    lg::i(TAG, "CONGRATULATIONS! Your personal time is: %2.2f",
+          m_player_time / 1000.0);
     updateRanking();
   }
   // reset handlers that must NOT be used

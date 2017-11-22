@@ -146,7 +146,8 @@ public:
   // radius values
   static const float side;
 
-  BadCube(float x, float y, float z,  bool m_3D_FLIGHT = false, float angle = 30.0);
+  BadCube(float x, float y, float z, bool m_3D_FLIGHT = false,
+          float angle = 30.0);
 
   void render();
 
@@ -161,36 +162,36 @@ public:
   inline float z() { return m_pz; }
 };
 
-
 /*
-* The Final Door to Life
-* 
-* This is the door Truman will have to cross to gain his freedom. 
-*/
+ * The Final Door to Life
+ *
+ * This is the door Truman will have to cross to gain his freedom.
+ */
 
 class Door {
 
-private: 
-  std::unique_ptr<agl::Mesh> m_mesh;  
-  float m_px, m_py, m_pz;  // coords
+private:
+  std::unique_ptr<agl::Mesh> m_mesh;
+  agl::TexID m_tex;
+  float m_px, m_py, m_pz;             // coords
   float m_scaleX, m_scaleY, m_scaleZ; // scaling factors
   float m_ship_old_z; // the previous ship position wrt ring ref frame
-  float m_angle;          // wrt Y-axis
+  float m_angle;      // wrt Y-axis
 
   agl::Env &m_env; // env reference
 
   // private cons, see get_door
-  Door(const char *mesh_filename);
+  Door(const char *mesh_filename, const char *texture_filename);
 
 public:
-  friend std::unique_ptr<Door> get_door(const char *mesh_filename);
+  friend std::unique_ptr<Door> get_door(const char *mesh_filename,
+                                        const char *texture_filename);
 
   // static members
   // view UP vector
   static const agl::Vec3 s_viewUP;
   // radius values to check crossing
   static const float side;
-
 
   void render();
 
@@ -203,9 +204,8 @@ public:
   inline float z() { return m_pz; }
 };
 
-std::unique_ptr<Door> get_door(const char *mesh_filename);
-
-
+std::unique_ptr<Door> get_door(const char *mesh_filename,
+                               const char *texture_filename);
 
 } // namespace elements
 

@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
   lg::set_level(lg::Level::INFO);
 
   std::string name(argv[1]);
-  size_t num_rings = 1; 
+  size_t num_rings = 4;
   game::Game game(name, num_rings);
   game.run();
 

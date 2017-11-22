@@ -6,10 +6,11 @@ namespace game {
 Game::Game(std::string gameID, size_t num_rings)
     : m_gameID(gameID), m_state(State::SPLASH), m_camera_type(CAMERA_BACK_CAR),
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0), m_victory(false),
-      m_flappy3D(false), m_game_started(false), m_restart_game(false),m_deadline_time(0.0), m_final_stage(false),
-      m_last_time(.0), m_penalty_time(0.0), m_num_rings(num_rings),
-      m_env(agl::get_env()), m_num_cubes(10),
-      m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr), m_final_door(nullptr),m_ssh(nullptr) {}
+      m_flappy3D(false), m_game_started(false), m_restart_game(false),
+      m_deadline_time(0.0), m_final_stage(false), m_last_time(.0),
+      m_penalty_time(0.0), m_num_rings(num_rings), m_env(agl::get_env()),
+      m_num_cubes(10), m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr),
+      m_final_door(nullptr), m_ssh(nullptr) {}
 
 /*
  * Init the game:
@@ -22,34 +23,35 @@ void Game::init() {
   m_main_win = m_env.createWindow(win_name, 100, 0, m_env.get_win_width(),
                                   m_env.get_win_height());
   m_main_win->show();
-  m_env.enableVSync(); 
+  m_env.enableVSync();
 
   m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 30);
   m_text_big = agl::getTextRenderer("Fonts/neuropol.ttf", 72);
 
-  m_easter_egg = m_gameID == "Truman"; 
+  m_easter_egg = m_gameID == "Truman";
 
   if (m_easter_egg) {
     m_floor = elements::get_floor("Texture/truman-texture.jpg");
-    m_sky = elements::get_sky("Texture/truman.jpg");    
+    m_sky = elements::get_sky("Texture/truman.jpg");
     m_splash_tex = m_env.loadTexture("Texture/splash3.jpg");
-    m_final_door = elements::get_door("Mesh/InteriorDoor.obj"); 
+    m_final_door = elements::get_door("Mesh/porta.obj", "Texture/wop4.jpg");
 
-    m_ssh = elements::get_spaceship("Texture/wood1.jpg", "Mesh/boat.obj", m_flappy3D);
+    m_ssh = elements::get_spaceship("Texture/wood1.jpg", "Mesh/boat.obj",
+                                    m_flappy3D);
 
   } else {
     m_floor = elements::get_floor("Texture/tex1.jpg");
     m_sky = elements::get_sky("Texture/space1.jpg");
-    m_ssh =
-        elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj", m_flappy3D);
+    m_ssh = elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj",
+                                    m_flappy3D);
 
     m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
   }
 
-  // init spaceship according to the surprise... or not. 
+  // init spaceship according to the surprise... or not.
   m_ssh->init(m_easter_egg);
 
-  m_menu_tex = m_env.loadTexture("Texture/menu.jpg");  
+  m_menu_tex = m_env.loadTexture("Texture/menu.jpg");
   init_rings();
   init_cubes();
   init_settings();
@@ -102,27 +104,27 @@ void Game::changeState(game::State next_state) {
 
 // victory: change state and save time for ranking
 void Game::goToVictory() {
-      lg::i(__func__, "GAME END!!");
-      m_victory = true;
-      m_player_time += (m_env.getTicks() - m_last_time); 
-      changeState(State::END);
+  lg::i(__func__, "GAME END!!");
+  m_victory = true;
+  m_player_time += (m_env.getTicks() - m_last_time);
+  changeState(State::END);
 }
 
-// update all timings and check if deadline has come. 
-// If so, goes to gameover. 
+// update all timings and check if deadline has come.
+// If so, goes to gameover.
 void Game::checkTime() {
-    auto time_now = m_env.getTicks();
-    auto diff = time_now - m_last_time;
-    m_deadline_time -= diff;
-    m_player_time += diff;
-    // if a penalty has been triggered, compute its remaining time
-    m_penalty_time = m_penalty_time > 0.0 ? (m_penalty_time - 100) : 0.0;
-    m_last_time = time_now;
+  auto time_now = m_env.getTicks();
+  auto diff = time_now - m_last_time;
+  m_deadline_time -= diff;
+  m_player_time += diff;
+  // if a penalty has been triggered, compute its remaining time
+  m_penalty_time = m_penalty_time > 0.0 ? (m_penalty_time - 100) : 0.0;
+  m_last_time = time_now;
 
-    if (m_deadline_time < 0) { // let's leave a last second hope
-      m_victory = false;
-      changeState(State::END);
-    }
+  if (m_deadline_time < 0) { // let's leave a last second hope
+    m_victory = false;
+    changeState(State::END);
+  }
 }
 
 void Game::gameAction() {
@@ -142,45 +144,44 @@ void Game::gameAction() {
   }
 
   // if we are in final stage, only the final door is taken into account
-  if(m_final_stage) {
-    if(m_final_door->checkCrossing(m_ssh->x(), m_ssh->z())) {
-        goToVictory(); 
-      }
-  } 
+  if (m_final_stage) {
+    if (m_final_door->checkCrossing(m_ssh->x(), m_ssh->z())) {
+      goToVictory();
+    }
+  }
 
   // else game proceeds normally
   else {
 
-  // BadCubes check 
-  for (auto &cube : m_cubes) {
-    if (cube.checkCrossing(m_ssh->x(), m_ssh->z())) {
-      lg::i(__func__, "Penalty!");
-      m_penalty_time = 6000U;
-      break;
-    }
-  }
-
-  // rings check 
-  auto &current_ring = m_rings.at(m_cur_ring_index);
-  // check se gli anelli sono stati attraversati
-  // spawn nuovo anello + bonus time || crea porta finale (time diventa rosso)
-  current_ring.checkCrossing(m_ssh->x(), m_ssh->z());
-  bool ring_crossed;
-  ring_crossed = current_ring.isTriggered();
-
-  if (ring_crossed) {
-    auto bonus = m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME; 
-    m_deadline_time += bonus; 
-    m_cur_ring_index++;
-    if (m_cur_ring_index >= m_num_rings) {
-      if(!m_easter_egg) {
-        goToVictory(); 
-      } else {
-        m_final_stage = true; 
+    // BadCubes check
+    for (auto &cube : m_cubes) {
+      if (cube.checkCrossing(m_ssh->x(), m_ssh->z())) {
+        lg::i(__func__, "Penalty!");
+        m_penalty_time = 6000U;
+        break;
       }
     }
-   }
 
+    // rings check
+    auto &current_ring = m_rings.at(m_cur_ring_index);
+    // check se gli anelli sono stati attraversati
+    // spawn nuovo anello + bonus time || crea porta finale (time diventa rosso)
+    current_ring.checkCrossing(m_ssh->x(), m_ssh->z());
+    bool ring_crossed;
+    ring_crossed = current_ring.isTriggered();
+
+    if (ring_crossed) {
+      auto bonus = m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME;
+      m_deadline_time += bonus;
+      m_cur_ring_index++;
+      if (m_cur_ring_index >= m_num_rings) {
+        if (!m_easter_egg) {
+          goToVictory();
+        } else {
+          m_final_stage = true;
+        }
+      }
+    }
   }
 }
 
@@ -192,7 +193,7 @@ void Game::init_rings() {
   // see coord_system.h
   // todo: add a check on minimum distance between each of the rings
   for (size_t i = 0; i < m_num_rings; ++i) {
-    auto coords = coordinateGenerator::randomCoord3D(); 
+    auto coords = coordinateGenerator::randomCoord3D();
     m_rings.emplace_back(coords.x, coords.y, coords.z, m_flappy3D);
   }
 }
@@ -201,7 +202,7 @@ void Game::init_cubes() {
   // cubes
   m_cubes.clear();
   for (size_t i = 0; i < m_num_cubes; ++i) {
-    auto coords = coordinateGenerator::randomCoord3D(); 
+    auto coords = coordinateGenerator::randomCoord3D();
     m_cubes.emplace_back(coords.x, coords.y, coords.z, m_flappy3D);
   }
 }
@@ -210,8 +211,8 @@ void Game::init_cubes() {
 void Game::init_settings() {
   m_cur_setting = 0;
   m_settings.emplace_back(Setting{m_env.m_blending, "Blending", "ON", "OFF"});
-  m_settings.emplace_back(Setting{m_env.m_wireframe, "Wireframe", "ON", "OFF"}); 
-  m_settings.emplace_back(Setting{m_env.m_envmap, "Env-Mapping", "ON", "OFF"});   
+  m_settings.emplace_back(Setting{m_env.m_wireframe, "Wireframe", "ON", "OFF"});
+  m_settings.emplace_back(Setting{m_env.m_envmap, "Env-Mapping", "ON", "OFF"});
   m_settings.emplace_back(
       Setting{m_flappy3D, "Flappy-Ship (HARD)", "ON", "OFF"});
 }
@@ -290,8 +291,9 @@ void Game::gameOnKey(Key key, bool pressed) {
     if (!m_game_started) {
       m_game_started = true;
       m_last_time = m_env.getTicks();
-      auto starting_time = m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME;
-      m_deadline_time = starting_time; 
+      auto starting_time =
+          m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME;
+      m_deadline_time = starting_time;
     }
 
     m_ssh->sendCommand(mt, pressed);
@@ -384,11 +386,11 @@ void Game::gameRender() {
     m_ssh->shadow();
   }
 
-  if(m_cur_ring_index >= m_num_rings && m_easter_egg) {
-    m_final_door->render(); 
+  if (m_cur_ring_index >= m_num_rings && m_easter_egg) {
+    m_final_door->render();
   }
 
-  // HeadUp Display 
+  // HeadUp Display
   drawHUD();
 
   m_env.enableLighting();
@@ -422,19 +424,20 @@ void Game::restartGame() {
   lg::i(TAG, "Starting NEW game...");
   // handle 3D flight if activated
   // game vars
-  m_restart_game, m_game_started, m_final_stage = false;
+  m_restart_game = m_game_started = m_final_stage = false;
   m_player_time = m_deadline_time = 0.0;
   m_penalty_time = m_last_time = 0;
 
   // camera
   m_camera_type = CAMERA_BACK_CAR;
 
-  m_env.reset(); 
+  m_env.reset();
 
-  // elements 
+  // elements
   // if player chose flappy mode we need to retrieve the proper Ship type
-  if(m_flappy3D) {
-    m_ssh = elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj", m_flappy3D);
+  if (m_flappy3D) {
+    m_ssh = elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj",
+                                    m_flappy3D);
   }
 
   m_ssh->init(m_easter_egg); // reset

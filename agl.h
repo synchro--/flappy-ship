@@ -176,7 +176,7 @@ private:
   std::function<void(game::MouseEvent, int32_t, int32_t)> m_mouse_event_handler;
 
 public:
-  // expose environment vars outside the class 
+  // expose environment vars outside the class
   bool m_wireframe, m_envmap, m_headlight, m_shadow, m_blending;
 
   // Friends can touch your private parts.
@@ -216,9 +216,8 @@ public:
   void set_render(decltype(m_render_handler) render = [] {});
   void set_winevent_handler(decltype(m_window_event_handler) onwinev = [] {});
 
-  // reset environment variables 
-  void reset(); 
-
+  // reset environment variables
+  void reset();
 
   std::unique_ptr<SmartWindow> createWindow(std::string &name, size_t x,
                                             size_t y, size_t w, size_t h);
@@ -242,7 +241,7 @@ public:
   inline void enableLighting() { glEnable(GL_LIGHTING); }
 
   void enableDoubleBuffering();
-  void enableVSync(); 
+  void enableVSync();
   void enableZbuffer(int depth);
   void enableJoystick();
 
