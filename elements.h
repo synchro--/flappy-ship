@@ -188,7 +188,8 @@ protected:
 
   // Spaceship Stats: this will be constant over time
   float m_steer_speed, m_steer_return, m_grip, m_frictionX, m_frictionY,
-      m_frictionZ, m_max_acceleration, m_max_flight_acc;
+      m_frictionZ, m_max_acceleration; 
+  float m_max_flight_acc;
 
   float m_scaleX, m_scaleY, m_scaleZ; // dimension scaling
   size_t m_rotation_angle; // depending on how the mesh has been designed
@@ -208,7 +209,7 @@ protected:
       m_mesh; // mesh structure for the Aventador Spaceship
   // angles, grip and friction
 
-  // private constructor to ensure singleton instance
+  // protected constructor to ensure singleton instance
   // instance is obtained through get_spaceship()
   Spaceship(const char *texture_filename, const char *mesh_filename);
 
@@ -252,20 +253,29 @@ public:
   void scale(float x, float y, float z);
 
   // render the Spaceship: TexID + Mesh
-  void render(bool flicker = false);
+  virtual void render(bool flicker = false);
   void shadow();
 };
 
 
-class Ship : Spaceship {
+class FlappyShip : Spaceship {
   private: 
   // override physics methods 
   void updatePosition() override; 
-  void updateVelocity() override; 
-  void computePhysics() override; 
+  bool updateVelocity() override; 
+  bool computePhysics() override; 
 
   // methods for 3D flight only   
   bool updateSteerFlight(); 
+
+  FlappyShip(const char *texture_filename, const char *mesh_filename);
+
+  public: 
+  // get flappy ship instance
+  friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
+                                                  const char *mesh_filename, bool m_flappy3D);
+
+  void render(bool flicker = false) override; 
 
 }; 
 

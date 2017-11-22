@@ -34,13 +34,13 @@ void Game::init() {
     m_sky = elements::get_sky("Texture/truman.jpg");    
     m_splash_tex = m_env.loadTexture("Texture/splash3.jpg");
 
-    m_ssh = elements::get_spaceship("Texture/wood1.jpg", "Mesh/boat.obj");
+    m_ssh = elements::get_spaceship("Texture/wood1.jpg", "Mesh/boat.obj", m_flappy3D);
 
   } else {
     m_floor = elements::get_floor("Texture/tex1.jpg");
     m_sky = elements::get_sky("Texture/space1.jpg");
     m_ssh =
-        elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj");
+        elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj", m_flappy3D);
 
     m_splash_tex = m_env.loadTexture("Texture/splash2.jpg");
   }
@@ -115,6 +115,7 @@ void Game::gameAction() {
     auto time_now = m_env.getTicks();
     auto diff = time_now - m_last_time;
     m_deadline_time -= diff;
+    m_player_time += diff;
     // if a penalty has been triggered, compute its remaining time
     m_penalty_time = m_penalty_time > 0.0 ? (m_penalty_time - 100) : 0.0;
     m_last_time = time_now;
@@ -140,7 +141,7 @@ void Game::gameAction() {
       // victory: change state and save time for ranking
       lg::i(__func__, "GAME END!!");
       m_victory = true;
-      m_player_time = m_env.getTicks();
+      m_player_time += (m_env.getTicks() - m_last_time); 
       changeState(State::END);
     }
   }
@@ -401,7 +402,13 @@ void Game::restartGame() {
 
   m_env.reset(); 
 
-  // elements
+  // elements 
+
+  // if player chose flappy mode we need to retrieve the proper Ship type
+  if(m_flappy3D) {
+    m_ssh =         elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj", m_flappy3D);
+  }
+
   m_ssh->init(m_easter_egg); // reset
   init_rings();
   init_cubes();
