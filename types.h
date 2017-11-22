@@ -131,6 +131,7 @@ static const auto BOAT_ANGLE = 270;
 namespace elements {
 static const auto FLOOR_SIZE = 120.0;
 static const auto SKY_RADIUS = 120.0;
+static const auto DOOR_SCALE = 0.07;
 } // namespace elements
 
 #endif //_TYPES_H_

@@ -1,11 +1,15 @@
 ale 0
+Tru 6.956
+Truman 8.584
 Jin 10.41
+Truman 11.454
 Truman 11.905
 Trum 12.206
 Ale 12.222
 Truman 12.652
 Trum 13.185
 Truman 15.369
+Truman 17.442
 Truman 20.355
 Ale 25.434
 Truman 26.825
@@ -15,6 +19,7 @@ lol 30.116
 Truman 39.93
 Trum 45.469
 ale 47.676
+Truman 48.732
 ale 67.772
 ale 79.681
 Trum 108.045

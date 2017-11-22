@@ -265,4 +265,60 @@ bool BadCube::checkCrossing(float x, float y, float z) {
   return (check_Z && check_Y && check_X);
 }
 
+/*
+ * The Final Door. See elements::Door
+ * 
+ */
+
+// get Door instance 
+std::unique_ptr<Door> get_door(const char *mesh_filename) {
+    const static auto TAG = __func__;
+    lg::i(TAG, "Loading Final Door --> Mesh: %s", mesh_filename);
+    // init
+    return std::unique_ptr<Door>(new Door(mesh_filename));
+}
+
+Door::Door(const char *mesh_filename)
+    : m_px(0), m_py(0), m_pz(FLOOR_SIZE-10), m_scaleX(DOOR_SCALE), m_scaleY(DOOR_SCALE), m_scaleZ(DOOR_SCALE), m_angle(0), m_ship_old_z(INFINITY), m_env(agl::get_env()), m_mesh(agl::loadMesh(mesh_filename)) 
+    { }
+
+
+// initaliazing static members of Door class
+// view UP vector
+const agl::Vec3 Door::s_viewUP = agl::Vec3(0.0, 1.0, 0.0);
+const float Door::side = 2.5; // door side
+
+void Door::render() {
+  m_env.mat_scope([&] {
+    m_env.translate(m_px, m_py, m_pz);
+    m_env.rotate(m_angle, s_viewUP);
+    m_env.scale(m_scaleX, m_scaleY, m_scaleZ);
+    m_mesh->renderGouraud(m_env.isWireframe());
+  });
+}
+
+bool Door::checkCrossing(float x, float z) {
+  // get distance wrt to the door center
+  x -= m_px;
+  z -= m_pz;
+
+  float cos_phi = cosf(m_angle * M_PI / 180.0f);
+  float sin_phi = sinf(m_angle * M_PI / 180.0f);
+
+  // project coords of the ship to the door reference frame
+  float x_ring = x * cos_phi - z * sin_phi;
+  float z_ring = x * sin_phi + z * cos_phi;
+
+  // X: is it inside the square perimeter ?
+  bool check_X = (x_ring < 2 * side) && (x_ring > -2 * side);
+  // Z: sign changed? Then crossing happened
+  bool check_Z =
+      (z_ring >= 0 && m_ship_old_z < 0) || (z_ring <= 0 && m_ship_old_z > 0);
+
+  // update last z
+  m_ship_old_z = z_ring;
+
+  return check_X && check_Z;
+}
+
 } // namespace elements
