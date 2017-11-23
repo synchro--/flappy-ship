@@ -116,11 +116,10 @@ int AGLTextRenderer::renderf(int x_o, int y_o, const char *fmt, ...) {
   return ret;
 }
 
-// private
 // Reminder: x_o, y_o is the top-left origin
 // Get Glyph -
 void AGLTextRenderer::renderChar(int x_o, int y_o, char letter) {
-  // check on letter todo
+  // check on letter
   if (letter > '~' || letter < ' ') {
     lg::e(__func__, "Out of range char");
   }
@@ -142,24 +141,6 @@ void AGLTextRenderer::renderChar(int x_o, int y_o, char letter) {
   // Draw texture with quads
   glBegin(GL_QUADS);
   {
-    /*
-    // bottom-left
-    glTexCoord2f(0, 0);
-      glVertex2f(x_o, y_o + m_font_height);
-
-
-      // top-left
-      glTexCoord2f(0, 1);
-      glVertex2f(x_o, y_o);
-
-      // top-right
-      glTexCoord2f(1, 1);
-      glVertex2f(x_o+ glyph.get_maxX(), y_o);
-
-      // bottom-right
-      glTexCoord2f(1, 0);
-      glVertex2f(x_o + glyph.get_maxX(), y_o + m_font_height);
-  */
     // bottom-left
     glTexCoord2f(0, 0);
     glVertex2f(x_o - m_font_outline, (y_o + m_font_height - m_font_outline));

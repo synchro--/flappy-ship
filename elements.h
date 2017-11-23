@@ -8,7 +8,7 @@
 
 /*
  * elementsh describes the different objects (elements) of the game
- * Floor, Sky, ..., it will be expanded as the game gets more complex
+ * Floor, Sky, Rings, ... it will be expanded as the game gets more complex
  * and new elements gets added.
  */
 

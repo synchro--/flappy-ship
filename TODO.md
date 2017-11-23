@@ -28,4 +28,27 @@ La posizione se non erro dovrebbe essere Z = Floor::SIZE e X = 0 tipo
 - ombre e lights dovrebbero essere nel menù
 - aggiungere envmapping che funziona bene e wireframe
 
+## Ingegneria del Software
+- Aggiungere helpers in openSettings, Game Action 
+- Dividere le funzioni nell'header a seconda se sono dei setter o delle callbacks 
+
+### Notes 
+ -----------------------------------------------------
+DEFAULT VARIABLES VALUES 
+
+view_alpha = 20;
+view_beta = 40; // angoli che definiscono la vista
+eyeDist = 5.0;                 // distanza dell'occhio dall'origine
+scrH = 750;
+scrW = 750;          // altezza e larghezza viewport (in pixels)
+useWireframe = false;
+useEnvmap = true;
+useHeadlight = false;
+useShadow = true;
+cameraType = 0;
+nstep =0; 
+fps =0; 
+fpsNow = 0; 
+timeLastInterval = 0; 
+
 

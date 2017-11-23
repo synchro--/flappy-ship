@@ -103,6 +103,9 @@ bool FlappyShip::updateVelocity() {
   return true;
 }
 
+// Flappy Render: 
+// It's almost the same but we need to tilt the nose of the ship according 
+// to the direction of the flight 
 void FlappyShip::render(bool flicker) {
   m_env.mat_scope([&] {
 

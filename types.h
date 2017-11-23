@@ -10,8 +10,7 @@
 #include <GL/glu.h>
 
 // This header contains different data types used in the game.
-// It's structured in different namespaces according to whom
-// uses the defined types.
+// It's structured in different namespaces.
 
 // definitions
 #define CAMERA_BACK_CAR 0

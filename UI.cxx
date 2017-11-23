@@ -1,7 +1,8 @@
 #include "game.h"
 #include <algorithm>
 
-/* This source contains all the Menu functions */
+// This source contains all the User Interface functions
+// Splash - Minimap - HUD - Settings - End Screen 
 
 namespace game {
 

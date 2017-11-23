@@ -6,7 +6,7 @@
 /*
  * SmartWindow is a class that represents a graphical window, it's basically
  * a wrapper on top of an SDL_Window.
- * Takes also care of initializing the GL Context
+ * The class takes also care of initializing the GL Context
  */
 
 namespace agl {

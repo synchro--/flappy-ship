@@ -25,7 +25,7 @@
  * simplify the usage of all the graphic functions in the project.
  *
  * Note: methods have camelCase usually.
- *       Small ones like accessors, however, have _underscore_ case.
+ *       Lil' ones like accessors, however, have _underscore_ case.
  */
 
 namespace agl {
@@ -83,29 +83,25 @@ struct Vertex {
 
 struct Edge {
 public:
-  Vertex *v[2]; // due puntatori a Vertice (i due estremi dell'edge)
-  // attributi per edge:
+  Vertex *v[2]; // pointers to the 2 edge extremes 
 };
 
 struct Face {
 public:
-  Vertex *verts[3]; // tre puntatori a Vertice (i tre vertici del triangolo)
+  Vertex *verts[3]; // pointers to the 3 triangle vertices
 
-  // costruttore
+  // public cons
   Face(Vertex *a, Vertex *b, Vertex *c);
 
-  // attributi per faccia
-  Normal3 normal; // normale (per faccia)
+  // each face has a Normal 
+  Normal3 normal; 
 
-  // computa la normale della faccia
+  // computes the face normal
   inline void computeNormal() {
     normal = -((verts[1]->point - verts[0]->point) %
                (verts[2]->point - verts[0]->point))
                   .normalize();
   }
-
-  // forse aggiungere un metodo render anche a Face rende il codice più
-  // leggibile
 };
 
 // A mesh object, loaded from a Wavefront Obj
@@ -263,8 +259,6 @@ public:
    * SDL_Quit event and dispatch everything.
    */
 
-  void redraw();
-
   // compute the FPS and Renders!
   void render();
   void renderLoop();
@@ -332,7 +326,7 @@ public:
  * The only way to do render TTF in OpenGL is to render each glyph as a texture,
  * which of course carries a painful overhead on the game at runtime. The
  * solution is to load an atlas of chars of the selected TTF as a vector of
- * textures and store in memory. Later on, when we'll need to render text we'll
+ * textures and store it on the GPU memory. Later on, when we'll need to render text we'll
  * just render it as a list of textured quads from pre-loaded textures.
  */
 

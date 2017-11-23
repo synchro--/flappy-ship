@@ -2,6 +2,7 @@
 #include <SDL2/SDL_ttf.h>
 
 namespace agl {
+
 // Returns the singleton instance of agl::Env, initializing it if necessary
 Env &get_env() {
   // having a unique ptr ensures the Env will be called only during the main
@@ -13,7 +14,7 @@ Env &get_env() {
   return *s_env;
 }
 
-// constructs the environment, initializing many elements
+// constructs the environment, initializing stuff
 Env::Env()
     // All callbacks are init to empty lambdas
     : m_action_handler([] {}), m_render_handler([] {}),
@@ -24,11 +25,9 @@ Env::Env()
       m_screenH(750), m_screenW(900), m_wireframe(false), m_envmap(true),
       m_headlight(false), m_shadow(false), m_blending(true) {
 
-  // "__func__" == function name
+  // -----> "__func__" == function name
+  // it will be used systematically thorugh the code 
   static const auto TAG = __func__;
-
-  // Don't let SDL set its signal() handlers - Ctrl+c and friends will work
-  // SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
 
   lg::i(TAG, "init SDL and OpenGL");
 
@@ -58,7 +57,7 @@ Env::~Env() {
   SDL_Quit();
 }
 
-// Sets the action callback which is called once in every iteration. Before the
+// Sets the action callback which is called once in every iteration, before the
 // actual rendering.
 void Env::set_action(decltype(m_action_handler) actions) {
   m_action_handler = actions;
@@ -121,6 +120,7 @@ void Env::enableVSync() {
 }
 
 /* enables joystick
+// NOT used in this application
 void Env::enableJoystick() {
   lg::i(__func__, "### Joystick is Enabled ###");
 
@@ -129,6 +129,9 @@ void Env::enableJoystick() {
 }
 */
 
+// this is a useful helper not to forget to pop prospective matrices 
+// that have been previously pushed.
+// Takes a lambda as argument
 void Env::mat_scope(const std::function<void(void)> callback) {
   glPushMatrix();
   callback();
@@ -142,9 +145,9 @@ void setColor(const Color &color) {
 }
 
 void Env::clearBuffer() {
-  // colore sfondo = bianco
+  // background colore = WHITE 
   glClearColor(WHITE.r, WHITE.g, WHITE.b, WHITE.a);
-  // riempe tutto lo screen buffer di pixel color sfondo
+  // fill screen buffer 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -217,21 +220,21 @@ void Env::drawCubeFill(const float S) {
 void Env::drawCubeWire(const float side) {
   lineWidth(12.0);
 
-  glBegin(GL_LINE_LOOP); // faccia z=+side
+  glBegin(GL_LINE_LOOP); // face z=+side
   glVertex3f(+side, +side, +side);
   glVertex3f(-side, +side, +side);
   glVertex3f(-side, -side, +side);
   glVertex3f(+side, -side, +side);
   glEnd();
 
-  glBegin(GL_LINE_LOOP); // faccia z=-side
+  glBegin(GL_LINE_LOOP); // face z=-side
   glVertex3f(+side, -side, -side);
   glVertex3f(-side, -side, -side);
   glVertex3f(-side, +side, -side);
   glVertex3f(+side, +side, -side);
   glEnd();
 
-  glBegin(GL_LINES); // 4 segmenti da -z a +z
+  glBegin(GL_LINES); // 4 segments from -z to +z
   glVertex3f(-side, -side, -side);
   glVertex3f(-side, -side, +side);
 
@@ -486,7 +489,8 @@ TexID Env::loadTexture(const char *filename, bool repeat, bool nearest) {
   return texbind;
 }
 
-// probabilmente da eliminare e gestire diversamente in seguito
+/*
+NOT USED 
 void Env::redraw() {
   // ci automandiamo un messaggio che (s.o. permettendo)
   // ci fara' ridisegnare la finestra
@@ -494,7 +498,7 @@ void Env::redraw() {
   e.type = SDL_WINDOWEVENT;
   e.window.event = SDL_WINDOWEVENT_EXPOSED;
   SDL_PushEvent(&e);
-}
+} */
 
 // 1. Compute FPS
 // 2. Calls rendering callback
@@ -547,8 +551,7 @@ void Env::setCoordToPixel() {
 }
 
 void Env::setupLightPosition() {
-  // setto la posizione luce
-  float light_position[4] = {0, 1, 2, 0}; // ultima comp=0 => luce direzionale
+  float light_position[4] = {0, 1, 2, 0}; // last component = 0 ==> directional light
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 }
 
@@ -568,8 +571,7 @@ void Env::setupModel() {
 }
 
 // Switches mode into GL_PERSPECTIVE, and then loads an identity matrix.
-// The perspective is then arbitrarily set up.
-// Height and Width are hardcoded for now
+// Then it sets up the perspective according to height and width
 void Env::setupPersp() {
   double fovy = 70.0; // field of view angle, in deegres, along y direction
   double zNear = .2, zFar = 1000; // clipping plane distance

@@ -358,9 +358,9 @@ void Game::gameRender() {
   m_floor->render();
   m_sky->render();
 
-  // FLICKERING PENALTY
-  // if the spaceship hit a cube it will be rendered in a flickered way
-  // switching from goroud to wirefram rend every 200ms
+  // ---FLICKERING PENALTY---
+  // if the spaceship hits a cube it will be rendered in a flickered way
+  // switching from gouraud to wireframe rendering every 200ms
   if (m_penalty_time && ((m_penalty_time / 200) % 2 == 1)) {
     m_ssh->render(true);
   } else {
@@ -434,7 +434,7 @@ void Game::restartGame() {
   m_env.reset();
 
   // elements
-  // if player chose flappy mode we need to retrieve the proper Ship type
+  // if player chose flappy mode we need to retrieve the proper type of Ship
   if (m_flappy3D) {
     m_ssh = elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj",
                                     m_flappy3D);
@@ -472,7 +472,7 @@ void Game::setupShipCamera() {
   float py = m_ssh->y();
   float pz = m_ssh->z();
 
-  // controllo la posizione della camera a seconda dell'opzione selezionata
+  // update camera position according to the selected camera mode
   switch (m_camera_type) {
 
   case CAMERA_BACK_CAR: {

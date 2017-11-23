@@ -9,7 +9,8 @@
 #include "types.h"
 
 /*
- * Coordinate System Generator.
+ * Coordinate System Generator
+ * ----------------------------
  * Namespace which provides high level functions to generate random
  * coordinates to place various elements in the game. It provides both general
  * random coords and random coords specific to one of the 4 quadrants. It

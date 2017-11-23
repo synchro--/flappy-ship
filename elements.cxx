@@ -187,7 +187,6 @@ BadCube::BadCube(float x, float y, float z, bool flight_mode, float angle)
 }
 
 // initaliazing static members of BadCube class
-
 // view UP vector
 const agl::Vec3 BadCube::s_viewUP = agl::Vec3(0.0, 1.0, 0.0);
 const float BadCube::side = 2.5; // side of the cube
@@ -196,7 +195,8 @@ void BadCube::render() {
   m_env.mat_scope([&] {
     m_env.translate(m_px, m_py, m_pz);
     m_env.rotate(m_angle, s_viewUP);
-
+    
+    // if blending is not active the cubes will be just plain squares
     if (m_env.isBlending()) {
       // maybe move this to Env helper function
       glEnable(GL_BLEND);
@@ -208,7 +208,6 @@ void BadCube::render() {
     } else {
       m_env.setColor(agl::YELLOW);
       m_env.drawSquare(side);
-      // m_env.drawCube(side);
     }
 
   });
