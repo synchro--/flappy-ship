@@ -40,7 +40,7 @@ void Game::init() {
                                     m_flappy3D);
 
   } else {
-    m_floor = elements::get_floor("Texture/tex1.jpg");
+    m_floor = elements::get_floor("Texture/tex2.jpg");
     m_sky = elements::get_sky("Texture/space1.jpg");
     m_ssh = elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj",
                                     m_flappy3D);
