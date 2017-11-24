@@ -6,7 +6,7 @@ namespace game {
 Game::Game(std::string gameID, size_t num_rings)
     : m_gameID(gameID), m_state(State::SPLASH), m_camera_type(CAMERA_BACK_CAR),
       m_eye_dist(5.0), m_view_alpha(20.0), m_view_beta(40.0), m_victory(false),
-      m_flappy3D(false), m_game_started(false), m_restart_game(false),
+      m_flappy3D(false), m_isFlappyOn(false), m_game_started(false), m_restart_game(false),
       m_deadline_time(0.0), m_final_stage(false), m_last_time(.0),
       m_penalty_time(0.0), m_num_rings(num_rings), m_env(agl::get_env()),
       m_num_cubes(10), m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr),
@@ -127,6 +127,44 @@ void Game::checkTime() {
   }
 }
 
+// check if current ring has been crossed 
+// if so gives a bonus time + spawn next ring 
+// if last ring has been crossed, go to victory 
+void Game::checkRings() {
+    // rings check
+    auto &current_ring = m_rings.at(m_cur_ring_index);
+    // check se gli anelli sono stati attraversati
+    // spawn nuovo anello + bonus time || crea porta finale (time diventa rosso)
+    current_ring.checkCrossing(m_ssh->x(), m_ssh->z());
+    bool ring_crossed;
+    ring_crossed = current_ring.isTriggered();
+
+    if (ring_crossed) {
+      auto bonus = m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME;
+      m_deadline_time += bonus;
+      m_cur_ring_index++;
+      if (m_cur_ring_index >= m_num_rings) {
+        if (!m_easter_egg) {
+          goToVictory();
+        } else {
+          m_final_stage = true;
+        }
+      }
+    }
+}
+
+    // BadCubes check
+// if the ship crosses one -> apply penalty
+void Game::checkCubes() {
+    for (auto &cube : m_cubes) {
+      if (cube.checkCrossing(m_ssh->x(), m_ssh->z())) {
+        lg::i(__func__, "Penalty!");
+        m_penalty_time = 6000U;
+        break;
+      }
+    }
+}
+
 void Game::gameAction() {
   // Game actions:
   // - Ship execute a step of physics
@@ -152,36 +190,8 @@ void Game::gameAction() {
 
   // else game proceeds normally
   else {
-
-    // BadCubes check
-    for (auto &cube : m_cubes) {
-      if (cube.checkCrossing(m_ssh->x(), m_ssh->z())) {
-        lg::i(__func__, "Penalty!");
-        m_penalty_time = 6000U;
-        break;
-      }
-    }
-
-    // rings check
-    auto &current_ring = m_rings.at(m_cur_ring_index);
-    // check se gli anelli sono stati attraversati
-    // spawn nuovo anello + bonus time || crea porta finale (time diventa rosso)
-    current_ring.checkCrossing(m_ssh->x(), m_ssh->z());
-    bool ring_crossed;
-    ring_crossed = current_ring.isTriggered();
-
-    if (ring_crossed) {
-      auto bonus = m_flappy3D ? game::FLAPPY_RING_TIME : game::RING_TIME;
-      m_deadline_time += bonus;
-      m_cur_ring_index++;
-      if (m_cur_ring_index >= m_num_rings) {
-        if (!m_easter_egg) {
-          goToVictory();
-        } else {
-          m_final_stage = true;
-        }
-      }
-    }
+    checkCubes(); 
+    checkRings(); 
   }
 }
 
@@ -422,7 +432,6 @@ void Game::restartGame() {
   static const auto TAG = __func__;
 
   lg::i(TAG, "Starting NEW game...");
-  // handle 3D flight if activated
   // game vars
   m_restart_game = m_game_started = m_final_stage = false;
   m_player_time = m_deadline_time = 0.0;
@@ -434,11 +443,11 @@ void Game::restartGame() {
   m_env.reset();
 
   // elements
-  // if player chose flappy mode we need to retrieve the proper type of Ship
-  if (m_flappy3D) {
-    m_ssh = elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj",
+  // handle 3D flight if activated
+  // retrieve the right type of ship 
+  m_ssh = elements::get_spaceship("Texture/tex5.jpg", "Mesh/Envos.obj",
                                     m_flappy3D);
-  }
+  m_isFlappyOn = m_flappy3D; // flag to remember the current game is in flappy mode
 
   m_ssh->init(m_easter_egg); // reset
   init_rings();

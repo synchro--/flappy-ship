@@ -27,6 +27,7 @@ private:
 
   // special var for 3D flight, it affects the whole game
   bool m_flappy3D;
+  bool m_isFlappyOn;
 
   int m_camera_type;
   float m_eye_dist, m_view_alpha, m_view_beta;
@@ -80,11 +81,14 @@ private:
 
   // game logic helpers
   void checkTime();
+  void checkRings(); 
+  void checkCubes(); 
   void goToVictory();
   void updateRanking();
 
   void gameAction();
   void gameOnKey(game::Key, bool pressed);
+  void gameOnMenu(game::Key);
   void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
   void gameOver();
   void gameRender();

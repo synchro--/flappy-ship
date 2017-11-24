@@ -167,22 +167,14 @@ void Game::renderMenu() {
   m_main_win->refresh();
 }
 
-void Game::openSettings() {
-  const static auto TAG = __func__;
-  // reset handlers that must NOT be used
-  m_env.set_keyup_handler();
-  m_env.set_action();
-  m_env.set_mouse_handler();
 
-  // set proper callbacks
-  m_env.set_render(std::bind(&Game::renderMenu, this));
-  m_env.set_winevent_handler(std::bind(&Game::renderMenu, this));
 
-  // this could go inside an ad-hoc function (more modular)
   // UP/DOWN choose setting
   // RIGHT/LEFT activate setting
-  m_env.set_keydown_handler([&](Key key) {
-    const static auto ENTRIES = N_SETTINGS + 2; // Settings + restart & quit
+void Game::gameOnMenu(game::Key key) {
+   const static auto TAG = __func__; 
+   const static auto ENTRIES = N_SETTINGS + 2; // Settings + restart & quit
+
     switch (key) {
     case Key::UP:
       m_cur_setting = (m_cur_setting - 1) % ENTRIES;
@@ -195,7 +187,7 @@ void Game::openSettings() {
     case Key::LEFT:
       if (m_cur_setting < N_SETTINGS) {
         m_settings.at(m_cur_setting).active = true;
-      }
+      } 
       break;
 
     case Key::RIGHT:
@@ -204,9 +196,10 @@ void Game::openSettings() {
       }
       break;
 
-    case Key::ESC:
-      // if 3D flight is chosen, restart
-      if (m_settings.at(Settings::FLAPPY3D).active && !m_easter_egg) {
+    case Key::ESC: {
+      bool restart_need = (m_settings.at(Settings::FLAPPY3D).active == !m_isFlappyOn);
+      // if 3D flight has been activated/deactivated restart! 
+      if (restart_need && !m_easter_egg) {
         m_restart_game = true;
         changeState(State::SPLASH);
       }
@@ -216,6 +209,7 @@ void Game::openSettings() {
         m_last_time = m_env.getTicks();
         changeState(State::GAME);
       }
+    }
       break;
 
     case Key::RETURN:
@@ -234,7 +228,22 @@ void Game::openSettings() {
       lg::i(TAG, "Key not recognized");
       break;
     }
-  });
+}
+
+void Game::openSettings() {
+  const static auto TAG = __func__;
+  using namespace std::placeholders;
+  
+  // reset handlers that must NOT be used
+  m_env.set_keyup_handler();
+  m_env.set_action();
+  m_env.set_mouse_handler();
+
+  // set proper callbacks
+  m_env.set_render(std::bind(&Game::renderMenu, this));
+  m_env.set_winevent_handler(std::bind(&Game::renderMenu, this));
+
+  m_env.set_keydown_handler(std::bind(&Game::gameOnMenu, this, _1));
 
   // first call
   renderMenu();
