@@ -1,4 +1,4 @@
-#ifndef _SHIP_H 
+#ifndef _SHIP_H
 #define _SHIP_H
 
 #include "types.h"
@@ -34,7 +34,7 @@ protected:
 
   // Spaceship Stats: this will be constant over time
   float m_steer_speed, m_steer_return, m_grip, m_frictionX, m_frictionY,
-      m_frictionZ, m_max_acceleration; 
+      m_frictionZ, m_max_acceleration;
   float m_max_flight_acc;
 
   float m_scaleX, m_scaleY, m_scaleZ; // dimension scaling
@@ -69,8 +69,8 @@ protected:
 
   void processCommand();
   bool updateSteering();
-  // these methods will differ between the Flappy 3D flight ship 
-  // and the normal one. 
+  // these methods will differ between the Flappy 3D flight ship
+  // and the normal one.
   virtual void updatePosition();
   virtual bool updateVelocity();
   virtual bool computePhysics();
@@ -78,7 +78,8 @@ protected:
 
 public:
   friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
-                                                  const char *mesh_filename, bool m_flappy3D);
+                                                  const char *mesh_filename,
+                                                  bool m_flappy3D);
 
   // accessors
   inline float facing() const { return m_facing; }
@@ -87,7 +88,7 @@ public:
   inline float x() const { return m_px; }
   inline float y() const { return m_py; }
   inline float z() const { return m_pz; }
-  
+
   inline void set_rotation_angle(size_t angle) { m_rotation_angle = angle; }
   inline void set_front_axis(agl::Vec3 axis) { m_front_axis = axis; }
   // reset spaceship status
@@ -103,31 +104,31 @@ public:
   void shadow();
 };
 
-
 class FlappyShip : Spaceship {
-  private: 
-  // override physics methods 
-  void updatePosition() override; 
-  bool updateVelocity() override; 
-  bool computePhysics() override; 
+private:
+  // override physics methods
+  void updatePosition() override;
+  bool updateVelocity() override;
+  bool computePhysics() override;
 
-  // methods for 3D flight only   
-  bool updateSteerFlight(); 
+  // methods for 3D flight only
+  bool updateSteerFlight();
 
   FlappyShip(const char *texture_filename, const char *mesh_filename);
 
-  public: 
+public:
   // get flappy ship instance
   friend std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
-                                                  const char *mesh_filename, bool m_flappy3D);
+                                                  const char *mesh_filename,
+                                                  bool m_flappy3D);
 
-  void render(bool flicker = false) override; 
-
-}; 
+  void render(bool flicker = false) override;
+};
 
 std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
-                                         const char *mesh_filename, bool m_flappy3D);
-                                    
-} // namespace
+                                         const char *mesh_filename,
+                                         bool m_flappy3D);
+
+} // namespace elements
 
 #endif // _SHIP_H

@@ -6,6 +6,7 @@
 #include "agl.h"
 #include "coord_system.h"
 #include "elements.h"
+#include "ship.h"
 
 /*The logic of the game, putting all together*/
 
@@ -20,11 +21,13 @@ private:
   bool m_game_started;
   bool m_restart_game;
   bool m_victory;
-  bool m_easter_egg;    // * Surprise *
+  bool m_easter_egg; // * Surprise *
+  bool m_final_stage;
   size_t m_cur_setting; // setting currently highlighted
 
   // special var for 3D flight, it affects the whole game
   bool m_flappy3D;
+  bool m_isFlappyOn;
 
   int m_camera_type;
   float m_eye_dist, m_view_alpha, m_view_beta;
@@ -54,6 +57,9 @@ private:
   std::vector<elements::BadCube> m_cubes;
   size_t m_num_cubes;
 
+  // Final Door
+  std::unique_ptr<elements::Door> m_final_door;
+
   // methods
   void setupShipCamera();
   void changeState(game::State state);
@@ -61,6 +67,7 @@ private:
     m_camera_type = (m_camera_type + 1) % CAMERA_TYPE_MAX;
   }
 
+  // Drawing Functions
   // Draw the Minimap with all the current rings
   void drawMiniMap();
   // Draw the HeadUP Display (FPS - Current Time Left - Ring crossed)
@@ -71,10 +78,17 @@ private:
   void drawSettingItem(size_t Xcoord, size_t Yoord, const char *name,
                        bool isSelected = false) const;
   void drawSplash();
+
+  // game logic helpers
+  void checkTime();
+  void checkRings(); 
+  void checkCubes(); 
+  void goToVictory();
   void updateRanking();
 
   void gameAction();
   void gameOnKey(game::Key, bool pressed);
+  void gameOnMenu(game::Key);
   void gameOnMouse(MouseEvent ev, int32_t x, int32_t y = -1.0);
   void gameOver();
   void gameRender();

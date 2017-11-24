@@ -151,7 +151,7 @@ void Logger::logRanking(const char *file_name,
     std::ostringstream oss;
     oss << entry.first << " " << entry.second << std::endl;
     outfile << oss.str();
-   // std::cout << oss.str();
+    // std::cout << oss.str();
   }
 }
 

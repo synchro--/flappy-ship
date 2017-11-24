@@ -7,7 +7,7 @@
 #include <vector>
 
 // pretty simple logging utility with printf-like formatting
-// Levels are: INFO, ERROR, PANIC, defined in typesh
+// Levels are: INFO, ERROR, PANIC, defined in types.h
 
 // log is already in use by std Library
 namespace lg {

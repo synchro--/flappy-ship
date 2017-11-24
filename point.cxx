@@ -14,24 +14,24 @@ Point3::Point3(float x, float y, float z) : x(x), y(y), z(z) {}
 // empty constructor:
 // Point3::Point3() : x(0), y(0), z(0) {}
 
-// restituisce il modulo
+// module
 float Point3::modulo() const { return sqrt(x * x + y * y + z * z); }
 
-// restituisce la versione di se stesso normalizzata
+// normalized version 
 Point3 Point3::normalize() const { return (*this) / modulo(); }
 
-// operatore "/" binario: divisione per uno scalare (un float)
+// binary operator "/" : division by a scalar (float)
 Point3 Point3::operator/(float f) const { return Point3(x / f, y / f, z / f); }
 
-// operatore "-" unario: inversione del verso del vettore
+// unary operator "-" : invert vector direction (verse)
 Point3 Point3::operator-() const { return Point3(-x, -y, -z); }
 
-// operatore "-" binario: differenza fra punti
+// binary operator "-" : difference between 2 points  
 Point3 Point3::operator-(const Point3 &other) const {
   return Point3(x - other.x, y - other.y, z - other.z);
 }
 
-// somma fra vettori
+// vector sum
 Point3 Point3::operator+(const Point3 &other) const {
   return Point3(x + other.x, y + other.y, z + other.z);
 }
@@ -44,7 +44,7 @@ Point3 &Point3::operator+=(const Point3 &other) {
   return *this;
 }
 
-// ridefinisco l'operatore binario "%" per fare il CROSS PRODUCT
+// redefine binary operator % for CROSS PRODUCT
 Point3 Point3::operator%(const Point3 &other) const {
   return Point3(y * other.z - z * other.y, -(x * other.z - z * other.x),
                 x * other.y - y * other.x);

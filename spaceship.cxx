@@ -1,4 +1,4 @@
-#include "elements.h"
+#include "ship.h"
 
 namespace elements {
 /*                                *
@@ -11,7 +11,8 @@ using namespace spaceship;
 
 // get Singleton
 std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
-                                         const char *mesh_filename, bool m_flappy3D) {
+                                         const char *mesh_filename,
+                                         bool m_flappy3D) {
   const static auto TAG = __func__;
   lg::i(TAG, "Loading Spaceship --> texture: %s Mesh: %s", texture_filename,
         mesh_filename);
@@ -20,13 +21,13 @@ std::unique_ptr<Spaceship> get_spaceship(const char *texture_filename,
   if (!s_Spaceship) {
     s_Spaceship.reset(new Spaceship(texture_filename, mesh_filename)); // Init
 } */
-  if(m_flappy3D) {
-    return std::unique_ptr<Spaceship>(new FlappyShip(texture_filename,
-                                                  mesh_filename));
+  if (m_flappy3D) {
+    return std::unique_ptr<Spaceship>(
+        new FlappyShip(texture_filename, mesh_filename));
   } else {
-     return std::unique_ptr<Spaceship>(new Spaceship(texture_filename,
-                                                  mesh_filename)); // init
-   }
+    return std::unique_ptr<Spaceship>(new Spaceship(texture_filename,
+                                                    mesh_filename)); // init
+  }
 }
 
 Spaceship::Spaceship(const char *texture_filename,
@@ -40,7 +41,7 @@ Spaceship::Spaceship(const char *texture_filename,
 
 void Spaceship::init(bool truman) {
   // The "Envos" spaceship mesh is huge. Here we set proper re-scaling.
-  m_scaleX = m_scaleY = m_scaleZ = truman ? BOAT_SCALE : ENVOS_SCALE; 
+  m_scaleX = m_scaleY = m_scaleZ = truman ? BOAT_SCALE : ENVOS_SCALE;
   m_rotation_angle = truman ? BOAT_ANGLE : ENVOS_ANGLE;
 
   m_px = 0.0;
@@ -54,7 +55,7 @@ void Spaceship::init(bool truman) {
   //---------------//
 
   m_viewUP = agl::Vec3(0, 1, 0);
-  m_front_axis = truman ? agl::Vec3(1, 0, 0) : agl::Vec3(0,0,1);
+  m_front_axis = truman ? agl::Vec3(1, 0, 0) : agl::Vec3(0, 0, 1);
 
   // strong friction on X-axis, if you wanna drift, go buy Need For Speed
   m_frictionX = 0.9;
@@ -72,7 +73,7 @@ void Spaceship::init(bool truman) {
   // init internal states
   m_state = {false};
 
-  // init queue: common idiom for clearing standard containers 
+  // init queue: common idiom for clearing standard containers
   // is swapping with an empty version of the container:
   decltype(m_cmds)().swap(m_cmds);
 }
@@ -239,7 +240,6 @@ bool Spaceship::updateSteering() {
   return true;
 }
 
-
 bool Spaceship::get_state(Motion mt) { return m_state[mt]; }
 
 const std::string motion_to_str(Motion m) {
@@ -293,7 +293,7 @@ void Spaceship::render(bool flicker) {
     m_env.rotate(m_rotation_angle, m_viewUP);
 
     // rotate the ship acc. to steering val, to represent tilting
-    int sign = m_rotation_angle == ENVOS_ANGLE ? -1 : 1; 
+    int sign = m_rotation_angle == ENVOS_ANGLE ? -1 : 1;
     m_env.rotate(sign * m_steering, m_front_axis);
     //   m_env.rotate(sign * m_steering, front_boat);
 

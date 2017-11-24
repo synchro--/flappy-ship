@@ -1,4 +1,4 @@
-#include "elements.h"
+#include "ship.h"
 
 namespace elements {
 /*                                *
@@ -9,12 +9,12 @@ namespace elements {
 
 using namespace spaceship;
 
-FlappyShip::FlappyShip(const char *texture_filename, const char *mesh_filename) : Spaceship(texture_filename, mesh_filename) {}
-
+FlappyShip::FlappyShip(const char *texture_filename, const char *mesh_filename)
+    : Spaceship(texture_filename, mesh_filename) {}
 
 bool FlappyShip::computePhysics() {
   bool steering = updateSteering();
-  bool steer_flight = updateSteerFlight(); 
+  bool steer_flight = updateSteerFlight();
   bool velocity = updateVelocity();
 
   return steering || steer_flight || velocity;
@@ -46,7 +46,6 @@ void FlappyShip::updatePosition() {
   // and apply grip
   m_facing -= (m_speedZ * m_grip) * m_steering;
 }
-
 
 bool FlappyShip::updateSteerFlight() {
   bool throttle = get_state(Motion::THROTTLE);
@@ -88,7 +87,7 @@ bool FlappyShip::updateVelocity() {
   if (throttle ^ brake) {
     int sign = throttle ? -1 : 1;
 
-    m_speedY -= sign * FLIGHT_ACC; 
+    m_speedY -= sign * FLIGHT_ACC;
     m_speedZ += sign * VERY_FAST_ACC;
     // Spaceships don't fly backwards
     m_speedZ = (m_speedZ > 0.05) ? 0 : m_speedZ;
@@ -104,6 +103,9 @@ bool FlappyShip::updateVelocity() {
   return true;
 }
 
+// Flappy Render: 
+// It's almost the same but we need to tilt the nose of the ship according 
+// to the direction of the flight 
 void FlappyShip::render(bool flicker) {
   m_env.mat_scope([&] {
 
@@ -117,11 +119,12 @@ void FlappyShip::render(bool flicker) {
     m_env.rotate(m_rotation_angle, m_viewUP);
 
     // rotate the ship acc. to steering val, to represent tilting
-    auto sign = m_rotation_angle == ENVOS_ANGLE ? -1 : 1; 
+    auto sign = m_rotation_angle == ENVOS_ANGLE ? -1 : 1;
     m_env.rotate(sign * m_steering, m_front_axis);
 
-    // rotate on the X-axis to represent tilting in flight mode, on the nose of the ship 
-    agl::Vec3 Xaxis = agl::Vec3(1,0,0);
+    // rotate on the X-axis to represent tilting in flight mode, on the nose of
+    // the ship
+    agl::Vec3 Xaxis = agl::Vec3(1, 0, 0);
     m_env.rotate(sign * m_steer_flight, Xaxis);
 
     if (flicker) {
