@@ -17,7 +17,10 @@ To compile this code you'll need:
 
 ## Start
 To launch the game you need to provide the player name as an argument: 
-`./start_game <player name>`
+
+```
+./start_game <player name>
+```
 The player name will be used to keep the ranking of the best players of **Flappy Ship**. 
 
 ## Splash
@@ -61,13 +64,15 @@ In the lower left there is a map showing the various elements of the game in dif
 When the rings are crossed their respective dots change color with them, greens become reds.
 ![Minimappa](Docs/minimappa.jpg)
 
-## Camera
+## Cameras
 By pressing `F1` you can change the camera during gameplay, there are 5 different modes:
+
 **Retro - Details - Wide Angle - Pilot - Arbitrary**
+
 ![CAM1](Docs/gameplay2.jpg)
 ![CAM2](Docs/camera4.jpg)
 ![CAM3](Docs/camera2.jpg)
-![Cam4](Docs/camera3.jpg)
+![CAM4](Docs/camera3.jpg)
 
 ## Settings
 By pressing `ESC` you can access the settings at any time of the game and modify certain options. For each option, it is indicated whether it is active or not. Use the Up / Down arrows keys to navigate the menu, the selected option is highlighted in yellow. Once highlighted, you can set it to On/Off with the left/right arrows.
