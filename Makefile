@@ -7,11 +7,11 @@ BNAME = start_game
 
 CXX ?= c++
 
-#CCACHE_EXISTS := $(shell ccache -V)
-#ifdef CCACHE_EXISTS
-#    CC := ccache $(CC)
-#    CXX := ccache $(CXX)
-#endif
+CCACHE_EXISTS := $(shell ccache -V)
+ifdef CCACHE_EXISTS
+    CC := ccache $(CC)
+    CXX := ccache $(CXX)
+endif
 
 .PHONY: all clean
 
