@@ -137,3 +137,7 @@ The [SDL\_ttf](https://www.libsdl.org/projects/SDL_ttf/docs/index.html) library 
 ### Software Design
 The project consists of ~5000 lines of C++11. For this reason the code has been widely commented and I tried to keep it as modular as possible, even to favor future expansions. 
 The architecture is based on asynchronous callbacks. I also tried to use the new C++ features available since 2011, such as novelties added to the standard library (e.g. smart pointers), lambda support and closures.
+
+---
+### Credits 
+The real-time TTF rendering library has been inspired by the [GLKTextRenderer](https://github.com/ichigo663/GLKTextRenderer) library of my colleague Antonio Cardace. 
