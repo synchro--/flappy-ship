@@ -17,15 +17,20 @@ To compile this code you'll need:
 
 ## Start
 To launch the game you need to provide the player name as an argument: 
-`./start_game <player name>`
+
+```
+./start_game <player name>
+```
 The player name will be used to keep the ranking of the best players of **Flappy Ship**. 
 
 ## Splash
 The first thing that will appear is an artistic Splash screen.
+
 ![Splash](Docs/splash.jpg)
 
 ## Gameplay
 The purpose of the game is to cross all the **power rings** before the time runs out. At the top of the screen you can read the remaining time and you'll notice that everytime you cross a ring you will acquire a bonus time that will help you to reach the next ring.
+
 ![GM1](Docs/gameplay1.jpg)
 
 If you cross all the rings then you will win, and a victory screen will appear; vice versa a defeat one will be displayed. 
@@ -33,12 +38,14 @@ If you cross all the rings then you will win, and a victory screen will appear; 
 ## Game over
 When you cross the last ring or the time runs out, you switch to the game over screen.
 If you win the screen will be green:
+
 ![Win](Docs/win.jpg)
 
 otherwise red:
+
 ![Lose](Docs/lose.jpg)
 
-#### Ranking
+### Ranking
 The game maintains an updated ranking of **Flappy Ship**. If you win, the total time spent to cross all the rings is computed and saved in the `ranking.txt` file. On the final screen, you will see the top-5 scores.
 
 ### Power Rings
@@ -47,52 +54,66 @@ When crossed, the rings change color becoming red (the color of the point on the
 ### Evil Cubes
 Evil cubes are obstacles that are scattered - again randomly - throughout the playing field. When crossed, a penalty shoots.
 
-##### Penalty
+#### Penalty
 The ship begins to blink indicating that we have slowed down for a handful of seconds. Flickering is achieved by changing the rendering mode every 200 milliseconds by alternating a normal rendering to a wireframe.
+
 ![Penalty](Docs/penalty.jpg)
 
 ## HUD
 TrueType font (see details below) is used to print a Head-Up display that contains the following information:
+
 `FPS - Remaining Time - N. of Rings crossed`
+
 ![Hud](Docs/HUD.jpg)
 
-## Minimappa
+## MiniMap
 In the lower left there is a map showing the various elements of the game in different colors and the location of the spaceship in the playfield.
 When the rings are crossed their respective dots change color with them, greens become reds.
+
 ![Minimappa](Docs/minimappa.jpg)
 
-## Camera
+## Cameras
 By pressing `F1` you can change the camera during gameplay, there are 5 different modes:
+
 **Retro - Details - Wide Angle - Pilot - Arbitrary**
+
 ![CAM1](Docs/gameplay2.jpg)
+
 ![CAM2](Docs/camera4.jpg)
+
 ![CAM3](Docs/camera2.jpg)
-![Cam4](Docs/camera3.jpg)
+
+![CAM4](Docs/camera3.jpg)
 
 ## Settings
 By pressing `ESC` you can access the settings at any time of the game and modify certain options. For each option, it is indicated whether it is active or not. Use the Up / Down arrows keys to navigate the menu, the selected option is highlighted in yellow. Once highlighted, you can set it to On/Off with the left/right arrows.
 Moreover, when the menu is displayed the timer stops so that it can be used to pause the game. 
+
 ![Settings](Docs/settings.jpg)
 
-##### Wireframe
+#### Wireframe
 When this option is on, the whole environment - excepted made for the floor - is rendered in wireframes, i.e. only drawing the edges of the objects.
+
 ![Wireframe](Docs/wireframe.jpg)
 
 
-##### Mapping the environment
-Enables the spherical environment mapping to achieve a more realistic rendering for surfaces, simulating the surrounding environmental reflection. When turned off from the Settings, the world will look much less realistic:
+#### Environment Mapping
+Enables the **spherical environment mapping** to achieve a more realistic rendering for surfaces, simulating the surrounding environmental reflection. When turned off from the Settings, the world will look much less realistic:
+
 ![ENV](Docs/no-env.jpg)
 
 ## Advanced options
-#### Alpha Blending
+### Alpha Blending
 Activate transparencies (default On) of power rings and evil cubes. 
 
 ![Mix](Docs/blending2.jpg)
 
-#### Hard Mode: Flappy Flight! 
+### Hard Mode: Flappy Flight! 
 When you activate this option the game restarts in ** hard mode**. You'll find yourself in the same scenario but this time everything can fluctuate in the air, even our spaceship. By pressing the accelerator 'W' the ship will increase and will leap in the air; when no keys are pressed the ship is pulled down by gravity; when the brake 'S' is pressed the ship will accelerate downwards. The tip of the Ship is tilted according to the flight direction mimiking the famous smartphone game Flappy Bird, albeit in 3D.
 Even rings and cubes will be scattered around the sky, so it will be more difficult to win.
+
 ![Flappy1](Docs/flappy1.jpg)
+
 ![Flappy2](Docs/flappy2.jpg)
 
 
@@ -103,15 +124,18 @@ If you specify **`Truman`** as the player name, the game will start in a special
 
 # Truman Escape
 This time the initial Splash will be different. The name already anticipates what the surprise is. The famous Truman finds himself again imprisoned within the ephemeral fiction of a spherical and finite universe (the universe of the game is indeed a sphere ...) and must escape.
-![Truman-splash](Docs/Truman-splash.jpg)
+
+![TrumanSplash](Docs/truman-splash.jpg)
 
 The texture applied to the sky shows its image close to the stairs leading to freedom. The floor is covered with leaflets with his face.
 Our spaceship was traded with the boat he used to flee in the movie, which has now acquired the ability to levitate!
-![Truman-gameplay](Docs/Truman-gameplay.jpg)
+
+![TrumanGameplay](Docs/truman-gameplay.jpg)
 
 ## Final Door
 This time it will not be enough to complete the crossing of all the rings. Once the last one is crossed, the secret door will appear, which is not marked on the minimap. Our job is to reach it and gain freedom. All this - of course - before the inexorable deadline comes.
-![Truman-final-door](Docs/Truman-final-door.jpg)
+
+![TrumanFinalDoor](Docs/truman-final-door.jpg)
 
 ---
 
