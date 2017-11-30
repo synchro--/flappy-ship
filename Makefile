@@ -1,4 +1,4 @@
-CXXFLAGS = -std=gnu++11 -g
+CXXFLAGS = -std=c++11 -g
 LDFLAGS = -lm -lSDL2 -lSDL2_ttf -lSDL2_image -lGLU -lGL
 MAKEFLAGS=-j4
 SRCS = $(wildcard *.cxx)
@@ -7,11 +7,11 @@ BNAME = start_game
 
 CXX ?= c++
 
-CCACHE_EXISTS := $(shell ccache -V)
-ifdef CCACHE_EXISTS
-    CC := ccache $(CC)
-    CXX := ccache $(CXX)
-endif
+#CCACHE_EXISTS := $(shell ccache -V)
+#ifdef CCACHE_EXISTS
+#    CC := ccache $(CC)
+#    CXX := ccache $(CXX)
+#endif
 
 .PHONY: all clean
 
