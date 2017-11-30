@@ -125,17 +125,17 @@ If you specify **`Truman`** as the player name, the game will start in a special
 # Truman Escape
 This time the initial Splash will be different. The name already anticipates what the surprise is. The famous Truman finds himself again imprisoned within the ephemeral fiction of a spherical and finite universe (the universe of the game is indeed a sphere ...) and must escape.
 
-![Truman-splash](Docs/Truman-splash.jpg)
+![TrumanSplash](Docs/Truman-splash.jpg)
 
 The texture applied to the sky shows its image close to the stairs leading to freedom. The floor is covered with leaflets with his face.
 Our spaceship was traded with the boat he used to flee in the movie, which has now acquired the ability to levitate!
 
-![Truman-gameplay](Docs/Truman-gameplay.jpg)
+![TrumanGameplay](Docs/Truman-gameplay.jpg)
 
 ## Final Door
 This time it will not be enough to complete the crossing of all the rings. Once the last one is crossed, the secret door will appear, which is not marked on the minimap. Our job is to reach it and gain freedom. All this - of course - before the inexorable deadline comes.
 
-![Truman-final-door](Docs/Truman-final-door.jpg)
+![TrumanFinalDoor](Docs/Truman-final-door.jpg)
 
 ---
 
