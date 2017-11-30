@@ -45,7 +45,7 @@ otherwise red:
 
 ![Lose](Docs/lose.jpg)
 
-#### Ranking
+### Ranking
 The game maintains an updated ranking of **Flappy Ship**. If you win, the total time spent to cross all the rings is computed and saved in the `ranking.txt` file. On the final screen, you will see the top-5 scores.
 
 ### Power Rings
@@ -54,7 +54,7 @@ When crossed, the rings change color becoming red (the color of the point on the
 ### Evil Cubes
 Evil cubes are obstacles that are scattered - again randomly - throughout the playing field. When crossed, a penalty shoots.
 
-##### Penalty
+#### Penalty
 The ship begins to blink indicating that we have slowed down for a handful of seconds. Flickering is achieved by changing the rendering mode every 200 milliseconds by alternating a normal rendering to a wireframe.
 
 ![Penalty](Docs/penalty.jpg)
@@ -66,7 +66,7 @@ TrueType font (see details below) is used to print a Head-Up display that contai
 
 ![Hud](Docs/HUD.jpg)
 
-## Minimappa
+## MiniMap
 In the lower left there is a map showing the various elements of the game in different colors and the location of the spaceship in the playfield.
 When the rings are crossed their respective dots change color with them, greens become reds.
 
@@ -91,24 +91,24 @@ Moreover, when the menu is displayed the timer stops so that it can be used to p
 
 ![Settings](Docs/settings.jpg)
 
-##### Wireframe
+#### Wireframe
 When this option is on, the whole environment - excepted made for the floor - is rendered in wireframes, i.e. only drawing the edges of the objects.
 
 ![Wireframe](Docs/wireframe.jpg)
 
 
-##### Mapping the environment
-Enables the spherical environment mapping to achieve a more realistic rendering for surfaces, simulating the surrounding environmental reflection. When turned off from the Settings, the world will look much less realistic:
+#### Environment Mapping
+Enables the **spherical environment mapping** to achieve a more realistic rendering for surfaces, simulating the surrounding environmental reflection. When turned off from the Settings, the world will look much less realistic:
 
 ![ENV](Docs/no-env.jpg)
 
 ## Advanced options
-#### Alpha Blending
+### Alpha Blending
 Activate transparencies (default On) of power rings and evil cubes. 
 
 ![Mix](Docs/blending2.jpg)
 
-#### Hard Mode: Flappy Flight! 
+### Hard Mode: Flappy Flight! 
 When you activate this option the game restarts in ** hard mode**. You'll find yourself in the same scenario but this time everything can fluctuate in the air, even our spaceship. By pressing the accelerator 'W' the ship will increase and will leap in the air; when no keys are pressed the ship is pulled down by gravity; when the brake 'S' is pressed the ship will accelerate downwards. The tip of the Ship is tilted according to the flight direction mimiking the famous smartphone game Flappy Bird, albeit in 3D.
 Even rings and cubes will be scattered around the sky, so it will be more difficult to win.
 
