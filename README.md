@@ -1,5 +1,6 @@
 # Flappy Ship - An OpenGL 3D racing game
-Welcome to the frenzy world of Flappy Sip, where there's no time to ponder but only to fly. Dive into a race against space-time! Will you be able to cross all the rings before the time runs out? 
+Welcome to the frenzy world of Flappy Ship, where there's no time to ponder but only to fly. 
+Dive into a race against space-time! Will you be able to cross all the rings before the time runs out? 
 
 ## Notes
 This game has been developed *mainly* as a project work for my university. Since it was a foundation class on CG, there was a very small introduction on shaders. Therefore the request was that the whole thing should rely on the *fixed* pipeline of OpenGL, now deprecated.
