@@ -2,6 +2,8 @@ Truman 27.206
 Hank 28.222
 Jin 28.368
 Tidus 33.652
+Levant 36.237
+Levant 36.984
 Squall 39.993
 Rick 50.185
 ale 67.772

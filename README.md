@@ -14,7 +14,7 @@ To compile this code you'll need:
 * make 
 * a C++ compiler like gcc or clang: the code uses features C++11, so please make sure your compiler supports it (e.g. gcc 4.8.1 or higher) 
 * an implementation of OpenGL (like Mesa)
-* SDL 2.0 
+* SDL 2.0: specifically, sdl2, sdl2_ttf and sdl2_image 
 
 ## Start
 To launch the game you need to provide the player name as an argument: 
