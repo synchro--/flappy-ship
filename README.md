@@ -110,8 +110,8 @@ Activate transparencies (default On) of power rings and evil cubes.
 ![Mix](docs/blending2.jpg)
 
 ### Hard Mode: Flappy Flight! 
-When you activate this option the game restarts in ** hard mode**. You'll find yourself in the same scenario but this time everything can fluctuate in the air, even our spaceship. By pressing the accelerator 'W' the ship will increase and will leap in the air; when no keys are pressed the ship is pulled down by gravity; when the brake 'S' is pressed the ship will accelerate downwards. The tip of the Ship is tilted according to the flight direction mimiking the famous smartphone game Flappy Bird, albeit in 3D.
-Even rings and cubes will be scattered around the sky, so it will be more difficult to win.
+When you activate this option the game restarts in **hard mode**. You'll find yourself in the same scenario but this time everything can fluctuate in the air, even our spaceship. By pressing the accelerator `W` the ship will fly and will leap in the air; when no keys are pressed the ship is pulled down by gravity; when the brake `S` is pressed the ship will accelerate downwards. The tip of the Ship is tilted according to the flight direction mimiking the famous smartphone game Flappy Bird, albeit in 3D.
+Even rings and cubes will be scattered around the sky, so it will be harder to win.
 
 ![Flappy1](docs/flappy1.jpg)
 
@@ -165,4 +165,7 @@ The architecture is based on asynchronous callbacks. I also tried to use the new
 
 ---
 ### Credits 
-The real-time TTF rendering library has been inspired by the [GLKTextRenderer](https://github.com/ichigo663/GLKTextRenderer) library of my colleague Antonio Cardace. 
+The real-time TTF rendering library has been inspired by the [GLKTextRenderer](https://github.com/ichigo663/GLKTextRenderer) library of my colleague Antonio Cardace.
+
+---
+Copyright Ali Alessio Salman 2017, [alessio.salman@gmail.com](mailto:alessio.salman@gmail.com)
