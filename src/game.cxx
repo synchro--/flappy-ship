@@ -1,7 +1,51 @@
 #include "game.h"
 #include "random"
 
+#include <unistd.h>   // access()
+#include <cstdlib>    // getenv
+#include <string>
+#include <vector>
+
 namespace game {
+
+namespace {
+// Check if a file is readable
+inline bool is_readable(const std::string &p) { return ::access(p.c_str(), R_OK) == 0; }
+
+// Try to locate a usable TTF font path, checking several locations
+std::string pick_font_path() {
+  std::vector<std::string> candidates;
+
+  // 1) User-installed fonts (macOS user font dir) - take priority so a
+  // user-installed version of a font can override the bundled one
+  if (const char *home = std::getenv("HOME")) {
+    std::string h(home);
+    candidates.emplace_back(h + "/Library/Fonts/neuropol.ttf");
+    candidates.emplace_back(h + "/Library/Fonts/NotoSerif.ttf");
+  }
+
+  // 2) Path relative to executable base (if available)
+  if (char *base = SDL_GetBasePath()) {
+    std::string b(base);
+    SDL_free(base);
+    candidates.emplace_back(b + "Fonts/neuropol.ttf");
+    candidates.emplace_back(b + "Fonts/NotoSerif.ttf");
+  }
+
+  // 3) Relative to current working directory (bundled Fonts/)
+  candidates.emplace_back("Fonts/neuropol.ttf");
+  candidates.emplace_back("Fonts/NotoSerif.ttf");
+
+  for (const auto &c : candidates) {
+    if (is_readable(c)) {
+      lg::i(__func__, "Using font: %s", c.c_str());
+      return c;
+    }
+  }
+
+  lg::panic(__func__, "No readable TTF font found (tried exe dir, cwd, ~/Library/Fonts)");
+}
+} // namespace
 
 Game::Game(std::string gameID, size_t num_rings)
     : m_gameID(gameID), m_state(State::SPLASH), m_camera_type(CAMERA_BACK_CAR),
@@ -10,7 +54,7 @@ Game::Game(std::string gameID, size_t num_rings)
       m_deadline_time(0.0), m_final_stage(false), m_last_time(.0),
       m_penalty_time(0.0), m_num_rings(num_rings), m_env(agl::get_env()),
       m_num_cubes(10), m_main_win(nullptr), m_floor(nullptr), m_sky(nullptr),
-      m_final_door(nullptr), m_ssh(nullptr) {}
+      m_final_door(nullptr) {}
 
 /*
  * Init the game:
@@ -25,8 +69,10 @@ void Game::init() {
   m_main_win->show();
   m_env.enableVSync();
 
-  m_text_renderer = agl::getTextRenderer("Fonts/neuropol.ttf", 30);
-  m_text_big = agl::getTextRenderer("Fonts/neuropol.ttf", 72);
+  // Pick a robust font path (user-installed -> bundled: exe dir / cwd)
+  const std::string font_path = pick_font_path();
+  m_text_renderer = agl::getTextRenderer(font_path.c_str(), 30);
+  m_text_big = agl::getTextRenderer(font_path.c_str(), 72);
 
   m_easter_egg = m_gameID == "Truman";
 

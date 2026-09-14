@@ -61,13 +61,20 @@ void AGLTextRenderer::loadTextureVector() {
       lg::e(TAG, "%s\n", TTF_GetError());
     }
 
+    // TTF_RenderGlyph_Blended returns a BGRA/ARGB-ordered surface, but the
+    // texture upload below expects bytes in R,G,B,A order; convert to the
+    // endian-independent RGBA32 layout so alpha ends up in the right channel
+    SDL_Surface *rgba_surface =
+        SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA32, 0);
+    SDL_FreeSurface(surface);
+
     // generate texture ID
     glGenTextures(1, &texbind);
 
     glBindTexture(GL_TEXTURE_2D, texbind);
     // create Texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, surface->pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rgba_surface->w, rgba_surface->h, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, rgba_surface->pixels);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -78,7 +85,7 @@ void AGLTextRenderer::loadTextureVector() {
     Glyph glyph(ch, texbind, minx, maxx, miny, maxy, advance);
     // append glyph texture at the end of the atlas
     m_glyphs.push_back(glyph);
-    SDL_FreeSurface(surface);
+    SDL_FreeSurface(rgba_surface);
   }
 }
 

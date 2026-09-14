@@ -111,7 +111,7 @@ void Env::renderLoop() {
       case SDL_WINDOWEVENT: {
         // let's redraw the window
         if (e.window.event == SDL_WINDOWEVENT_EXPOSED ||
-            SDL_WINDOWEVENT_SIZE_CHANGED) {
+            e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
           m_window_event_handler();
         }
         break;
@@ -120,6 +120,9 @@ void Env::renderLoop() {
         // ---- MOUSE EVENTS --- //
 
       case SDL_MOUSEMOTION: {
+        if (!m_mouse_event_handler) {
+          break;
+        }
         auto handler = m_mouse_event_handler;
 
         if (e.motion.state & SDL_BUTTON(1)) {
@@ -129,7 +132,10 @@ void Env::renderLoop() {
 
       case SDL_MOUSEWHEEL: {
         auto handler = m_mouse_event_handler;
-        handler(MouseEvent::WHEEL, e.wheel.y, -1.0);
+
+        if (handler) {
+          handler(MouseEvent::WHEEL, e.wheel.y, -1.0);
+        }
       } break;
 
       default:
